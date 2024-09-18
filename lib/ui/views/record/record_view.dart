@@ -1,11 +1,11 @@
+
 import 'dart:async';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-
+import 'package:path_provider/path_provider.dart';
 import '../transcribe/transcribe_view.dart';
 
 class RecordView extends StatefulWidget {
@@ -75,45 +75,67 @@ class _RecordViewState extends State<RecordView> {
   }
 
 
-// Will use later............................
-  // void _showRestartAlert() {
-  //   _pauseTimer(); // Pause the timer when the alert is shown
-  //
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Do you want to restart again?'),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: Text('Restart'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //               _resetRecording();
-  //             },
-  //           ),
-  //           TextButton(
-  //             child: Text('No'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //               _resumeTimer(); // Resume the timer if it was paused
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
+  void _showRestartAlert() {
+    _pauseTimer(); // Pause the timer when the alert is shown
 
-  // void _resetRecording() {
-  //   _startTimer(); // Restart the timer
-  //
-  //   // Restart recording
-  //   setState(() {
-  //     _isRecording = true;
-  //   });
-  //   // Add your code to start recording here
-  // }
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
+          ),
+          title: Text(
+            'Reset the Recording',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          content: Text(
+            'Resetting the recording will erase the current audio note and start a new one.',
+            style: TextStyle(
+              color: Colors.black,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _restartRecordingSession();
+              },
+              child: Text(
+                'Reset',
+                style: TextStyle(color: AppColors.ButtonColor2),
+              ),
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Colors.white),
+                side: WidgetStateProperty.all(BorderSide(color: AppColors.ButtonColor2)),
+                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _resumeTimer(); // Resume the timer if it was paused
+              },
+              child: Text(
+                'Close',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+              ),
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      _resumeTimer();
+    });
+  }
+
 
   @override
   void dispose() {
@@ -131,10 +153,8 @@ class _RecordViewState extends State<RecordView> {
     try {
       final content = [
         Content.text(
-          'You are an advanced AI language model with the ability to understand and transcribe spoken inputs in multiple languages, including Hindi, English, and mixed-language phrases. Your tasks are as follows:1. **Transcribe Accurately:** Transcribe the spoken input accurately, retaining the original meaning and context, even if the input contains a mix of languages (e.g., Hindi and English) or is poorly structured.2. **Language Detection and Selective Translation:** Identify any non-English segments in the input. Translate these segments into English **without altering the original meaning**. Ensure that the translation is contextually appropriate.3**Error Correction with Context Preservation:** Correct any grammatical errors, spelling mistakes, or idiomatic inaccuracies **without changing the intended meaning** of the input. Your goal is to maintain the original messages intent while improving readability and correctness.4. **Final Output:** Provide the final output in clear, correct English. Ensure that the output preserves the original meaning of the input, with proper grammar, spelling, and punctuation.\n: "$originalText"',
-            // "Please correct the following text for any spelling and grammatical errors, and slightly paraphrase it while keeping the original language:\n: $originalText"
-            // 'Please translate correct any grammatical errors in the following sentence and return only the corrected text: "$originalText"'
-        )            // 'Please correct any grammatical errors in the following sentence and return only the corrected text: "$originalText"'
+            "Please take the following voice input, neutralize any harmful, sexual, or offensive language if present, and translate the input into English if necessary. Return only the polite, rephrased English version of the text without adding any extra comments, explanations, or alternative responses. Original input: $originalText"
+        )
 
       ];
       final response = await _model.generateContent(content);
@@ -194,8 +214,10 @@ class _RecordViewState extends State<RecordView> {
 
     // Stop the speech recognition
     await _speech.stop();
+    bool isEmptyInput = _speechText.isEmpty;
 
     if (!isRestarting && !_hasTranscriptionBeenSent) {
+      String textToSend;
       if (_speechText.isNotEmpty) {
         // Checking if formatting is needed
         final bool needsFormatting = _checkIfFormattingNeeded(_speechText);
@@ -212,6 +234,7 @@ class _RecordViewState extends State<RecordView> {
             MaterialPageRoute(
               builder: (context) => TranscribeResult(
                 transcribedText: formattedText,
+                isEmptyInput: isEmptyInput,
                 onDelete: () {
                   widget.onRecordingComplete('');
                   _hasTranscriptionBeenSent = false; // Reset flag on deletion
@@ -224,7 +247,8 @@ class _RecordViewState extends State<RecordView> {
           print('No formatted text available.');
         }
       } else {
-        print('No new speech was recognized.');
+        print("Not available");
+
       }
     }
 
@@ -235,6 +259,8 @@ class _RecordViewState extends State<RecordView> {
 
     try {
       final transcriptionToSend = _isRestarted ? _speechText : _speechText;
+      bool isEmptyInput = transcriptionToSend.isEmpty;
+
 
       if (!_hasTranscriptionBeenSent) {
         String? formattedText = await _formatText(transcriptionToSend);
@@ -248,6 +274,7 @@ class _RecordViewState extends State<RecordView> {
             MaterialPageRoute(
               builder: (context) => TranscribeResult(
                 transcribedText: formattedText,
+                isEmptyInput: isEmptyInput,
                 onDelete: () {
                   widget.onRecordingComplete('');
                   _hasTranscriptionBeenSent = false; // Reset flag on deletion
@@ -264,6 +291,7 @@ class _RecordViewState extends State<RecordView> {
       print('Error stopping the recording: $e');
     }
   }
+
 
   void _initializeSpeechToText() {
     _speech = stt.SpeechToText();
@@ -416,13 +444,13 @@ class _RecordViewState extends State<RecordView> {
                       style: TextButton.styleFrom(
                         foregroundColor: _isDiscardButtonActive
                             ? Colors.white
-                            : AppColors.ButtonColor,
+                            : AppColors.ButtonColor2,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(color: AppColors.ButtonColor),
+                          side: BorderSide(color: AppColors.ButtonColor2),
                         ),
                         backgroundColor: _isDiscardButtonActive
-                            ? AppColors.ButtonColor
+                            ? AppColors.ButtonColor2
                             : Colors.white,
                       ),
                     ),
@@ -442,10 +470,10 @@ class _RecordViewState extends State<RecordView> {
                         : AppColors.ButtonColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: AppColors.ButtonColor),
+                      side: BorderSide(color: AppColors.ButtonColor2),
                     ),
                     backgroundColor: _isKeepRecordingButtonActive
-                        ? AppColors.ButtonColor
+                        ? AppColors.ButtonColor2
                         : Colors.white,
                   ),
                 ),
@@ -527,7 +555,8 @@ class _RecordViewState extends State<RecordView> {
                     () {
                   if (_isRecording) {
                     // _showRestartConfirmationDialog();
-                    _restartRecordingSession();
+                    // _restartRecordingSession();
+                    _showRestartAlert();
                   }
                 },
                 child: Image.asset(

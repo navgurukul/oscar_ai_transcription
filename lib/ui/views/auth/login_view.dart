@@ -31,7 +31,7 @@ class _LoginViewState extends State<LoginView> {
 
     GoogleSignIn _googleSignIn = GoogleSignIn(
       // clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com",  //from this app
-
+clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com",
 
     scopes: [
         'https://www.googleapis.com/auth/userinfo.email',

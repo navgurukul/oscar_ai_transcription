@@ -61,6 +61,8 @@ dependencies:
   shared_preferences: ^2.3.2
   flutter_svg: ^2.0.10+1
   flutter_email_sender: ^6.0.3
+#  vosk_flutter: ^0.3.48
+#  permission_handler: ^10.2.0
 
 dev_dependencies:
   flutter_test:
@@ -70,7 +72,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets1/Group 2.png"
+  image_path: "assets1/Group 24.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

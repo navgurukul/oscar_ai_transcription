@@ -1,4 +1,4 @@
-package org.samyarth.oscar
+package org.samyarth.oscarai
 
 import io.flutter.embedding.android.FlutterActivity
 

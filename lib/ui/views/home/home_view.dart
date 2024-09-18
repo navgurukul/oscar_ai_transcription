@@ -416,7 +416,7 @@ class _HomePageState extends State<HomePage> {
                                           icon: Icon(
                                             Icons.delete_outline_rounded,
                                             color: Colors.black,
-                                            size: 17.0,
+                                            size: 18.0,
                                           ),
                                           onPressed: () {
                                             _confirmDeleteTranscription(transcription['id'].toString());
