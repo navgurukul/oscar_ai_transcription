@@ -29,7 +29,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "org.samyarth.oscarai"
+    namespace "org.samyarth.oscarai.flutter"
     compileSdkVersion 34
     ndkVersion flutter.ndkVersion
     ndkVersion "26.1.10909125"
@@ -55,7 +55,7 @@ android {
 //    org.samyarth.oscarai
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "org.samyarth.oscarai"
+        applicationId "org.samyarth.oscarai.flutter"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion
