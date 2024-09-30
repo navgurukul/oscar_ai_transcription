@@ -3,23 +3,27 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:oscar_stt/core/constants/app_colors.dart';
+// import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/constants/app_colors.dart';
 import '../record/record_view.dart';
 
 class TranscribeResult extends StatefulWidget {
   final String transcribedText;
+  final String unformattedText;
   final VoidCallback onDelete;
   final String tokenid;
   final bool isEmptyInput;
 
-  const TranscribeResult({
-    Key? key,
-    required this.transcribedText,
-    required this.onDelete,
-    required this.tokenid, this.isEmptyInput = false,
-  }) : super(key: key);
+  const TranscribeResult(
+      {Key? key,
+        required this.transcribedText,
+        required this.onDelete,
+        required this.tokenid,
+        this.isEmptyInput = false,
+        required this.unformattedText})
+      : super(key: key);
 
   @override
   State<TranscribeResult> createState() => _TranscribeResultState();
@@ -28,11 +32,14 @@ class TranscribeResult extends StatefulWidget {
 class _TranscribeResultState extends State<TranscribeResult> {
   bool _isEditing = false;
   late TextEditingController _textController;
+  late TextEditingController _notFormattedText;
+  bool _showTranscribedText = false;
 
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController(text: widget.transcribedText);
+    _notFormattedText = TextEditingController(text: widget.unformattedText);
   }
 
 
@@ -40,8 +47,6 @@ class _TranscribeResultState extends State<TranscribeResult> {
   void _handleBack() {
     Navigator.pop(context, 'show_popup'); // Pass a specific result
   }
-
-
 
   void _shareText() {
     try {
@@ -52,9 +57,6 @@ class _TranscribeResultState extends State<TranscribeResult> {
     }
   }
 
-
-
-
   Future<void> _deleteTranscription(BuildContext context) async {
     widget.onDelete(); // Perform the delete operation
     Navigator.pop(context, 'Transcription deleted');
@@ -64,7 +66,6 @@ class _TranscribeResultState extends State<TranscribeResult> {
     // Pop the current screen with the message
   }
 
-
   void _copyText() {
     Clipboard.setData(ClipboardData(text: _textController.text));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -73,7 +74,8 @@ class _TranscribeResultState extends State<TranscribeResult> {
   }
 
   Future<void> _sendTranscriptionToBackend() async {
-    final String apiUrl = 'https://dev-oscar.merakilearn.org/api/v1/transcriptions/add'; // Replace with your actual API URL
+    final String apiUrl =
+        'https://dev-oscar.merakilearn.org/api/v1/transcriptions/add'; // Replace with your actual API URL
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
@@ -83,6 +85,7 @@ class _TranscribeResultState extends State<TranscribeResult> {
         },
         body: jsonEncode(<String, String>{
           'transcribedText': _textController.text,
+          'userTextInput': _notFormattedText.text,
         }),
       );
       if (response.statusCode == 201) {
@@ -106,7 +109,6 @@ class _TranscribeResultState extends State<TranscribeResult> {
     });
   }
 
-
   @override
   void didUpdateWidget(covariant TranscribeResult oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -116,52 +118,238 @@ class _TranscribeResultState extends State<TranscribeResult> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
 
-    return
-      Scaffold(
-        backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-        appBar: AppBar(
-          leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
-              onPressed: _handleBack
-
+    return Scaffold(
+      backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+      appBar: AppBar(
+        scrolledUnderElevation: 0.0,
+        automaticallyImplyLeading: false,
+        elevation: 0,
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
+            onPressed: _handleBack),
+        title: Center(
+          child: Text(
+            'Your transcription!',
+            style: TextStyle(fontSize: mq.width * 0.05,fontWeight: FontWeight.bold),
           ),
-          title: Center(
-            child: Text(
-              'Your Transcription',
-              style: TextStyle(fontSize: mq.width * 0.05),
-            ),
-          ),
-          backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-          toolbarHeight: mq.height * 0.1,
         ),
-        body: Padding(
+        backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+        toolbarHeight: mq.height * 0.1,
+      ),
+      // body: SafeArea(
+      //   child: Padding(
+      //     padding: EdgeInsets.all(mq.width * 0.04),
+      //     child: SingleChildScrollView(
+      //       child: Column(
+      //         crossAxisAlignment: CrossAxisAlignment.center,
+      //         // mainAxisAlignment: MainAxisAlignment.center,
+      //         children: [
+      //           Center(
+      //             child: Container(
+      //               constraints: BoxConstraints(
+      //               minHeight: mq.height * 0.2,
+      //                 maxHeight: mq.height * 0.5,
+      //                 minWidth: mq.width * 1.0,
+      //                 maxWidth: mq.width * 1.0,
+      //             ),
+      //               decoration:
+      //                   BoxDecoration(
+      //                       color: AppColors.ButtonColor,
+      //                       border: Border.all(color: AppColors.ButtonColor),
+      //                       borderRadius: BorderRadius.all(Radius.circular(20))
+      //                   ),
+      //               child: Padding(
+      //                 padding: const EdgeInsets.all(8.0),
+      //                 child: Expanded(
+      //                   child: SingleChildScrollView(
+      //                     child: Text(
+      //                       _textController.text,
+      //                       // _showTranscribedText ? widget.unformattedText : _textController.text,
+      //                       style: GoogleFonts.roboto(
+      //                         fontSize: mq.width * 0.05,
+      //                         fontWeight: FontWeight.normal,
+      //                       ),
+      //                       textAlign: TextAlign.center,
+      //                     ),
+      //                   ),
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //
+      //           if (_showTranscribedText)
+      //             Container(
+      //               constraints: BoxConstraints(
+      //               //
+      //                 minWidth: mq.width * 0.8,
+      //                 maxWidth: mq.width * 0.8,
+      //               ),
+      //               decoration: BoxDecoration(color: Colors.white,
+      //                 border: Border.all(color: Colors.white),
+      //                   borderRadius: BorderRadius.only(bottomRight:Radius.circular(20), bottomLeft: Radius.circular(20) )
+      //
+      //               ),
+      //               child: Padding(
+      //                 padding: const EdgeInsets.all(8.0),
+      //                 child:
+      //                  Expanded(
+      //                    child: SingleChildScrollView(
+      //                     child: Text(
+      //                       widget.unformattedText,
+      //                       style: GoogleFonts.roboto(
+      //                         fontSize: mq.width * 0.05,
+      //                         fontWeight: FontWeight.normal,
+      //                       ),
+      //                       textAlign: TextAlign.center,
+      //
+      //                     ),
+      //                                          ),
+      //                  ),
+      //               ),
+      //             ),
+      //           Container(
+      //             decoration: BoxDecoration(
+      //                 color: Colors.orange,
+      //                 border: Border.all(color: Colors.orange),
+      //                 borderRadius: BorderRadius.only(bottomRight:Radius.circular(20), bottomLeft: Radius.circular(20) )
+      //             ),
+      //             child: TextButton(
+      //               onPressed: () {
+      //                 setState(() {
+      //                   _showTranscribedText = !_showTranscribedText;
+      //                 });
+      //               },
+      //               child: Text(
+      //                 _showTranscribedText
+      //                     ? 'Hide Original Transcripts'
+      //                     : 'View Original Transcripts',
+      //                 style: GoogleFonts.roboto(
+      //                   fontSize: mq.width * 0.045,
+      //                   fontWeight: FontWeight.bold,
+      //                   color: Colors.white
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //
+      //
+      //
+      //           SizedBox(height: mq.height * 0.09),
+      //         ],
+      //       ),
+      //     ),
+      //   ),
+      // ),
+
+      body: SafeArea(
+        child: Padding(
           padding: EdgeInsets.all(mq.width * 0.04),
           child: SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  _textController.text,
-                  style: GoogleFonts.roboto(
-                    fontSize: mq.width * 0.05,
-                    fontWeight: FontWeight.normal,
+                Center(
+                  child: Container(
+                    constraints: BoxConstraints(
+                      minHeight: mq.height * 0.2,
+                      maxHeight: mq.height * 0.5,
+                      minWidth: mq.width * 1.0,
+                      maxWidth: mq.width * 1.0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.ButtonColor,
+                      border: Border.all(color: AppColors.ButtonColor),
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SingleChildScrollView(
+                        child: Text(
+                          _textController.text,
+                          style: GoogleFonts.roboto(
+                            fontSize: mq.width * 0.05,
+                            fontWeight: FontWeight.normal,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
+
+                if (_showTranscribedText)
+                  Container(
+                    constraints: BoxConstraints(
+                      minWidth: mq.width * 0.8,
+                      maxWidth: mq.width * 0.8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(20),
+                        bottomLeft: Radius.circular(20),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SingleChildScrollView(
+                        child: Text(
+                          widget.unformattedText,
+                          style: GoogleFonts.roboto(
+                            fontSize: mq.width * 0.05,
+                            fontWeight: FontWeight.normal,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    border: Border.all(color: Colors.orange),
+                    borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(20),
+                      bottomLeft: Radius.circular(20),
+                    ),
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _showTranscribedText = !_showTranscribedText;
+                      });
+                    },
+                    child: Text(
+                      _showTranscribedText
+                          ? 'Hide Original Transcripts'
+                          : 'View Original Transcripts',
+                      style: GoogleFonts.roboto(
+                        fontSize: mq.width * 0.045,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: mq.height * 0.09),
               ],
             ),
           ),
         ),
-        bottomSheet: widget.isEmptyInput
-            ? _buildEmptyInputBottomSheet(context)
-            : _buildFullInputBottomSheet(context),
+      ),
 
-      );
+
+      bottomSheet: widget.isEmptyInput
+          ? _buildEmptyInputBottomSheet(context)
+          : _buildFullInputBottomSheet(context),
+    );
   }
 
   Widget _buildEmptyInputBottomSheet(BuildContext context) {
@@ -169,12 +357,11 @@ class _TranscribeResultState extends State<TranscribeResult> {
 
     return BottomAppBar(
       color: Color.fromRGBO(220, 236, 235, 1.0),
-
       child: Container(
         color: Color.fromRGBO(220, 236, 235, 1.0),
         child: Padding(
           padding: EdgeInsets.only(bottom: mq.height * 0.02),
-          child:  Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
@@ -191,12 +378,10 @@ class _TranscribeResultState extends State<TranscribeResult> {
                     ),
                   );
                 },
-                child: Image.asset(
-                    'assets1/Frame 24.png',
+                child: Image.asset('assets1/Frame 24.png',
                     width: mq.width * 0.15 // Adjust the height if necessary
                 ),
               ),
-
             ],
           ),
         ),
@@ -210,11 +395,10 @@ class _TranscribeResultState extends State<TranscribeResult> {
     return SafeArea(
       child: BottomAppBar(
         color: Color.fromRGBO(220, 236, 235, 1.0),
-
         child: Padding(
           padding: EdgeInsets.only(bottom: mq.height * 0.02),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
                 margin: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
@@ -225,7 +409,6 @@ class _TranscribeResultState extends State<TranscribeResult> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-
                     IconButton(
                       icon: Icon(Icons.copy, color: AppColors.ButtonColor2),
                       onPressed: _copyText,
@@ -236,9 +419,9 @@ class _TranscribeResultState extends State<TranscribeResult> {
                       onPressed: _shareText,
                       iconSize: mq.width * 0.07,
                     ),
-
                     IconButton(
-                      icon: Icon(Icons.delete_outline_rounded, color: AppColors.ButtonColor2),
+                      icon: Icon(Icons.delete_outline_rounded,
+                          color: AppColors.ButtonColor2),
                       onPressed: () {
                         _deleteTranscription(context);
                         // _handleDeleteTranscription();
@@ -246,60 +429,23 @@ class _TranscribeResultState extends State<TranscribeResult> {
                       },
                       iconSize: mq.width * 0.07,
                     ),
+
                   ],
                 ),
               ),
-
-              // Second Container: Save button
-              // GestureDetector(
-              //   onTap: _sendTranscriptionToBackend,
-              //   child: Container(
-              //     // margin: EdgeInsets.symmetric(horizontal: mq.width * 0.02),
-              //     padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05, vertical: mq.height * 0.015),
-              //
-              //     // padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05,vertical: mq.height * 0.02),
-              //     height: mq.height * 0.08,
-              //     // width: mq.width*0.03,
-              //
-              //
-              //     decoration: BoxDecoration(
-              //       color: AppColors.ButtonColor2,
-              //       borderRadius: BorderRadius.circular(mq.width * 0.1),
-              //     ),
-              //     child: Row(
-              //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //       children: [
-              //         Icon(
-              //           Icons.save,
-              //           color: Colors.white,
-              //           size: mq.width * 0.06,
-              //         ),
-              //         // Spacer(),
-              //         SizedBox(width: mq.width * 0.02), // Space between icon and text
-              //         Text(
-              //           "Save",
-              //           style: TextStyle(
-              //             color: Colors.white,
-              //             fontSize: mq.width * 0.04,
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              // )
-
 
               SafeArea(
                 child: GestureDetector(
                   onTap: _sendTranscriptionToBackend,
                   child: Container(
                     // margin: EdgeInsets.symmetric(horizontal: mq.width * 0.02),
-                    padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05,),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: mq.width * 0.05,
+                    ),
 
                     // padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05,vertical: mq.height * 0.02),
                     height: mq.height * 0.07,
                     // width: mq.width*0.03,
-
 
                     decoration: BoxDecoration(
                       color: AppColors.ButtonColor2,
@@ -314,7 +460,9 @@ class _TranscribeResultState extends State<TranscribeResult> {
                           size: mq.width * 0.06,
                         ),
                         // Spacer(),
-                        SizedBox(width: mq.width * 0.02), // Space between icon and text
+                        SizedBox(
+                            width:
+                            mq.width * 0.02), // Space between icon and text
                         Text(
                           "Save",
                           style: TextStyle(
@@ -326,237 +474,14 @@ class _TranscribeResultState extends State<TranscribeResult> {
                     ),
                   ),
                 ),
-              )
-
-            ],        ),
+              ),
+            ],
+          ),
         ),
       ),
     );
 
-//       Scaffold(
-//       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-//       appBar: AppBar(
-//         leading: IconButton(
-//             icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
-//             onPressed: _handleBack
-//
-//         ),
-//         title: Center(
-//           child: Text(
-//             'Your Transcripts',
-//             style: TextStyle(fontSize: mq.width * 0.05),
-//           ),
-//         ),
-//         backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-//         toolbarHeight: mq.height * 0.1,
-//       ),
-//       body:
-//       Padding(
-//         padding: EdgeInsets.all(mq.width * 0.04),
-//         child: SingleChildScrollView(
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               _isEditing
-//                   ? TextField(
-//                 controller: _textController,
-//                 maxLines: null,
-//                 style: GoogleFonts.roboto(
-//                   fontSize: mq.width * 0.05,
-//                   fontWeight: FontWeight.normal,
-//                   color: Colors.black,
-//                 ),
-//                 decoration: InputDecoration(
-//                   border: InputBorder.none,
-//                   fillColor: Colors.transparent,
-//                   filled: true,
-//                   contentPadding: EdgeInsets.zero,
-//                 ),
-//                 textAlign: TextAlign.center,
-//               )
-//                   : Text(
-//                 _textController.text,
-//                 style: GoogleFonts.roboto(
-//                   fontSize: mq.width * 0.05,
-//                   fontWeight: FontWeight.normal,
-//                 ),
-//                 textAlign: TextAlign.center,
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//       bottomSheet: Container(
-//         color: Color.fromRGBO(220, 236, 235, 1.0),
-//         child: Padding(
-//           padding: EdgeInsets.only(bottom: mq.height * 0.02),
-//           child: Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//
-//             children: [
-//               Container(
-//                 margin: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
-//                 decoration: BoxDecoration(
-//                   color: Colors.white,
-//                   borderRadius: BorderRadius.circular(mq.width * 0.1),
-//                 ),
-//                 child: Row(
-//                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                   children: [
-//
-//                     IconButton(
-//                       icon: Icon(Icons.copy, color: AppColors.ButtonColor2),
-//                       onPressed: _copyText,
-//                       iconSize: mq.width * 0.07,
-//                     ),
-//                     IconButton(
-//                       icon: Icon(Icons.share, color: AppColors.ButtonColor2),
-//                       onPressed: _shareText,
-//                       iconSize: mq.width * 0.07,
-//                     ),
-//
-//                     IconButton(
-//                       icon: Icon(Icons.delete_outline_rounded, color: AppColors.ButtonColor2),
-//                       onPressed: () {
-//                         _deleteTranscription(context);
-//                         // _handleDeleteTranscription();
-//                         Navigator.pop(context);
-//                       },
-//                       iconSize: mq.width * 0.07,
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//
-//               // Second Container: Save button
-//               GestureDetector(
-//                 onTap: _sendTranscriptionToBackend,
-//                 child: Container(
-//                   padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05, vertical: mq.height * 0.015),
-//                   decoration: BoxDecoration(
-//                     color: AppColors.ButtonColor2,
-//                     borderRadius: BorderRadius.circular(mq.width * 0.1),
-//                   ),
-//                   child: Row(
-//                     children: [
-//                       Icon(
-//                         Icons.save,
-//                         color: Colors.white,
-//                         size: mq.width * 0.07,
-//                       ),
-//                       SizedBox(width: mq.width * 0.02), // Space between icon and text
-//                       Text(
-//                         "Save",
-//                         style: TextStyle(
-//                           color: Colors.white,
-//                           fontSize: mq.width * 0.05,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               )
-//
-//
-//             ],
-//           ),
-//
-//
-//         ),
-//       ),
-//
-// ///////////////////////////////////////////////////////////////
-//
-//       // bottomSheet: Container(
-//       //   color: Color.fromRGBO(220, 236, 235, 1.0),
-//       //   child: Padding(
-//       //     padding: EdgeInsets.only(bottom: mq.height * 0.02),
-//       //     child: (_textController.text == null || _textController.text.isEmpty)
-//       //         ? Center(
-//       //       child: ElevatedButton(
-//       //         onPressed: _navigateToRecordView, // Function to navigate to RecordView
-//       //         style: ElevatedButton.styleFrom(
-//       //           backgroundColor: AppColors.ButtonColor2,
-//       //           padding: EdgeInsets.symmetric(
-//       //               horizontal: mq.width * 0.1, vertical: mq.height * 0.02),
-//       //           shape: RoundedRectangleBorder(
-//       //             borderRadius: BorderRadius.circular(mq.width * 0.1),
-//       //           ),
-//       //         ),
-//       //         child: Text(
-//       //           'Start',
-//       //           style: TextStyle(fontSize: mq.width * 0.05, color: Colors.white),
-//       //         ),
-//       //       ),
-//       //     )
-//       //         : Row(
-//       //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//       //       children: [
-//       //         Container(
-//       //           margin: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
-//       //           decoration: BoxDecoration(
-//       //             color: Colors.white,
-//       //             borderRadius: BorderRadius.circular(mq.width * 0.1),
-//       //           ),
-//       //           child: Row(
-//       //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//       //             children: [
-//       //               IconButton(
-//       //                 icon: Icon(Icons.copy, color: AppColors.ButtonColor2),
-//       //                 onPressed: _copyText,
-//       //                 iconSize: mq.width * 0.07,
-//       //               ),
-//       //               IconButton(
-//       //                 icon: Icon(Icons.share, color: AppColors.ButtonColor2),
-//       //                 onPressed: _shareText,
-//       //                 iconSize: mq.width * 0.07,
-//       //               ),
-//       //               IconButton(
-//       //                 icon: Icon(Icons.delete_outline_rounded,
-//       //                     color: AppColors.ButtonColor2),
-//       //                 onPressed: () {
-//       //                   _deleteTranscription(context);
-//       //                   Navigator.pop(context);
-//       //                 },
-//       //                 iconSize: mq.width * 0.07,
-//       //               ),
-//       //             ],
-//       //           ),
-//       //         ),
-//       //         GestureDetector(
-//       //           onTap: _sendTranscriptionToBackend,
-//       //           child: Container(
-//       //             padding: EdgeInsets.symmetric(
-//       //                 horizontal: mq.width * 0.05, vertical: mq.height * 0.015),
-//       //             decoration: BoxDecoration(
-//       //               color: AppColors.ButtonColor2,
-//       //               borderRadius: BorderRadius.circular(mq.width * 0.1),
-//       //             ),
-//       //             child: Row(
-//       //               children: [
-//       //                 Icon(
-//       //                   Icons.save,
-//       //                   color: Colors.white,
-//       //                   size: mq.width * 0.07,
-//       //                 ),
-//       //                 SizedBox(width: mq.width * 0.02),
-//       //                 Text(
-//       //                   "Save",
-//       //                   style: TextStyle(
-//       //                     color: Colors.white,
-//       //                     fontSize: mq.width * 0.05,
-//       //                   ),
-//       //                 ),
-//       //               ],
-//       //             ),
-//       //           ),
-//       //         ),
-//       //       ],
-//       //     ),
-//       //   ),
-//       // ),
-//
-//     );
+
   }
 
   @override
@@ -565,6 +490,3 @@ class _TranscribeResultState extends State<TranscribeResult> {
     super.dispose();
   }
 }
-
-
-
