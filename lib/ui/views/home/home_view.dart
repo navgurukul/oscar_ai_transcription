@@ -256,7 +256,8 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SettingsScreen(
+                    builder: (context) =>
+                        SettingsScreen(
                       profileName: widget.profileName,
                       profilePicUrl: widget.profilePicUrl,
                     ),
@@ -460,7 +461,8 @@ class _HomePageState extends State<HomePage> {
               final newTranscription = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RecordView(
+                  builder: (context) =>
+                      RecordView(
                     onRecordingComplete: (transcribedText) {
                       _refreshData();
                       Navigator.pop(context, true);
@@ -474,6 +476,8 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder: (context) => TranscribeResult(
                             transcribedText: transcribedText,
+                            unformattedText: '',
+
                             onDelete: () => _deleteTranscription(transcribedText),
                             tokenid: widget.tokenid,
                           ),

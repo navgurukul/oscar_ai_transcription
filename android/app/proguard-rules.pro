@@ -18,6 +18,12 @@
 -keep class com.google.j2objc.annotations.** { *; }
 -dontwarn com.google.j2objc.annotations.**
 
+-keepattributes *Annotation*
+-keep class com.google.firebase.crashlytics.** { *; }
+-keep class com.google.firebase.analytics.** { *; }
+-dontwarn com.google.firebase.crashlytics.**
+
+
 
 # Preserve the classes and methods related to authentication and token handling
 -keep class com.yourpackage.authentication.** { *; }
