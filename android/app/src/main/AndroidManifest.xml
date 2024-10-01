@@ -17,6 +17,8 @@
         android:icon="@mipmap/launcher_icon">
 <!--        tools:replace="android:icon, android:label">-->
 
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -46,6 +48,8 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+
 
 
 

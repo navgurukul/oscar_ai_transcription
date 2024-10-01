@@ -3,9 +3,10 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:oscar_stt/core/constants/app_colors.dart';
+// import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:path_provider/path_provider.dart';
+import '../../../core/constants/app_colors.dart';
 import '../transcribe/transcribe_view.dart';
 
 class RecordView extends StatefulWidget {
@@ -29,6 +30,8 @@ class _RecordViewState extends State<RecordView> {
   bool _isRestarted = false;
   bool _isPaused = false;
   bool _isLoading = false;
+
+  String _completeSpeechText = '';
 
 
 
@@ -234,6 +237,7 @@ class _RecordViewState extends State<RecordView> {
             MaterialPageRoute(
               builder: (context) => TranscribeResult(
                 transcribedText: formattedText,
+                unformattedText: _speechText,
                 isEmptyInput: isEmptyInput,
                 onDelete: () {
                   widget.onRecordingComplete('');
@@ -274,6 +278,7 @@ class _RecordViewState extends State<RecordView> {
             MaterialPageRoute(
               builder: (context) => TranscribeResult(
                 transcribedText: formattedText,
+                unformattedText: _speechText,
                 isEmptyInput: isEmptyInput,
                 onDelete: () {
                   widget.onRecordingComplete('');
@@ -344,15 +349,22 @@ class _RecordViewState extends State<RecordView> {
     await _speech.listen(
       onResult: (val) {
         setState(() {
-          _speechText = val.recognizedWords;
+          // _speechText = val.recognizedWords;
+
+          if (val.finalResult) {
+            _completeSpeechText += ' ' + val.recognizedWords;
+            print('Appended text: $_completeSpeechText');
+          }
         });
-        if (val.finalResult) {
-          print('Final speech result: $_speechText');
-        }
+        // if (val.finalResult) {
+        //   print('Final speech result: $_speechText');
+        // }
       },
       listenFor: Duration(minutes: 3), //  maximum listening duration to 1 minute
       pauseFor: Duration(minutes: 20),  //  the time allowed for silence before stopping to 1 minute
       onSoundLevelChange: (level) {
+        _stopCurrentRecording();
+        _startRecording();
       },
     );
   }
@@ -408,7 +420,7 @@ class _RecordViewState extends State<RecordView> {
       builder: (BuildContext context) {
         var mq = MediaQuery.of(context).size;
         return AlertDialog(
-            shape: RoundedRectangleBorder(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,),
           title: Text(
             'Sure you want to exit?',
@@ -461,6 +473,7 @@ class _RecordViewState extends State<RecordView> {
                   onPressed: () {
                     setState(() {
                       _isKeepRecordingButtonActive = true;
+                      // _restartRecordingSession();
                     });
                     Navigator.of(context).pop();
                   },
@@ -550,77 +563,117 @@ class _RecordViewState extends State<RecordView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              GestureDetector(
-                onTap:
-                    () {
-                  if (_isRecording) {
-                    // _showRestartConfirmationDialog();
-                    // _restartRecordingSession();
-                    _showRestartAlert();
-                  }
-                },
-                child: Image.asset(
-                  'assets1/Frame 24.png',
-                  width: mq.width * 0.15,
+
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.ButtonColor2, // Red background color
+                  shape: BoxShape.circle, // Circular shape
+                ),
+                padding: EdgeInsets.all(mq.width * 0.02), // Padding for the icon inside the circle
+                child: IconButton(
+                  icon: Icon(
+                    Icons.restart_alt, // Restart icon
+                    color: Colors.white, // Icon color (white for visibility)
+                  ),
+                  iconSize: mq.width * 0.08, // Responsive icon size
+                  onPressed: () {
+                    if (_isRecording) {
+                      _showRestartAlert();
+                    }
+                  },
                 ),
               ),
-              GestureDetector(
-                onTap: _stopRecording,
-                child: Image.asset(
-                  'assets1/Vector.png',
-                  width: mq.width * 0.15,
+
+              // Stop IconButton in a Circular Red Container
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.ButtonColor2, // Red background color
+                  shape: BoxShape.circle, // Circular shape
+                ),
+                padding: EdgeInsets.all(mq.width * 0.02), // Padding for the icon inside the circle
+                child: IconButton(
+                  icon: Icon(
+                    Icons.stop, // Stop icon
+                    color: Colors.white, // Icon color (white for visibility)
+                  ),
+                  iconSize: mq.width * 0.08, // Responsive icon size
+                  onPressed: _stopRecording,
                 ),
               ),
+              // GestureDetector(
+              //   onTap:
+              //       () {
+              //     if (_isRecording) {
+              //       // _showRestartConfirmationDialog();
+              //       // _restartRecordingSession();
+              //       _showRestartAlert();
+              //     }
+              //   },
+              //   child:
+              //
+              //
+              //   Image.asset(
+              //     'assets1/Frame 24.png',
+              //     width: mq.width * 0.15,
+              //   ),
+              // ),
+              // GestureDetector(
+              //   onTap: _stopRecording,
+              //   child: Image.asset(
+              //     'assets1/Vector.png',
+              //     width: mq.width * 0.15,
+              //   ),
+              // ),
             ],
           ),
           if (_isLoading)
 
-            // Show loading indicator if _isLoading is true
+          // Show loading indicator if _isLoading is true
             if (_isLoading)
-                Stack(
-                  children: [
-                    // Blurred background
-                    BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Can adjust the blur strength as needed
-                      child: Container(
-                        color: Colors.black.withOpacity(0.2), // Slightly tinted background to improve readability
-                      ),
+              Stack(
+                children: [
+                  // Blurred background
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Can adjust the blur strength as needed
+                    child: Container(
+                      color: Colors.black.withOpacity(0.2), // Slightly tinted background to improve readability
                     ),
-                    // Custom loading UI
-                    Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: mq.width * 0.04, vertical: mq.height * 0.1),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
+                  ),
+                  // Custom loading UI
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: mq.width * 0.04, vertical: mq.height * 0.1),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
 
-                            SizedBox(height: mq.height * 0.03),
-                            LinearProgressIndicator(
-                              color: Color.fromRGBO(81, 160, 155, 1.0),
-                              backgroundColor: Colors.grey[200],
-                              minHeight: 30,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            SizedBox(height: mq.height * 0.03),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05),
-                              child: Text(
-                                'Please wait a moment while we prepare the text for you',
-                                style: TextStyle(
-                                  fontSize: mq.width * 0.04,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                                textAlign: TextAlign.center,
+                          SizedBox(height: mq.height * 0.03),
+                          LinearProgressIndicator(
+                            color: Color.fromRGBO(81, 160, 155, 1.0),
+                            backgroundColor: Colors.grey[200],
+                            minHeight: 30,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          SizedBox(height: mq.height * 0.03),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05),
+                            child: Text(
+                              'Please wait a moment while we prepare the text for you',
+                              style: TextStyle(
+                                fontSize: mq.width * 0.04,
+                                fontWeight: FontWeight.normal,
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
 
         ],
       ),
