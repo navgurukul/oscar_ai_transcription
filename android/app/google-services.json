@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "89230287346",
+    "project_id": "oscar-ai-transcription",
+    "storage_bucket": "oscar-ai-transcription.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:89230287346:android:380427c71aeb29f5d1cb6b",
+        "android_client_info": {
+          "package_name": "org.samyarth.oscarai.release"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "89230287346-2hnoiqabj4nd0jtbf4ufhumtllbnl767.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "3729113005a9417ab1ac88f2b3c3d48411ae24c0"
+          }
+        },
+        {
+          "client_id": "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgB0uGqewrOZXoOhf7Am7ERjbInZV7i2M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
