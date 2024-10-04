@@ -20,8 +20,8 @@ Oscar AI Transcription is an AI-powered Android keyboard application that provid
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/YourUsername/Oscar-AI-Transcription.git
-    cd Oscar-AI-Transcription
+    git clone https://github.com/navgurukul/oscar_ai_transcription.git
+    cd oscar_ai_transcription
     ```
 2. Open the project in **Android Studio**.
 3. Sync the Gradle files and run the app on an emulator or Android device.
@@ -29,7 +29,7 @@ Oscar AI Transcription is an AI-powered Android keyboard application that provid
 ## Contributors
 
 - Suraj Sahani ([@surajsahani](https://github.com/surajsahani))
-- @sapnajha1
+- Sapna Jha ([@sapnajha1](https://github.com/sapnajha1))
 
 
 ## License
