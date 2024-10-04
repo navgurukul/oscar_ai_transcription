@@ -1,16 +1,37 @@
-# oscar_stt
+# Oscar AI Transcription
 
-A new Flutter project.
+Oscar AI Transcription is an AI-powered Android keyboard application that provides advanced speech-to-text functionality. Users can transcribe their speech into text, which is enhanced by AI for grammar, spelling, and style improvements.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Real-Time Speech Recognition**: Converts spoken words to text instantly.
+- **AI Enhancements**: Automatically corrects grammar, spelling, and style.
+- **Cross-App Compatibility**: Use the transcription service in any app.
+- **Offline Support**: Works without internet access for supported Android versions.
+- **User-Friendly Interface**: Intuitive design for easy navigation and use.
 
-A few resources to get you started if this is your first Flutter project:
+## Technologies Used
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Programming Languages**: Dart, Flutter
+- **AI Integration**: Gemini API
+- **Data Storage**: PostgressSQl
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Installation
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/YourUsername/Oscar-AI-Transcription.git
+    cd Oscar-AI-Transcription
+    ```
+2. Open the project in **Android Studio**.
+3. Sync the Gradle files and run the app on an emulator or Android device.
+
+## Contributors
+
+- Suraj Sahani ([@YourGitHubUsername](https://github.com/YourGitHubUsername))
+- Sapna
+
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
