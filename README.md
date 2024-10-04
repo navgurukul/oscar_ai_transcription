@@ -28,8 +28,8 @@ Oscar AI Transcription is an AI-powered Android keyboard application that provid
 
 ## Contributors
 
-- Suraj Sahani ([@YourGitHubUsername](https://github.com/YourGitHubUsername))
-- Sapna
+- Suraj Sahani ([@surajsahani](https://github.com/surajsahani))
+- @sapnajha1
 
 
 ## License
