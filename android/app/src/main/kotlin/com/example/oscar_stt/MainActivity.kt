@@ -1,4 +1,4 @@
-package org.samyarth.oscarai.flutter
+package org.samyarth.oscarai.release
 
 import io.flutter.embedding.android.FlutterActivity
 
