@@ -22,6 +22,30 @@
           }
         },
         {
+          "client_id": "89230287346-gragj3muo4iihbe4upsfhb1egqh6dfkt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "9ef113f460b40f3e07b48c83597e4d35c02cad23"
+          }
+        },
+        {
+          "client_id": "89230287346-gs1nbvbfqv2tm521l0jqt06jbv8r64bm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "7864f0894284418503f25ec702c1f6911f7af6f2"
+          }
+        },
+        {
+          "client_id": "89230287346-veofe7vl5ubfsrkpb3hsq7vtlhtc1b7d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "a5baf962bdf3de80a7d25e22c9f255c64b191e94"
+          }
+        },
+        {
           "client_id": "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
           "client_type": 3
         }
