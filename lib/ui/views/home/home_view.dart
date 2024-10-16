@@ -49,14 +49,31 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
+    //      // Listen for back button presses on Android
+    // SystemChannels.platform.setMethodCallHandler((MethodCall call) async {
+    //   if (call.method == 'SystemNavigator.pop') {
+    //     // If back button is pressed, close the app
+    //     SystemNavigator.pop();
+    //     return Future.value(true);
+    //   }
+    //   return Future.value(false);
+    // });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ModalRoute.of(context)?.settings.arguments == true) {
         _showRefreshAlertDialog();
         _refreshData(); // Refresh data when returning from another page
       }
     });
+
+
   }
 
+  // void dispose() {
+  //   // Remove the back button handler when the widget is disposed
+  //   SystemChannels.platform.setMethodCallHandler(null);
+  //   super.dispose();
+  // }
 
 
   void _showRefreshAlertDialog() {
@@ -218,7 +235,45 @@ class _HomePageState extends State<HomePage> {
     final imageSize = screenWidth * 0.75;
 
 
-    return Scaffold(
+    return WillPopScope(onWillPop: () async {
+      // Exit the app directly
+        await SystemNavigator.pop();
+        return false;
+        // return await showDialog(
+        //   context: context,
+        //   builder: (context) => AlertDialog(
+        //     title: Text('Exit App'),
+        //     content: Text('Do you want to exit the app?'),
+        //     actions: <Widget>[
+        //       TextButton(
+        //         style: TextButton.styleFrom(
+        //         // backgroundColor: WidgetStateProperty.all(Colors.white),
+        //         // padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+        //       ),
+        //         onPressed: () => Navigator.of(context).pop(false),
+        //         child: Text('No'),
+        //       ),
+        //       TextButton(
+        //         style: TextButton.styleFrom(
+        //           shape: RoundedRectangleBorder(
+        //                   borderRadius: BorderRadius.circular(20),
+        //                   side: BorderSide(color: AppColors.ButtonColor2),
+        //                 ),
+
+        //         // backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
+        //         // padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+        //       ),
+        //         onPressed: () {
+        //           Navigator.of(context).pop(true);
+        //           SystemNavigator.pop(); // This will close the app
+        //         },
+        //         child: Text('Yes'),
+        //       ),
+        //     ],
+        //   ),
+        // ) ?? false;
+      },
+    child:Scaffold(
       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
 
       appBar:
@@ -448,59 +503,73 @@ class _HomePageState extends State<HomePage> {
         children: <Widget>[
           Container(
             // width: mq.width*1/7,
-            height: mq.height*1/9,
+            height: mq.height*1/10,
             decoration: BoxDecoration(
               color: AppColors.flotingButton,
               shape: BoxShape.circle,
             ),
           child: Center(
-            child: IconButton(
-                icon: Icon(
-                  Icons.mic,   // Microphone icon
-                  color: Colors.black, // Icon color
-                  // size: 50.0,  // Icon size
-                ),
-                iconSize: mq.width*1/10,
-                onPressed: () async{
-                  // Add your microphone handling logic here
-                  print("Microphone button pressed");
-                  final newTranscription = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RecordView(
-                      onRecordingComplete: (transcribedText) {
-                        _refreshData();
-                        Navigator.pop(context, true);
+            child: Container(
+              height: mq.height*1/13,
+              // width: mq.width*1/10,
+              decoration: BoxDecoration(
+                color: AppColors.ButtonColor2,
+                shape: BoxShape.circle,
+              ),
             
-            
-                        setState(() {
-                          _transcriptionsFuture = _fetchTranscriptions();
-                        });
-            
-            
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TranscribeResult(
-                              transcribedText: transcribedText,
-                              unformattedText: '',
-                              onDelete: () =>
-                                  _deleteTranscription(transcribedText),
-                              tokenid: widget.tokenid,
-                            ),
-                          ),
-                        );
-                      },
-                      tokenid: widget.tokenid,
-                    ),
+            child:
+            Center(
+              child: IconButton(
+                  icon: Icon(
+                    Icons.mic,   // Microphone icon
+                    color: Colors.white, // Icon color
+                    // size: 50.0,  // Icon size
                   ),
-                );
-                if (newTranscription != null && newTranscription == true) {
-                  _refreshData();
-                }
-              },
-            ),
-          ),),
+                  iconSize: mq.height*1/18,
+                  onPressed: () async{
+                    // Add your microphone handling logic here
+                    print("Microphone button pressed");
+                    final newTranscription = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RecordView(
+                        onRecordingComplete: (transcribedText) {
+                          _refreshData();
+                          Navigator.pop(context, true);
+              
+              
+                          setState(() {
+                            _transcriptionsFuture = _fetchTranscriptions();
+                          });
+              
+              
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TranscribeResult(
+                                transcribedText: transcribedText,
+                                unformattedText: '',
+                                onDelete: () =>
+                                    _deleteTranscription(transcribedText),
+                                tokenid: widget.tokenid,
+                              ),
+                            ),
+                          );
+                        },
+                        tokenid: widget.tokenid,
+                      ),
+                    ),
+                  );
+                  if (newTranscription != null && newTranscription == true) {
+                    _refreshData();
+                  }
+                },
+              ),
+            ),),
+          ),
+          ),
+
+          
 
           // Larger circular container
           // Container(
@@ -557,9 +626,11 @@ class _HomePageState extends State<HomePage> {
           //   ),
           // ),
         ],
+        
       ),
+      
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    );
+    ),);
 
   }
 }

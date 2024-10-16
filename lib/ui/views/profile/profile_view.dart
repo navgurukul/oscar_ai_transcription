@@ -57,7 +57,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final Color greenContainerColor = Color(0xFF51A09B);
   final Color signOutColor = Color(0xFF4D4D4D);
-  final String contactEmail = 'support.oscar@samyarth.org';
+  final String contactEmail = 'platforms@samyarth.org';
   bool _hasAgreed = false;
 
   @override
@@ -76,7 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final String termsOfUseText =  '''
 
 
-1. By using the Oscar AI Transcription App ("App"), you agree to be bound by these Terms of Use ("Terms"). If you do not agree with these Terms, you should not use the App.
+1. By using the Oscar AI Transcription ("App"), you agree to be bound by these Terms of Use ("Terms"). If you do not agree with these Terms, you should not use the App.
 
 2. The Oscar AI Transcription App is an integrable speech-to-text converter intended for use on Android devices. It allows users to input text via voice.
 
@@ -101,7 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final String privacyPolicyText =  '''
 
 
-1. We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Oscar AI Transcription App.
+1. We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Oscar AI Transcription .
 
 2. We collect personal information such as your email address and user preferences when you create an account or use the App. We also collect information about your usage of the App, such as the features you use, the time and duration of your use, and error reports.
 
@@ -300,7 +300,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(termsOfUseText),
                 InkWell(
                 onTap: () => _launchEmailClient(),
-                child: Text('support.oscar@samyarth.org',style: TextStyle(color: Colors.blue,),),),
+                child: Text('platforms@samyarth.org',style: TextStyle(color: Colors.blue,),),),
           
               ],
             ),
@@ -342,7 +342,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(privacyPolicyText),
                 InkWell(
                 onTap: () => _launchEmailClient(),
-                child: Text('support.oscar@samyarth.org',style: TextStyle(color: Colors.blue,),),),
+                child: Text('platforms@samyarth.org',style: TextStyle(color: Colors.blue,),),),
           
               ],
             ),

@@ -370,7 +370,7 @@ class _TranscribeResultState extends State<TranscribeResult> {
                 // width: mq.width*1/10,
                 height:  mq.height*1/10,
                 decoration: BoxDecoration(
-            color: AppColors.flotingButton,
+            color: Colors.white,
             shape: BoxShape.circle,
                         ),
               child: Center(
@@ -389,7 +389,7 @@ class _TranscribeResultState extends State<TranscribeResult> {
                       ),
                     );
                 },
-                icon: Icon(Icons.replay_outlined,color: Colors.black,)),
+                icon: Icon(Icons.replay_outlined,color: AppColors.ButtonColor2,)),
               ),
             ),
           ),
@@ -441,9 +441,11 @@ class _TranscribeResultState extends State<TranscribeResult> {
 
     return SafeArea(
       child: BottomAppBar(
+        height: mq.height*1/9,
         color: Color.fromRGBO(220, 236, 235, 1.0),
         child: Padding(
-          padding: EdgeInsets.only(bottom: mq.height * 0.02),
+          padding: EdgeInsets.only(bottom: mq.height * 0.01),
+          //  padding: EdgeInsets.only(top: mq.height * 0.02,bottom: mq.height * 0.01),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -453,31 +455,33 @@ class _TranscribeResultState extends State<TranscribeResult> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(mq.width * 0.1),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.copy, color: AppColors.ButtonColor2),
-                      onPressed: _copyText,
-                      iconSize: mq.width * 0.07,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.share, color: AppColors.ButtonColor2),
-                      onPressed: _shareText,
-                      iconSize: mq.width * 0.07,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete_outline_rounded,
-                          color: AppColors.ButtonColor2),
-                      onPressed: () {
-                        _deleteTranscription(context);
-                        // _handleDeleteTranscription();
-                        Navigator.pop(context);
-                      },
-                      iconSize: mq.width * 0.07,
-                    ),
-
-                  ],
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.copy, color: AppColors.ButtonColor2),
+                        onPressed: _copyText,
+                        iconSize: mq.width * 0.08,
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.share, color: AppColors.ButtonColor2),
+                        onPressed: _shareText,
+                        iconSize: mq.width * 0.08,
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete_outline_rounded,
+                            color: AppColors.ButtonColor2),
+                        onPressed: () {
+                          _deleteTranscription(context);
+                          // _handleDeleteTranscription();
+                          Navigator.pop(context);
+                        },
+                        iconSize: mq.width * 0.08,
+                      ),
+                  
+                    ],
+                  ),
                 ),
               ),
 
@@ -504,7 +508,7 @@ class _TranscribeResultState extends State<TranscribeResult> {
                         Icon(
                           Icons.save,
                           color: Colors.white,
-                          size: mq.width * 0.06,
+                          size: mq.width * 0.07,
                         ),
                         // Spacer(),
                         SizedBox(
