@@ -469,10 +469,13 @@ class _RecordViewState extends State<RecordView> {
                   ),
                 ),
                 TextButton(
-                  child: Text('Keep Recording'),
+                  child: Text('Start new Recording'),
                   onPressed: () {
                     setState(() {
-                      _isKeepRecordingButtonActive = true;
+                      // Add _restartRecordingSession() this function for start recording for starting for solving bug related to arrow back button not working properly
+                      _restartRecordingSession();
+                      // _isKeepRecordingButtonActive = true;          
+                      // commented this above line for solving line 475 issue of arrow back button not working
                       // _restartRecordingSession();
                     });
                     Navigator.of(context).pop();

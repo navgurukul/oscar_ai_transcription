@@ -11,3 +11,9 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Ignore local.properties file (contains local paths)
+local.properties
+
+# Ignore google-services.json file (contains Firebase configuration)
+**/google-services.json
