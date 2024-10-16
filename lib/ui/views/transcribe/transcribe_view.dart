@@ -352,42 +352,89 @@ class _TranscribeResultState extends State<TranscribeResult> {
     );
   }
 
+  
+
   Widget _buildEmptyInputBottomSheet(BuildContext context) {
     var mq = MediaQuery.of(context).size;
 
-    return BottomAppBar(
-      color: Color.fromRGBO(220, 236, 235, 1.0),
-      child: Container(
+
+    return
+    SafeArea(
+      child: BottomAppBar(
+        height: mq.height*1/8,
         color: Color.fromRGBO(220, 236, 235, 1.0),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: mq.height * 0.02),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RecordView(
-                        onRecordingComplete: (String recording) {
-                          // Handle recording completion here
-                        },
-                        tokenid: widget.tokenid,
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.only(top: mq.height * 0.001),
+            child: Container(
+                // width: mq.width*1/10,
+                height:  mq.height*1/10,
+                decoration: BoxDecoration(
+            color: AppColors.flotingButton,
+            shape: BoxShape.circle,
+                        ),
+              child: Center(
+                child: IconButton(
+                  iconSize: mq.width*1/12,
+                  onPressed: (){
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecordView(
+                          onRecordingComplete: (String recording) {
+                            // Handle recording completion here
+                          },
+                          tokenid: widget.tokenid,
+                        ),
                       ),
-                    ),
-                  );
+                    );
                 },
-                child: Image.asset('assets1/Frame 24.png',
-                    width: mq.width * 0.15 // Adjust the height if necessary
-                ),
+                icon: Icon(Icons.replay_outlined,color: Colors.black,)),
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+
+
+  // Widget _buildEmptyInputBottomSheet(BuildContext context) {
+  //   var mq = MediaQuery.of(context).size;
+
+  //   return BottomAppBar(
+  //     color: Color.fromRGBO(220, 236, 235, 1.0),
+  //     child: Container(
+  //       color: Color.fromRGBO(220, 236, 235, 1.0),
+  //       child: Padding(
+  //         padding: EdgeInsets.only(bottom: mq.height * 0.02),
+  //         child: Row(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             GestureDetector(
+  //               onTap: () {
+  //                 Navigator.pushReplacement(
+  //                   context,
+  //                   MaterialPageRoute(
+  //                     builder: (context) => RecordView(
+  //                       onRecordingComplete: (String recording) {
+  //                         // Handle recording completion here
+  //                       },
+  //                       tokenid: widget.tokenid,
+  //                     ),
+  //                   ),
+  //                 );
+  //               },
+  //               child: Image.asset('assets1/Frame 24.png',
+  //                   width: mq.width * 0.15 // Adjust the height if necessary
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildFullInputBottomSheet(BuildContext context) {
     var mq = MediaQuery.of(context).size;

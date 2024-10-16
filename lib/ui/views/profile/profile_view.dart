@@ -76,9 +76,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final String termsOfUseText =  '''
 
 
-1. By using the Oscar Keyboard App ("App"), you agree to be bound by these Terms of Use ("Terms"). If you do not agree with these Terms, you should not use the App.
+1. By using the Oscar AI Transcription App ("App"), you agree to be bound by these Terms of Use ("Terms"). If you do not agree with these Terms, you should not use the App.
 
-2. The Oscar Keyboard App is a third-party integrable speech-to-text converter keyboard intended for use on Android devices. It allows users to input text via voice.
+2. The Oscar AI Transcription App is an integrable speech-to-text converter intended for use on Android devices. It allows users to input text via voice.
 
 3. You are responsible for maintaining the confidentiality of your account and password and for using the App in compliance with all applicable laws and regulations. You agree not to misuse the App or attempt to interfere with its operation.
 
@@ -96,13 +96,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 10. We reserve the right to modify these Terms at any time. Your continued use of the App after any such changes constitutes your acceptance of the new Terms.
 
-11. If you have any questions about these Terms, please contact us at support.oscar@samyarth.org.
-  ''';
+11. If you have any questions about these Terms, please contact us at''';
 
   final String privacyPolicyText =  '''
 
 
-1. We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Oscar Keyboard App.
+1. We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Oscar AI Transcription App.
 
 2. We collect personal information such as your email address and user preferences when you create an account or use the App. We also collect information about your usage of the App, such as the features you use, the time and duration of your use, and error reports.
 
@@ -120,10 +119,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 9. We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy within the App. Your continued use of the App after any such changes constitutes your acceptance of the new Privacy Policy.
 
-10. If you have any questions about this Privacy Policy, please contact us at support.oscar@samyarth.org
-
-
-  ''';
+10. If you have any questions about this Privacy Policy, please contact us at''';
 
   @override
   Widget build(BuildContext context) {
@@ -240,6 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
   Widget _buildCustomSignOutButton(BuildContext context) {
+    const String KEYLOGIN = "Login"; // Define the constant here
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       child: Align(
@@ -249,6 +246,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             await GoogleSignIn().signOut();
             SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.remove('isLoggedIn');
+            // Added some line below for solving the bug related to credentials get stored after logout
+            // await prefs.remove('profileName');
+            // await prefs.remove('profilePicUrl');
+            // await prefs.remove('tokenid');
+            // await prefs.remove('KEYLOGIN');
+            await prefs.setBool(KEYLOGIN, false);
+            print("Profile Name after logout: ${prefs.getString('profileName')}"); // should print null
+            print("Profile Pic URL after logout: ${prefs.getString('profilePicUrl')}"); // should print null
+            print("Token ID after logout: ${prefs.getString('tokenid')}"); // should print null
+
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => LoginView()),
                   (route) => false,
@@ -288,7 +295,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: Text("Terms of Use",style: GoogleFonts.karla(),),
           content: SingleChildScrollView(
-            child: Text(termsOfUseText),
+            child: Column(
+              children: [
+                Text(termsOfUseText),
+                InkWell(
+                onTap: () => _launchEmailClient(),
+                child: Text('support.oscar@samyarth.org',style: TextStyle(color: Colors.blue,),),),
+          
+              ],
+            ),
+            
+            
           ),
           actions: [
             if (!hasAgreedToTerms)
@@ -320,7 +337,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return AlertDialog(
           title: Text("Privacy Policy"),
           content: SingleChildScrollView(
-            child: Text(privacyPolicyText),
+            child: Column(
+              children: [
+                Text(privacyPolicyText),
+                InkWell(
+                onTap: () => _launchEmailClient(),
+                child: Text('support.oscar@samyarth.org',style: TextStyle(color: Colors.blue,),),),
+          
+              ],
+            ),
           ),
           actions: [
             if (!hasAgreedToTerms)

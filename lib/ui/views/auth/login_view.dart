@@ -85,7 +85,7 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
             context,
             MaterialPageRoute(
               builder: (context) =>
-                   HomePage(
+                  HomePage(
                 tokenid: globalToken5!,
                 profileName: result.displayName ?? "User's Name",
                 profilePicUrl: result.photoUrl ?? "",
