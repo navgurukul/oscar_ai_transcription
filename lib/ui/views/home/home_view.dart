@@ -446,59 +446,116 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: Stack(
         alignment: Alignment.center,
         children: <Widget>[
-          // Larger circular container
           Container(
-            width: 100.0,
-            height: 100.0,
+            // width: mq.width*1/7,
+            height: mq.height*1/9,
             decoration: BoxDecoration(
               color: AppColors.flotingButton,
               shape: BoxShape.circle,
             ),
-          ),
-
-          GestureDetector(
-            onTap: () async {
-              final newTranscription = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      RecordView(
-                    onRecordingComplete: (transcribedText) {
-                      _refreshData();
-                      Navigator.pop(context, true);
-
-                      setState(() {
-                        _transcriptionsFuture = _fetchTranscriptions();
-                      });
-
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TranscribeResult(
-                            transcribedText: transcribedText,
-                            unformattedText: '',
-
-                            onDelete: () => _deleteTranscription(transcribedText),
-                            tokenid: widget.tokenid,
-                          ),
-                        ),
-                      );
-                    },
-                    tokenid: widget.tokenid,
-                  ),
+          child: Center(
+            child: IconButton(
+                icon: Icon(
+                  Icons.mic,   // Microphone icon
+                  color: Colors.black, // Icon color
+                  // size: 50.0,  // Icon size
                 ),
-              );
-              if (newTranscription != null && newTranscription == true) {
-
-                _refreshData();
-              }
-            },
-            child: Image.asset(
-              'assets1/mic.png',
-              width: 60.0,
-              height: 60.0,
+                iconSize: mq.width*1/10,
+                onPressed: () async{
+                  // Add your microphone handling logic here
+                  print("Microphone button pressed");
+                  final newTranscription = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecordView(
+                      onRecordingComplete: (transcribedText) {
+                        _refreshData();
+                        Navigator.pop(context, true);
+            
+            
+                        setState(() {
+                          _transcriptionsFuture = _fetchTranscriptions();
+                        });
+            
+            
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TranscribeResult(
+                              transcribedText: transcribedText,
+                              unformattedText: '',
+                              onDelete: () =>
+                                  _deleteTranscription(transcribedText),
+                              tokenid: widget.tokenid,
+                            ),
+                          ),
+                        );
+                      },
+                      tokenid: widget.tokenid,
+                    ),
+                  ),
+                );
+                if (newTranscription != null && newTranscription == true) {
+                  _refreshData();
+                }
+              },
             ),
-          ),
+          ),),
+
+          // Larger circular container
+          // Container(
+          //   width: 100.0,
+          //   height: 100.0,
+          //   decoration: BoxDecoration(
+          //     color: AppColors.flotingButton,
+          //     shape: BoxShape.circle,
+          //   ),
+          // ),
+      
+
+          // GestureDetector(
+          //   onTap: () async {
+          //     final newTranscription = await Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) =>
+          //             RecordView(
+          //           onRecordingComplete: (transcribedText) {
+          //             _refreshData();
+          //             Navigator.pop(context, true);
+
+          //             setState(() {
+          //               _transcriptionsFuture = _fetchTranscriptions();
+          //             });
+
+          //             Navigator.pushReplacement(
+          //               context,
+          //               MaterialPageRoute(
+          //                 builder: (context) => TranscribeResult(
+          //                   transcribedText: transcribedText,
+          //                   unformattedText: '',
+
+          //                   onDelete: () => _deleteTranscription(transcribedText),
+          //                   tokenid: widget.tokenid,
+          //                 ),
+          //               ),
+          //             );
+          //           },
+          //           tokenid: widget.tokenid,
+          //         ),
+          //       ),
+          //     );
+          //     if (newTranscription != null && newTranscription == true) {
+
+          //       _refreshData();
+          //     }
+          //   },
+          //   child: Image.asset(
+          //     'assets1/mic.png',
+          //     width: 60.0,
+          //     height: 60.0,
+          //   ),
+          // ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
