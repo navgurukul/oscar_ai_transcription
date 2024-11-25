@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:oscar_stt/ui/views/auth/login_view.dart';
 // import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../record/record_view.dart';
@@ -94,7 +97,44 @@ class _TranscribeResultState extends State<TranscribeResult> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Saved transcription')),
         );
-      } else {
+      }
+      // added below else if condition for error 401 , invalid token 
+      else if (response.statusCode == 401) {
+        print(' Invalid token: ${response.statusCode}');
+        // Show AlertDialog
+        showDialog(
+          context: context,
+          barrierDismissible:
+              false, // Prevent dialog from closing on tap outside
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Session Expired'),
+              content: Text('Your token is expired and you are logged out.'),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop(); // Close the dialog
+
+                    // Sign out and clear session
+                    await GoogleSignIn().signOut();
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    await prefs.remove('isLoggedIn');
+
+                    // Navigate to LoginView
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => LoginView()),
+                      (route) => false,
+                    );
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } 
+      else {
         print('Failed to send transcription: ${response.statusCode}');
       }
     } catch (e) {
