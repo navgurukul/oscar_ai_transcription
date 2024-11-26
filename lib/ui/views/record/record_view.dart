@@ -146,12 +146,13 @@ class _RecordViewState extends State<RecordView> {
     super.dispose();
   }
 
+  bool _isDialogOpen = false;
+
 
   Future<String?> _formatText(String originalText) async {
     setState(() {
       _isLoading = true; // Start loading
     });
-
 
     try {
       final content = [
@@ -178,7 +179,38 @@ class _RecordViewState extends State<RecordView> {
           : formattedText;
     } catch (e) {
       print("Error using Gemini API: $e");
-      return originalText; // Return the original text if an error occurs
+      if (!_isDialogOpen) {
+        _isDialogOpen = true; // Mark dialog as open
+        showDialog(
+          context: context,
+          barrierDismissible:
+              false, // Prevent dialog from closing on tap outside
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Oops ! An error occured'),
+              content: Text('$e'),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                     _isDialogOpen = false; // Mark dialog as closed
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                     // Close the dialog
+
+
+                    // Navigate to LoginView
+                    // Navigator.of(context).pushAndRemoveUntil(
+                    //   MaterialPageRoute(builder: (context) => HomePage()),
+                    //   (route) => false,
+                    // );
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );};
+      // return originalText; // Return the original text if an error occurs
     } finally {
       setState(() {
         _isLoading = false; // End loading
