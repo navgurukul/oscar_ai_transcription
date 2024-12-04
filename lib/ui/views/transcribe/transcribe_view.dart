@@ -133,7 +133,7 @@ class _TranscribeResultState extends State<TranscribeResult> {
             );
           },
         );
-      } 
+      }
       else {
         print('Failed to send transcription: ${response.statusCode}');
       }

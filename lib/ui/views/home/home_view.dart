@@ -36,6 +36,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<List<Map<String, dynamic>>> _transcriptionsFuture;
   List<Map<String, dynamic>> _currentTranscriptions = [];
+  bool _isDialogOpen = false;
 
 
   @override
@@ -197,21 +198,34 @@ class _HomePageState extends State<HomePage> {
           ),
         );
       } else if(response.statusCode == 400){
-        print('bad request');
+        print('Bad Request');
+        _showErrorDialog(context ,'Bad Request');
 
       }
       else if(response.statusCode == 404){
         print('Transcription not found');
+        _showErrorDialog(context ,'Transcription not found');
+
+      } 
+      else if(response.statusCode == 500){
+        print('Internal server error ');
+        _showErrorDialog(context ,'Internal server error ');
 
       }
       else {
+        _showErrorDialog(context ,'Failed to delete transcription');
         throw Exception('Failed to delete transcription');
+      
       }
     } catch (e) {
       // Handle the error
       print('Error: $e');
+      _showErrorDialog(context ,'$e');
     }
   }
+
+
+
   Future<List<Map<String, dynamic>>> _fetchTranscriptions() async {
     final response = await http.get(
       Uri.parse('https://dev-oscar.merakilearn.org/api/v1/transcriptions'),
@@ -221,9 +235,50 @@ class _HomePageState extends State<HomePage> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return List<Map<String, dynamic>>.from(data['data']);
-    } else {
+    }else if(response.statusCode == 400){
+      final data = jsonDecode(response.body);
+      _showErrorDialog(context , data['message']);
+      return data['message']; // Return the message from the API response
+    }else if(response.statusCode == 404){
+      final data = jsonDecode(response.body);
+      _showErrorDialog(context , data['message']);
+      return data['message']; // Return the message from the API response
+    }else if(response.statusCode == 500){
+      final data = jsonDecode(response.body);
+      _showErrorDialog(context , data['message']);
+      return data['message']; // Return the message from the API response
+    }else if(response.statusCode == 401){
+      final data = jsonDecode(response.body);
+      _showErrorDialog(context , data['message']);
+      return data['message']; // Return the message from the API response
+    }
+    else {
       throw Exception('Failed to load transcriptions');
     }
+  }
+
+  
+  
+void _showErrorDialog(BuildContext context, String errorMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dialog from closing on outside tap
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Oops an error occured'),
+          content: Text(errorMessage), // Display error message dynamically
+          actions: [
+            TextButton(
+              onPressed: () {
+                _isDialogOpen = false; // Mark dialog as closed
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
