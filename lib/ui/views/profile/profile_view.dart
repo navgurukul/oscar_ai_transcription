@@ -121,12 +121,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 10. If you have any questions about this Privacy Policy, please contact us at''';
 
+void handleback(){
+    Navigator.pop(context, 'Saved transcription');
+  }
+
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+      appBar: AppBar(
+        scrolledUnderElevation: 0.0,
+        
+        automaticallyImplyLeading: false,
+        backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+        elevation: 0,
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.06),
+            onPressed: handleback,
+            ),),
 
       // backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
       body: Padding(

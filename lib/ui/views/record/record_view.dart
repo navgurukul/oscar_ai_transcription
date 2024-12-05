@@ -234,6 +234,7 @@ Future<String?> _formatText(String _speechText) async {
   try {
     // Prepare the POST request body
     final Map<String, String> body = {
+      
       "user_input": _speechText,
       "device_tag": '3',
     };
@@ -254,7 +255,7 @@ Future<String?> _formatText(String _speechText) async {
       final responseData = jsonDecode(response.body);
 
       // Extract formatted text from response
-      final formattedText = responseData["data"]["capture"]["transcribedText"] ?? _speechText;
+      final formattedText = responseData["data"]["output"] ?? _speechText;
 
       return formattedText.isEmpty || formattedText == _speechText
           ? _speechText
@@ -307,9 +308,12 @@ Future<String?> _formatText(String _speechText) async {
     }
 
     else {
-      // Handle API response errors
+      
       print("Error: ${response.statusCode} - ${response.body}");
-      return _speechText;
+      final responseData = jsonDecode(response.body);
+      // _showErrorDialog(context ,responseData['message']);
+
+      return responseData['message']; // Return the "message"
     }
   } catch (e) {
     // Handle exceptions
@@ -739,6 +743,7 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
                     color: Colors.white, // Icon color (white for visibility)
                   ),
                   iconSize: mq.width * 0.08, // Responsive icon size
+
                   onPressed: () {
                     if (_isRecording) {
                       _showRestartAlert();
