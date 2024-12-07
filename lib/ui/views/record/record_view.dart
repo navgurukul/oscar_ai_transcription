@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oscar_stt/ui/views/auth/login_view.dart';
+import 'package:oscar_stt/ui/views/home/home_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -224,6 +225,7 @@ class _RecordViewState extends State<RecordView> {
   // }
 
 Future<String?> _formatText(String _speechText) async {
+  var mq = MediaQuery.of(context).size;
   setState(() {
     _isLoading = true; // Start loading
     // _isDialogOpen = false;
@@ -251,7 +253,8 @@ Future<String?> _formatText(String _speechText) async {
 
     // Check the status code
     if (response.statusCode == 201) {
-      print('successfull');
+      print('Transcription successfull ');
+      
       final responseData = jsonDecode(response.body);
 
       // Extract formatted text from response
@@ -272,12 +275,21 @@ Future<String?> _formatText(String _speechText) async {
               false, // Prevent dialog from closing on tap outside
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Session Expired'),
-              content: Text('Your token is expired and you are logged out.'),
+              shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
+          ),
+              title: Text('Session Expired', style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),),
+              content: Text('Your token is expired and you will now be logged out . Please Login again', style: TextStyle(
+              fontWeight: FontWeight.w400,fontSize: mq.width * 0.04,
+              color: Colors.black,
+            ),),
               actions: [
                 TextButton(
                   onPressed: () async {
-                    Navigator.of(context).pop(); // Close the dialog
+                    // Navigator.of(context).pop(); // Close the dialog
 
                     // Sign out and clear session
                     await GoogleSignIn().signOut();
@@ -291,7 +303,10 @@ Future<String?> _formatText(String _speechText) async {
                       (route) => false,
                     );
                   },
-                  child: Text('OK'),
+                  child: Text('OK',style: TextStyle(color: Colors.white),), style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+              ),
                 ),
               ],
             );
@@ -304,7 +319,7 @@ Future<String?> _formatText(String _speechText) async {
 
     }else if (response.statusCode == 500) {
       print('Internal Server Error.');
-      _showErrorDialog(context ,'Internal Server Error.');
+      _showErrorDialog(context ,'The server had an error while processing your request');
     }
 
     else {
@@ -318,6 +333,7 @@ Future<String?> _formatText(String _speechText) async {
   } catch (e) {
     // Handle exceptions
     print("Error making POST request: $e");
+    _showErrorDialog(context , e as String);
     // return _speechText;
   } finally {
     setState(() {
@@ -328,20 +344,54 @@ Future<String?> _formatText(String _speechText) async {
 
 
 void _showErrorDialog(BuildContext context, String errorMessage) {
+  var mq = MediaQuery.of(context).size;
     showDialog(
       context: context,
       barrierDismissible: false, // Prevent dialog from closing on outside tap
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Oops an error occured'),
-          content: Text(errorMessage), // Display error message dynamically
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
+          ),
+          title: const Text('Oops an error occured',style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),),
+          content: Text(errorMessage,style: TextStyle(
+              fontWeight: FontWeight.w400,fontSize: mq.width * 0.04,
+              color: Colors.black,
+            ),), // Display error message dynamically
           actions: [
             TextButton(
-              onPressed: () {
-                _isDialogOpen = false; // Mark dialog as closed
-                Navigator.of(context).pop(); // Close the dialog
+              // onPressed: () {
+              //   _isDialogOpen = false; // Mark dialog as closed
+              //   Navigator.of(context).pop(); // Close the dialog
+              // },
+              onPressed: ()async {
+                // _isDialogOpen = false; // Mark dialog as closed
+                // Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                String profileName = prefs.getString('profileName') ?? '';
+                String profilePicUrl = prefs.getString('profilePicUrl') ?? '';
+                String transcribedata = prefs.getString('transcribedata') ?? '';
+                Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            profileName: profileName,
+            profilePicUrl: profilePicUrl,
+            transcribedata: transcribedata,
+            tokenid: widget.tokenid,
+          ),
+        ),
+      );
               },
-              child: const Text('OK'),
+              child: const Text('OK',style: TextStyle(color: Colors.white),),
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+              ),
             ),
           ],
         );

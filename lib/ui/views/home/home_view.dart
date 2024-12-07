@@ -70,11 +70,11 @@ class _HomePageState extends State<HomePage> {
 
   }
 
-  // void dispose() {
+  void dispose() {
   //   // Remove the back button handler when the widget is disposed
   //   SystemChannels.platform.setMethodCallHandler(null);
-  //   super.dispose();
-  // }
+    super.dispose();
+  }
 
 
   void _showRefreshAlertDialog() {
@@ -123,6 +123,7 @@ class _HomePageState extends State<HomePage> {
 
 
   Future<void> _confirmDeleteTranscription(String transcriptionId) async {
+    var mq = MediaQuery.of(context).size;
     return showDialog<void>(
       context: context,
       barrierDismissible: true, // user can tap outside to dismiss the dialog
@@ -131,8 +132,12 @@ class _HomePageState extends State<HomePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero, // No border radius
           ),
-          title: Text('Confirm Delete'),
-          content: Text('Are you sure you want to delete this note?'),
+          title: Text('Confirm Delete',style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),),
+          content: Text('Are you sure you want to delete this note?',style: TextStyle(
+              fontWeight: FontWeight.w400,fontSize: mq.width * 0.04,
+            ),),
           actions: <Widget>[
             SizedBox(height: 20.0),
 
@@ -199,17 +204,17 @@ class _HomePageState extends State<HomePage> {
         );
       } else if(response.statusCode == 400){
         print('Bad Request');
-        _showErrorDialog(context ,'Bad Request');
+        _showErrorDialog(context ,'Failed to delete transcription due to Bad Request');
 
       }
       else if(response.statusCode == 404){
         print('Transcription not found');
-        _showErrorDialog(context ,'Transcription not found');
+        _showErrorDialog(context ,'Failed to delete due to Transcription not found');
 
       } 
       else if(response.statusCode == 500){
         print('Internal server error ');
-        _showErrorDialog(context ,'Internal server error ');
+        _showErrorDialog(context ,'Failed to delete transcription due to Internal server error ');
 
       }
       else {
@@ -239,20 +244,24 @@ class _HomePageState extends State<HomePage> {
       final data = jsonDecode(response.body);
       _showErrorDialog(context , data['message']);
       return data['message']; // Return the message from the API response
-    }else if(response.statusCode == 404){
+    }
+    else if(response.statusCode == 404){
       final data = jsonDecode(response.body);
       _showErrorDialog(context , data['message']);
       return data['message']; // Return the message from the API response
-    }else if(response.statusCode == 500){
+    }
+    else if(response.statusCode == 500){
       final data = jsonDecode(response.body);
       _showErrorDialog(context , data['message']);
       return data['message']; // Return the message from the API response
-    }else if(response.statusCode == 401){
+    }
+    else if(response.statusCode == 401){
       final data = jsonDecode(response.body);
       _showErrorDialog(context , data['message']);
       return data['message']; // Return the message from the API response
     }
     else {
+      _showErrorDialog(context ,'Failed to load transcription');
       throw Exception('Failed to load transcriptions');
     }
   }
@@ -260,20 +269,33 @@ class _HomePageState extends State<HomePage> {
   
   
 void _showErrorDialog(BuildContext context, String errorMessage) {
+  var mq = MediaQuery.of(context).size;
     showDialog(
       context: context,
       barrierDismissible: false, // Prevent dialog from closing on outside tap
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Oops an error occured'),
-          content: Text(errorMessage), // Display error message dynamically
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
+          ),
+          title: const Text('Oops! an error occured',style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            )),
+          content: Text(errorMessage,style: TextStyle(
+              fontWeight: FontWeight.w400,fontSize: mq.width * 0.04,
+              color: Colors.black,
+            )), // Display error message dynamically
           actions: [
             TextButton(
               onPressed: () {
                 _isDialogOpen = false; // Mark dialog as closed
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: const Text('OK'),
+              child: const Text('OK',style: TextStyle(color: Colors.white),),style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+              ),
             ),
           ],
         );

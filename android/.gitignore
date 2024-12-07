@@ -13,5 +13,5 @@ key.properties
 **/*.jks
 local.properties
 google-services.json
-
+pubspec.lock
 

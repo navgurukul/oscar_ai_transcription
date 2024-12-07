@@ -76,7 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final String termsOfUseText =  '''
 
 
-1. By using the Oscar AI Transcription ("App"), you agree to be bound by these Terms of Use ("Terms"). If you do not agree with these Terms, you should not use the App.
+1. By using the Oscar AI Transcription App, you agree to be bound by these Terms of Use ("Terms"). If you do not agree with these Terms, you should not use the App.
 
 2. The Oscar AI Transcription App is an integrable speech-to-text converter intended for use on Android devices. It allows users to input text via voice.
 
@@ -402,3 +402,8 @@ void handleback(){
     '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
   }
 }
+
+
+
+
+
