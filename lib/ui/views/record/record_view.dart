@@ -1,13 +1,19 @@
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:oscar_stt/ui/views/auth/login_view.dart';
+import 'package:oscar_stt/ui/views/home/home_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../transcribe/transcribe_view.dart';
+import 'package:http/http.dart' as http;
 
 class RecordView extends StatefulWidget {
   final Function(String) onRecordingComplete;
@@ -37,17 +43,17 @@ class _RecordViewState extends State<RecordView> {
 
 
 
-  late final GenerativeModel _model;
-  final String geminiApiUrl =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyD2-74-Ol3Yw29b0aG31o9yUnukrW2aHqo"; // Replace with your API key
+  // late final GenerativeModel _model;
+  // final String geminiApiUrl =
+  //     "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyD2-74-Ol3Yw29b0aG31o9yUnukrW2aHqo"; // Replace with your API key
 
-  final Map<String, String> headers = {'Content-Type': 'application/json'};
+  // final Map<String, String> headers = {'Content-Type': 'application/json'};
 
 
   @override
   void initState() {
     super.initState();
-    _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: 'AIzaSyD2-74-Ol3Yw29b0aG31o9yUnukrW2aHqo'); // Replace 'YOUR_API_KEY' with your actual API key
+    // _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: 'AIzaSyD2-74-Ol3Yw29b0aG31o9yUnukrW2aHqo'); // Replace 'YOUR_API_KEY' with your actual API key
     _initializeSpeechToText();
     _startRecording();
   }
@@ -146,59 +152,267 @@ class _RecordViewState extends State<RecordView> {
     super.dispose();
   }
 
-
-  Future<String?> _formatText(String originalText) async {
-    setState(() {
-      _isLoading = true; // Start loading
-    });
+  bool _isDialogOpen = false;
 
 
-    try {
-      final content = [
-        Content.text(
-            "Please take the following voice input, neutralize any harmful, sexual, or offensive language if present, and translate the input into English if necessary. Return only the polite, rephrased English version of the text without adding any extra comments, explanations, or alternative responses. Original input: $originalText"
-        )
+  // Future<String?> _formatText(String originalText) async {
+  //   setState(() {
+  //     _isLoading = true; // Start loading
+  //   });
 
-      ];
-      final response = await _model.generateContent(content);
+  //   try {
+  //     final content = [
+  //       Content.text(
+  //           "Please take the following voice input, neutralize any harmful, sexual, or offensive language if present, and translate the input into English if necessary. Return only the polite, rephrased English version of the text without adding any extra comments, explanations, or alternative responses. Original input: $originalText"
+  //       )
 
-      print("API Response: ${response.text}");
+  //     ];
+  //     final response = await _model.generateContent(content);
 
-      if (response.text == null || response.text!.isEmpty) {
-        print("Generated text was blocked or empty.");
-        return originalText; // Return the original text if the generated one is blocked
-      }
+  //     print("API Response: ${response.text}");
 
-      // Extract only the formatted text from the response
-      final formattedText = _extractFormattedText(response.text!);
+  //     if (response.text == null || response.text!.isEmpty) {
+  //       print("Generated text was blocked or empty.");
+  //       return originalText; // Return the original text if the generated one is blocked
+  //     }
 
-      // Return the original text if formatted text is empty or identical to the original
-      return formattedText.isEmpty || formattedText == originalText
-          ? originalText
+  //     // Extract only the formatted text from the response
+  //     final formattedText = _extractFormattedText(response.text!);
+
+  //     // Return the original text if formatted text is empty or identical to the original
+  //     return formattedText.isEmpty || formattedText == originalText
+  //         ? originalText
+  //         : formattedText;
+  //   } catch (e) {
+  //     print("Error using Gemini API: $e");
+  //     if (!_isDialogOpen) {
+  //       _isDialogOpen = true; // Mark dialog as open
+  //       showDialog(
+  //         context: context,
+  //         barrierDismissible:
+  //             false, // Prevent dialog from closing on tap outside
+  //         builder: (BuildContext context) {
+  //           return AlertDialog(
+  //             title: Text('Oops ! An error occured'),
+  //             content: Text('$e'),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () async {
+  //                    _isDialogOpen = false; // Mark dialog as closed
+  //                     Navigator.of(context).pop();
+  //                     Navigator.of(context).pop();
+  //                    // Close the dialog
+
+
+  //                   // Navigate to LoginView
+  //                   // Navigator.of(context).pushAndRemoveUntil(
+  //                   //   MaterialPageRoute(builder: (context) => HomePage()),
+  //                   //   (route) => false,
+  //                   // );
+  //                 },
+  //                 child: Text('OK'),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );};
+  //     // return originalText; // Return the original text if an error occurs
+  //   } finally {
+  //     setState(() {
+  //       _isLoading = false; // End loading
+  //     });
+  //   }
+  // }
+
+Future<String?> _formatText(String _speechText) async {
+  var mq = MediaQuery.of(context).size;
+  setState(() {
+    _isLoading = true; // Start loading
+    // _isDialogOpen = false;
+  });
+
+  const String apiUrl = "https://dev-oscar.merakilearn.org/api/v1/optimize/optimize-text"; // Replace with your API endpoint
+
+  try {
+    // Prepare the POST request body
+    final Map<String, String> body = {
+      
+      "user_input": _speechText,
+      "device_tag": '3',
+    };
+
+    // Make the POST request
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Authorization': 'Bearer ${widget.tokenid}',
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
+      body: jsonEncode(body),
+    );
+
+    // Check the status code
+    if (response.statusCode == 201) {
+      print('Transcription successfull ');
+      
+      final responseData = jsonDecode(response.body);
+
+      // Extract formatted text from response
+      final formattedText = responseData["data"]["output"] ?? _speechText;
+
+      return formattedText.isEmpty || formattedText == _speechText
+          ? _speechText
           : formattedText;
-    } catch (e) {
-      print("Error using Gemini API: $e");
-      return originalText; // Return the original text if an error occurs
-    } finally {
-      setState(() {
-        _isLoading = false; // End loading
-      });
+
+    }else if (response.statusCode == 401) {
+      print('Unauthorized');
+      // final responseData = jsonDecode(response.body);
+      // _showErrorDialog(context ,'Your token is expired , Please login again'  );
+       // Show AlertDialog
+        showDialog(
+          context: context,
+          barrierDismissible:
+              false, // Prevent dialog from closing on tap outside
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
+          ),
+              title: Text('Session Expired', style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),),
+              content: Text('Your token is expired and you will now be logged out . Please Login again', style: TextStyle(
+              fontWeight: FontWeight.w400,fontSize: mq.width * 0.04,
+              color: Colors.black,
+            ),),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    // Navigator.of(context).pop(); // Close the dialog
+
+                    // Sign out and clear session
+                    await GoogleSignIn().signOut();
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    await prefs.remove('isLoggedIn');
+
+                    // Navigate to LoginView
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => LoginView()),
+                      (route) => false,
+                    );
+                  },
+                  child: Text('OK',style: TextStyle(color: Colors.white),), style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+              ),
+                ),
+              ],
+            );
+          },
+        );
+
+    }else if (response.statusCode == 429) {
+      print('To many request or daily quota exceed');
+      _showErrorDialog(context ,'To many request or daily quota exceed');
+
+    }else if (response.statusCode == 500) {
+      print('Internal Server Error.');
+      _showErrorDialog(context ,'The server had an error while processing your request');
     }
+
+    else {
+      
+      print("Error: ${response.statusCode} - ${response.body}");
+      final responseData = jsonDecode(response.body);
+      // _showErrorDialog(context ,responseData['message']);
+
+      return responseData['message']; // Return the "message"
+    }
+  } catch (e) {
+    // Handle exceptions
+    print("Error making POST request: $e");
+    _showErrorDialog(context , e as String);
+    // return _speechText;
+  } finally {
+    setState(() {
+      _isLoading = false; // End loading
+    });
+  }
+}
+
+
+void _showErrorDialog(BuildContext context, String errorMessage) {
+  var mq = MediaQuery.of(context).size;
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dialog from closing on outside tap
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
+          ),
+          title: const Text('Oops an error occured',style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),),
+          content: Text(errorMessage,style: TextStyle(
+              fontWeight: FontWeight.w400,fontSize: mq.width * 0.04,
+              color: Colors.black,
+            ),), // Display error message dynamically
+          actions: [
+            TextButton(
+              // onPressed: () {
+              //   _isDialogOpen = false; // Mark dialog as closed
+              //   Navigator.of(context).pop(); // Close the dialog
+              // },
+              onPressed: ()async {
+                // _isDialogOpen = false; // Mark dialog as closed
+                // Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                String profileName = prefs.getString('profileName') ?? '';
+                String profilePicUrl = prefs.getString('profilePicUrl') ?? '';
+                String transcribedata = prefs.getString('transcribedata') ?? '';
+                Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            profileName: profileName,
+            profilePicUrl: profilePicUrl,
+            transcribedata: transcribedata,
+            tokenid: widget.tokenid,
+          ),
+        ),
+      );
+              },
+              child: const Text('OK',style: TextStyle(color: Colors.white),),
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
 
-  String _extractFormattedText(String apiResponse) {
-    final formattedTextPattern = RegExp(r'The sentence \"(.*?)\" is grammatically correct\.', caseSensitive: false);
 
-    final match = formattedTextPattern.firstMatch(apiResponse);
-    if (match != null && match.group(1) != null) {
-      // Extract the text within the double quotes
-      return match.group(1)!.trim();
-    }
+  // String _extractFormattedText(String apiResponse) {
+  //   final formattedTextPattern = RegExp(r'The sentence \"(.*?)\" is grammatically correct\.', caseSensitive: false);
 
-    // Return the original response if no specific pattern is found
-    return apiResponse.trim();
-  }
+  //   final match = formattedTextPattern.firstMatch(apiResponse);
+  //   if (match != null && match.group(1) != null) {
+  //     // Extract the text within the double quotes
+  //     return match.group(1)!.trim();
+  //   }
+
+  //   // Return the original response if no specific pattern is found
+  //   return apiResponse.trim();
+  // }
 
 
   bool _hasTranscriptionBeenSent = false;
@@ -579,6 +793,7 @@ class _RecordViewState extends State<RecordView> {
                     color: Colors.white, // Icon color (white for visibility)
                   ),
                   iconSize: mq.width * 0.08, // Responsive icon size
+
                   onPressed: () {
                     if (_isRecording) {
                       _showRestartAlert();
