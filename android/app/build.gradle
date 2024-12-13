@@ -69,14 +69,6 @@ android {
 
 
     }
-//    signingConfigs {
-//        debug {
-//            keyAlias 'uploadkeystore2228'
-//            keyPassword 'android'
-//            storeFile file('upload-keystore2228.jks')
-//            storePassword 'android'
-//        }
-//    }
 
     signingConfigs {
         release {

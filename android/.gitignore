@@ -11,7 +11,4 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
-local.properties
-google-services.json
-pubspec.lock
 
