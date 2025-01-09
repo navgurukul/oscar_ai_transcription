@@ -498,8 +498,9 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
                       ListView.builder(
                         padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05), // Added padding on left and right
                         itemCount: transcriptions.length,
+
                         itemBuilder: (context, index) {
-                          final transcription = transcriptions[index];
+                          final transcription = transcriptions.reversed.toList()[index];
                           return Card(
                             color: AppColors.ButtonColor,
                             margin: EdgeInsets.symmetric(vertical: 10.0),
