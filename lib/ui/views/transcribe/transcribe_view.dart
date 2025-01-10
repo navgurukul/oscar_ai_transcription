@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:oscar_stt/ui/views/auth/login_view.dart';
 // import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
