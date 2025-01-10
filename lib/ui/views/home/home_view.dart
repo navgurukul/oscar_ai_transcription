@@ -5,7 +5,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
+import 'package:oscar_stt/ui/detailpage.dart';
 import 'package:oscar_stt/ui/views/transcribe/transcribe_view.dart';
 import '../../../core/viewmodels/api_service.dart';
 import '../../shared/styles/text_style.dart';
@@ -303,6 +305,12 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
     );
   }
 
+  // // Function to format date
+  // String _formatDate(String dateString) {
+  //   final date = DateTime.parse(dateString).toLocal();
+  //   return DateFormat('MMM dd, yyyy').format(date); // Formats to Jan 10, 2025
+  // }
+
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
@@ -501,6 +509,8 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
 
                         itemBuilder: (context, index) {
                           final transcription = transcriptions.reversed.toList()[index];
+                          // final formattedDate = _formatDate(transcription['createdAt']);
+                          
                           return Card(
                             color: AppColors.ButtonColor,
                             margin: EdgeInsets.symmetric(vertical: 10.0),
@@ -509,17 +519,52 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    height: 70.0,
-                                    child: Scrollbar(
-                                      child: SingleChildScrollView(
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 8.0,left: 8.0),                                          child: Text(
-                                            transcription['transcribedText'],
+                                // Added a gesture detector on card to open detail page 
+                                  GestureDetector(
+                                    onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => Detailpage(
+                                            transcribedText: transcription[
+                                                'transcribedText'],
+                                                id1:transcription['id'].toString(),
+                                              
+                                        unformattedText:transcription['userTextInput'],
+                                        title:transcription['title'],
+                                      tokenid: widget.tokenid,
+                                      //  date: formattedDate,
+                                          ),
+                                        ),
+                                      ),
+                                    child: Container(
+                                      height: 70.0,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 8.0,left: 8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                    
+                                          children: [
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Text(
+                                            // formattedDate,
+                                            '',
                                             style: TextStyle(
-                                              fontSize: 16.0,
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
                                             ),
                                           ),
+                                            Text(
+                                              transcription['transcribedText'],
+                                              style: TextStyle(
+                                                fontSize: 16.0,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),

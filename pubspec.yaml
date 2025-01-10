@@ -64,6 +64,8 @@ dependencies:
   flutter_svg: ^2.0.10+1
   flutter_email_sender: ^6.0.3
   jwt_decoder: ^2.0.1
+  date_format: ^2.0.9
+  intl: ^0.20.1
 #  vosk_flutter: ^0.3.48
 #  permission_handler: ^10.2.0
 
