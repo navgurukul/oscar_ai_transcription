@@ -16,14 +16,14 @@ import '../record/record_view.dart';
 class TranscribeResult extends StatefulWidget {
   final String transcribedText;
   final String unformattedText;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
   final String tokenid;
   final bool isEmptyInput;
 
   const TranscribeResult(
       {Key? key,
         required this.transcribedText,
-        required this.onDelete,
+        this.onDelete,
         required this.tokenid,
         this.isEmptyInput = false,
         required this.unformattedText})
@@ -62,7 +62,7 @@ class _TranscribeResultState extends State<TranscribeResult> {
   }
 
   Future<void> _deleteTranscription(BuildContext context) async {
-    widget.onDelete(); // Perform the delete operation
+    widget.onDelete!(); // Perform the delete operation
     Navigator.pop(context, 'Transcription deleted');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Transcription deleted')),

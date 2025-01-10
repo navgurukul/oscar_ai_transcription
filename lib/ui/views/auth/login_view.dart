@@ -58,6 +58,7 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
         String profilePicUrl = result.photoUrl ?? "";
         String? id = result.id;
 
+
         globalToken5 = id;  /// when i use here then able to do login
 
         print("Google Sign-In successful");
@@ -67,6 +68,8 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
         print("Profile Picture URL: $profilePicUrl");
         print("ID: $id");
         print("Google Sign-In successful");
+
+
         await _authWithMeraki(fullName,lastName, email, profilePicUrl, id, context);
 
 
