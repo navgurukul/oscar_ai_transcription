@@ -1,89 +1,8 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_svg/svg.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import 'package:provider/provider.dart';
-// import 'package:oscar_stt/core/viewmodels/splash_viewmodel.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import '../auth/login_view.dart';
-// import '../home/home_view.dart';
-
-// class SplashScreen extends StatefulWidget {
-//   @override
-//   _SplashScreenState createState() => _SplashScreenState();
-// }
-
-// class _SplashScreenState extends State<SplashScreen> {
-//   static const String KEYLOGIN = "Login";
-
-
-
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _checkSessionAndNavigate();
-//   }
-
-
-//   _checkSessionAndNavigate() async {
-//     await Future.delayed(Duration(seconds: 3)); // 3 seconds delay
-
-//     SharedPreferences prefs = await SharedPreferences.getInstance();
-//     bool? isLoggedIn = prefs.getBool(KEYLOGIN);
-//     print(isLoggedIn);
-
-//     if (isLoggedIn != null && isLoggedIn) {
-//       String profileName = prefs.getString('profileName') ?? '';
-//       String profilePicUrl = prefs.getString('profilePicUrl') ?? '';
-//       String transcribedata = prefs.getString('transcribedata') ?? '';
-//       String tokenid = prefs.getString('tokenid') ?? '';
-
-//       Navigator.pushReplacement(
-//         context,
-//         MaterialPageRoute(
-//           builder: (context) => HomePage(
-//             profileName: profileName,
-//             profilePicUrl: profilePicUrl,
-//             transcribedata: transcribedata,
-//             tokenid: tokenid,
-//           ),
-//         ),
-//       );
-//     } else {
-//       Navigator.pushReplacement(
-//         context,
-//         MaterialPageRoute(builder: (context) => LoginView()),
-//       );
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final screenWidth = MediaQuery.of(context).size.width;
-//     final imageSize = screenWidth * 0.75;
-
-//     return Scaffold(
-//       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-//       body: Center(
-//         child:
-//         SvgPicture.asset(
-//           'assets1/Oscar Logo with Text.svg',
-//           width: imageSize,
-//           height: imageSize * 0.75,
-//         ),
-
-
-//       ),
-//     );
-//   }
-// }
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth/login_view.dart';
@@ -107,7 +26,10 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 3)); // Splash delay
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? isLoggedIn = prefs.getBool(KEYLOGIN);
-    String? tokenid = prefs.getString('tokenid'); // Retrieve token
+    String? tokenid = prefs.getString(
+      'tokenid'
+      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJodXBlbmRyYUBuYXZndXJ1a3VsLm9yZyIsInVzZXJJZCI6MSwiaWF0IjoxNzM0NjA3OTQwLCJleHAiOjE3MzUyMTI3NDB9.B7GjA5ZyMt6iXRUWAqzpkpC6QABcDO3XB_XfDlFeWN8'
+    ); // Retrieve token
     print(isLoggedIn);
 
     // Check login and token expiry
@@ -135,53 +57,12 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       );
     } else {
-      // Show dialog and redirect to login if token is expired or user is not logged in
-      // print('token is expired');
-      // _showTokenExpiryDialog;
-      // Redirect to login if not logged in or token is expired
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginView()),
-      );
+      _showSessionExpiredDialog();
     }
   }
 
 
-  //  // Function to show a dialog when the token expires
-  // void _showTokenExpiryDialog() {
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false, // Prevent dismissing by tapping outside
-  //     builder: (context) => AlertDialog(
-  //       title: Text("Session Expired"),
-  //       content: Text("Your session has expired. Please log in again."),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () {
-  //             Navigator.of(context).pop(); // Close the dialog
-  //             Navigator.pushReplacement(
-  //               context,
-  //               MaterialPageRoute(builder: (context) => LoginView()),
-  //             );
-  //           },
-  //           child: Text("OK"),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
-
-  // // Function to check if the token is expired
-  // bool _isTokenExpired(String token) {
-  //   try {
-  //     return JwtDecoder.isExpired(token);
-  //   } catch (e) {
-  //     debugPrint("Error decoding token: $e");
-  //     return true; // Treat invalid tokens as expired
-  //   }
-    
-  // }
 
   // Function to check if the token is expired
   bool _isTokenExpired(String token) {
@@ -202,6 +83,37 @@ class _SplashScreenState extends State<SplashScreen> {
       return true; // Treat invalid tokens as expired
       // return false;
     }
+  }
+
+  //Function to show session expired alert dialog
+  void _showSessionExpiredDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text("Session Expired"),
+        content: Text("Your session has expired. Please log in again."),
+        actions: [
+          TextButton(onPressed: () {
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginView()));
+          },
+              child: Container(
+                // width: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.ButtonColor2, // Replace with your desired color
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: EdgeInsets.all(16.0), // Adjust for size
+                child: Text(
+                  "OK",
+                  style: TextStyle(color: Colors.white), // Text color
+                ),
+              ),)
+        ],
+      )
+    );
   }
 
   @override
