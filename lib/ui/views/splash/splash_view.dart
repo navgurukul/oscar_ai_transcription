@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,15 +26,16 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 3)); // Splash delay
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? isLoggedIn = prefs.getBool(KEYLOGIN);
-    String? tokenid = prefs.getString(
-      'tokenid'
-      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJodXBlbmRyYUBuYXZndXJ1a3VsLm9yZyIsInVzZXJJZCI6MSwiaWF0IjoxNzM0NjA3OTQwLCJleHAiOjE3MzUyMTI3NDB9.B7GjA5ZyMt6iXRUWAqzpkpC6QABcDO3XB_XfDlFeWN8'
-    ); // Retrieve token
+    String? tokenid = prefs.getString('tokenid'
+        //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJodXBlbmRyYUBuYXZndXJ1a3VsLm9yZyIsInVzZXJJZCI6MSwiaWF0IjoxNzM0NjA3OTQwLCJleHAiOjE3MzUyMTI3NDB9.B7GjA5ZyMt6iXRUWAqzpkpC6QABcDO3XB_XfDlFeWN8'
+        ); // Retrieve token
     print(isLoggedIn);
 
     // Check login and token expiry
-    if (isLoggedIn != null && isLoggedIn && tokenid != null && !_isTokenExpired(tokenid)) {
-      
+    if (isLoggedIn != null &&
+        isLoggedIn &&
+        tokenid != null &&
+        !_isTokenExpired(tokenid)) {
       // Retrieve user details if the token is valid
       String profileName = prefs.getString('profileName') ?? '';
       String profilePicUrl = prefs.getString('profilePicUrl') ?? '';
@@ -43,7 +44,6 @@ class _SplashScreenState extends State<SplashScreen> {
       // Optionally, get the remaining time until expiry
       Duration timeRemaining = JwtDecoder.getRemainingTime(tokenid);
       print("Time remaining: ${timeRemaining.inMinutes} minutes");
-    
 
       Navigator.pushReplacement(
         context,
@@ -61,9 +61,6 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-
-
-
   // Function to check if the token is expired
   bool _isTokenExpired(String token) {
     try {
@@ -72,12 +69,14 @@ class _SplashScreenState extends State<SplashScreen> {
       int expiryTimestamp = decodedToken['exp'] ?? 0;
 
       // Check if the expiry timestamp is within the next 24 hours (1440 minutes)
-      DateTime expiryDate = DateTime.fromMillisecondsSinceEpoch(expiryTimestamp * 1000);
+      DateTime expiryDate =
+          DateTime.fromMillisecondsSinceEpoch(expiryTimestamp * 1000);
       DateTime currentDate = DateTime.now();
       Duration remainingDuration = expiryDate.difference(currentDate);
 
       // Check if remaining duration is greater than 24 hours
-      return remainingDuration.isNegative || remainingDuration.inMinutes <= 1440;
+      return remainingDuration.isNegative ||
+          remainingDuration.inMinutes <= 1440;
     } catch (e) {
       debugPrint("Error decoding token: $e");
       return true; // Treat invalid tokens as expired
@@ -88,32 +87,33 @@ class _SplashScreenState extends State<SplashScreen> {
   //Function to show session expired alert dialog
   void _showSessionExpiredDialog() {
     showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text("Session Expired"),
-        content: Text("Your session has expired. Please log in again."),
-        actions: [
-          TextButton(onPressed: () {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginView()));
-          },
-              child: Container(
-                // width: 5,
-                decoration: BoxDecoration(
-                  color: AppColors.ButtonColor2, // Replace with your desired color
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.all(16.0), // Adjust for size
-                child: Text(
-                  "OK",
-                  style: TextStyle(color: Colors.white), // Text color
-                ),
-              ),)
-        ],
-      )
-    );
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+              title: Text("Session Expired"),
+              content: Text("Your session has expired. Please log in again."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => LoginView()));
+                  },
+                  child: Container(
+                    // width: 5,
+                    decoration: BoxDecoration(
+                      color: AppColors
+                          .ButtonColor2, // Replace with your desired color
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: EdgeInsets.all(16.0), // Adjust for size
+                    child: Text(
+                      "OK",
+                      style: TextStyle(color: Colors.white), // Text color
+                    ),
+                  ),
+                )
+              ],
+            ));
   }
 
   @override
@@ -124,10 +124,22 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
       body: Center(
-        child: SvgPicture.asset(
-          'assets1/Oscar Logo with Text.svg',
-          width: imageSize,
-          height: imageSize * 0.75,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets1/logo-new.png',
+              width: 90,
+              height: 90,
+            ),
+            Text(
+              "OSCAR",
+              style: GoogleFonts.spectral(
+                  color: const Color(0xFF51A09B),
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700),
+            )
+          ],
         ),
       ),
     );

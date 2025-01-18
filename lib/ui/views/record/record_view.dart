@@ -1,5 +1,4 @@
-
-// Correct code without solving crash but having open ai integration here: 
+// Correct code without solving crash but having open ai integration here:
 // import 'dart:async';
 // import 'dart:convert';
 // import 'dart:ui';
@@ -40,16 +39,11 @@
 
 //   String _completeSpeechText = '';
 
-
-
-
-
 //   // late final GenerativeModel _model;
 //   // final String geminiApiUrl =
 //   //     "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyD2-74-Ol3Yw29b0aG31o9yUnukrW2aHqo"; // Replace with your API key
 
 //   // final Map<String, String> headers = {'Content-Type': 'application/json'};
-
 
 //   @override
 //   void initState() {
@@ -58,8 +52,6 @@
 //     _initializeSpeechToText();
 //     _startRecording();
 //   }
-
-
 
 //   void _startTimer() {
 //     // _isPaused = false;
@@ -83,7 +75,6 @@
 //       });
 //     });
 //   }
-
 
 //   void _showRestartAlert() {
 //     _pauseTimer(); // Pause the timer when the alert is shown
@@ -146,7 +137,6 @@
 //     });
 //   }
 
-
 //   @override
 //   void dispose() {
 //     _timer?.cancel();
@@ -154,7 +144,6 @@
 //   }
 
 //   bool _isDialogOpen = false;
-
 
 //   // Future<String?> _formatText(String originalText) async {
 //   //   setState(() {
@@ -204,7 +193,6 @@
 //   //                     Navigator.of(context).pop();
 //   //                    // Close the dialog
 
-
 //   //                   // Navigate to LoginView
 //   //                   // Navigator.of(context).pushAndRemoveUntil(
 //   //                   //   MaterialPageRoute(builder: (context) => HomePage()),
@@ -237,7 +225,7 @@
 //   try {
 //     // Prepare the POST request body
 //     final Map<String, String> body = {
-      
+
 //       "user_input": _speechText,
 //       "device_tag": '3',
 //     };
@@ -255,7 +243,7 @@
 //     // Check the status code
 //     if (response.statusCode == 201) {
 //       print('Transcription successfull ');
-      
+
 //       final responseData = jsonDecode(response.body);
 
 //       // Extract formatted text from response
@@ -324,7 +312,7 @@
 //     }
 
 //     else {
-      
+
 //       print("Error: ${response.statusCode} - ${response.body}");
 //       final responseData = jsonDecode(response.body);
 //       // _showErrorDialog(context ,responseData['message']);
@@ -342,7 +330,6 @@
 //     });
 //   }
 // }
-
 
 // void _showErrorDialog(BuildContext context, String errorMessage) {
 //   var mq = MediaQuery.of(context).size;
@@ -400,8 +387,6 @@
 //     );
 //   }
 
-
-
 //   // String _extractFormattedText(String apiResponse) {
 //   //   final formattedTextPattern = RegExp(r'The sentence \"(.*?)\" is grammatically correct\.', caseSensitive: false);
 
@@ -415,10 +400,8 @@
 //   //   return apiResponse.trim();
 //   // }
 
-
 //   bool _hasTranscriptionBeenSent = false;
 //   bool _isProcessing = false;
-
 
 //   Future<void> _stopCurrentRecording({bool isRestarting = false}) async {
 //     if (!_isRecording) return; // Avoid multiple stops
@@ -439,7 +422,6 @@
 //       if (_speechText.isNotEmpty) {
 //         // Checking if formatting is needed
 //         final bool needsFormatting = _checkIfFormattingNeeded(_speechText);
-
 
 //         String? formattedText = needsFormatting ? await _formatText(_speechText) : _speechText;
 
@@ -480,7 +462,6 @@
 //       final transcriptionToSend = _isRestarted ? _speechText : _speechText;
 //       bool isEmptyInput = transcriptionToSend.isEmpty;
 
-
 //       if (!_hasTranscriptionBeenSent) {
 //         String? formattedText = await _formatText(transcriptionToSend);
 
@@ -511,7 +492,6 @@
 //       print('Error stopping the recording: $e');
 //     }
 //   }
-
 
 //   void _initializeSpeechToText() {
 //     _speech = stt.SpeechToText();
@@ -581,21 +561,15 @@
 //     );
 //   }
 
-
-
-
 //   bool _checkIfFormattingNeeded(String text) {
 //     return true;
 //   }
-
-
 
 //   String _formatTime(int seconds) {
 //     final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
 //     final secs = (seconds % 60).toString().padLeft(2, '0');
 //     return '$minutes:$secs';
 //   }
-
 
 //   void _checkPermissionAndStartListening() async {
 //     bool available = await _speech.initialize(
@@ -607,8 +581,6 @@
 //         }
 //       },
 //     );
-
-
 
 //     if (available) {
 //       _speech.listen(onResult: (val) {
@@ -631,7 +603,6 @@
 //       _isKeepRecordingButtonActive = true;
 //       _isDiscardButtonActive = false;
 //     });
-
 
 //     showDialog(
 //       context: context,
@@ -692,7 +663,7 @@
 //                     setState(() {
 //                       // Add _restartRecordingSession() this function for start recording for starting for solving bug related to arrow back button not working properly
 //                       _restartRecordingSession();
-//                       // _isKeepRecordingButtonActive = true;          
+//                       // _isKeepRecordingButtonActive = true;
 //                       // commented this above line for solving line 475 issue of arrow back button not working
 //                       // _restartRecordingSession();
 //                     });
@@ -718,7 +689,6 @@
 //       },
 //     );
 //   }
-
 
 //   @override
 //   Widget build(BuildContext context) {
@@ -905,15 +875,14 @@
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-
-// code for open ai backend integration of meraki swagger api and solve crash issues's well                    
+// code for open ai backend integration of meraki swagger api and solve crash issues's well
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 // import 'package:keep_screen_on/keep_screen_on.dart';
@@ -935,7 +904,7 @@ class RecordView extends StatefulWidget {
   final Function(String) onRecordingComplete;
   final String tokenid;
 
-  RecordView({required this.onRecordingComplete,required this.tokenid});
+  RecordView({required this.onRecordingComplete, required this.tokenid});
 
   @override
   _RecordViewState createState() => _RecordViewState();
@@ -957,10 +926,9 @@ class _RecordViewState extends State<RecordView> {
 
   // late final GenerativeModel _model;
   // final String geminiApiUrl =
-      // "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyD2-74-Ol3Yw29b0aG31o9yUnukrW2aHqo"; // Replace with your API key
+  // "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyD2-74-Ol3Yw29b0aG31o9yUnukrW2aHqo"; // Replace with your API key
 
   // final Map<String, String> headers = {'Content-Type': 'application/json'};
-
 
   @override
   void initState() {
@@ -970,61 +938,58 @@ class _RecordViewState extends State<RecordView> {
     // _startRecording();
   }
 
-
-Future<bool> _requestMicrophonePermission() async {
-  var status = await Permission.microphone.status;
-  if (status.isDenied || status.isPermanentlyDenied) {
-    status = await Permission.microphone.request();
+  Future<bool> _requestMicrophonePermission() async {
+    var status = await Permission.microphone.status;
+    if (status.isDenied || status.isPermanentlyDenied) {
+      status = await Permission.microphone.request();
+    }
+    return status.isGranted;
   }
-  return status.isGranted;
-}
 
-void  _initializeSpeechToText() async {
+  void _initializeSpeechToText() async {
     _speech = stt.SpeechToText();
     bool micPermission = await _requestMicrophonePermission();
-  if (!micPermission) {
-    print('Microphone permission not granted');
-    return;
-  }
-
-    try{
-    bool available = await _speech.initialize(
-      onStatus: (val) => print('onStatus: $val'),
-      onError: (val) {
-        print('onError: $val');
-        if (val.errorMsg == 'error_speech_timeout') {
-          print('Speech recognition timeout');
-        }
-      },
-    );
-
-    if (available) {
-      _speech.listen(onResult: (val) {
-        setState(() {
-          _speechText = val.recognizedWords;
-        });
-        if (val.finalResult) {
-          print('Final speech result: $_speechText');
-          print('allowed to record voice');
-        }
-      });
-    } else {
-      print('Speech recognition not available');
-      throw Exception('Speech recognition not available.');
+    if (!micPermission) {
+      print('Microphone permission not granted');
+      return;
     }
-    }on PlatformException catch (e) {
-    print('PlatformException: ${e.message}');
-    // Show a user-friendly message
-    _showErrorDialog1('Speech recognition not available on this device.');
-  }
-    catch(e,stackTrace){
+
+    try {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) {
+          print('onError: $val');
+          if (val.errorMsg == 'error_speech_timeout') {
+            print('Speech recognition timeout');
+          }
+        },
+      );
+
+      if (available) {
+        _speech.listen(onResult: (val) {
+          setState(() {
+            _speechText = val.recognizedWords;
+          });
+          if (val.finalResult) {
+            print('Final speech result: $_speechText');
+            print('allowed to record voice');
+          }
+        });
+      } else {
+        print('Speech recognition not available');
+        throw Exception('Speech recognition not available.');
+      }
+    } on PlatformException catch (e) {
+      print('PlatformException: ${e.message}');
+      // Show a user-friendly message
+      _showErrorDialog1('Speech recognition not available on this device.');
+    } catch (e, stackTrace) {
       print('Error during SpeechToText initialization: $e');
       FirebaseCrashlytics.instance.recordError(e, stackTrace);
-    _showErrorDialog1('Speech recognition initialization failed. Please try again.');
-
+      _showErrorDialog1(
+          'Speech recognition initialization failed. Please try again.');
     }
   }
-
 
   void _restartRecordingSession() {
     // if we comment below  _stopCurrentRecording function then old recording will not be visible or save only new will be saved .
@@ -1033,32 +998,28 @@ void  _initializeSpeechToText() async {
     setState(() {
       _isRestarted = true;
       _seconds = 0;
-      _speechText = '';// Reset timer
+      _speechText = ''; // Reset timer
     });
 
-    try{
+    try {
       _initializeSpeechToText();
 
-    _startRecording();
-    }catch(e,stackTrace){
+      _startRecording();
+    } catch (e, stackTrace) {
       print('Error during restart: $e');
       FirebaseCrashlytics.instance.recordError(e, stackTrace);
-    _showErrorDialog1('Failed to restart recording. Please try again.');
-
-     } // Start a new recording session
+      _showErrorDialog1('Failed to restart recording. Please try again.');
+    } // Start a new recording session
   }
-
 
   void _startTimer() {
     // _isPaused = false;
-    _timer = Timer.periodic(Duration(seconds: 1), ( Timer timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
       setState(() {
         _seconds++;
       });
     });
   }
-
-
 
   void _pauseTimer() {
     // _isPaused = true;
@@ -1069,12 +1030,9 @@ void  _initializeSpeechToText() async {
     if (!_isPaused) return;
     _isPaused = false;
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {
-      });
+      setState(() {});
     });
   }
-
-
 
   void _showRestartAlert() {
     _pauseTimer(); // Pause the timer when the alert is shown
@@ -1084,7 +1042,8 @@ void  _initializeSpeechToText() async {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
+            borderRadius: BorderRadius.circular(
+                8.0), // Square shape with slightly rounded corners
           ),
           title: Text(
             'Reset the Recording',
@@ -1102,7 +1061,6 @@ void  _initializeSpeechToText() async {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                
                 Navigator.of(context).pop();
                 _restartRecordingSession();
               },
@@ -1112,8 +1070,10 @@ void  _initializeSpeechToText() async {
               ),
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(Colors.white),
-                side: WidgetStateProperty.all(BorderSide(color: AppColors.ButtonColor2)),
-                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+                side: WidgetStateProperty.all(
+                    BorderSide(color: AppColors.ButtonColor2)),
+                padding: WidgetStateProperty.all(
+                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
               ),
             ),
             TextButton(
@@ -1126,8 +1086,10 @@ void  _initializeSpeechToText() async {
                 style: TextStyle(color: Colors.white),
               ),
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
-                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+                backgroundColor:
+                    WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(
+                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
               ),
             ),
           ],
@@ -1138,57 +1100,55 @@ void  _initializeSpeechToText() async {
     });
   }
 
-
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
   }
 
+  Future<String?> _formatText(String _speechText) async {
+    setState(() {
+      _isLoading = true; // Start loading
+      // _isDialogOpen = false;
+    });
 
-Future<String?> _formatText(String _speechText) async {
-  setState(() {
-    _isLoading = true; // Start loading
-    // _isDialogOpen = false;
-  });
+    const String apiUrl =
+        "https://dev-oscar.merakilearn.org/api/v1/optimize/optimize-text"; // Replace with your API endpoint
 
-  const String apiUrl = "https://dev-oscar.merakilearn.org/api/v1/optimize/optimize-text"; // Replace with your API endpoint
+    try {
+      // Prepare the POST request body
+      final Map<String, String> body = {
+        "user_input": _speechText,
+        "device_tag": '3',
+      };
 
-  try {
-    // Prepare the POST request body
-    final Map<String, String> body = {
-      "user_input": _speechText,
-      "device_tag": '3',
-    };
+      // Make the POST request
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer ${widget.tokenid}',
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
+        body: jsonEncode(body),
+      );
 
-    // Make the POST request
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {
-        'Authorization': 'Bearer ${widget.tokenid}',
-        'Content-Type': 'application/json; charset=UTF-8'
-      },
-      body: jsonEncode(body),
-    );
+      // Check the status code
+      if (response.statusCode == 201) {
+        print('successfull');
+        final responseData = jsonDecode(response.body);
+        print("Response Body: $responseData");
 
-    // Check the status code
-    if (response.statusCode == 201) {
-      print('successfull');
-      final responseData = jsonDecode(response.body);
-      print("Response Body: $responseData");
+        // Extract formatted text from response
+        final formattedText = responseData["data"]["output"] ?? _speechText;
 
-      // Extract formatted text from response
-      final formattedText = responseData["data"]["output"] ?? _speechText;
-
-      return formattedText.isEmpty || formattedText == _speechText
-          ? _speechText
-          : formattedText;
-
-    }else if (response.statusCode == 401) {
-      print('Unauthorized');
-      // final responseData = jsonDecode(response.body);
-      // _showErrorDialog(context ,'Your token is expired , Please login again'  );
-       // Show AlertDialog
+        return formattedText.isEmpty || formattedText == _speechText
+            ? _speechText
+            : formattedText;
+      } else if (response.statusCode == 401) {
+        print('Unauthorized');
+        // final responseData = jsonDecode(response.body);
+        // _showErrorDialog(context ,'Your token is expired , Please login again'  );
+        // Show AlertDialog
         showDialog(
           context: context,
           barrierDismissible:
@@ -1196,16 +1156,23 @@ Future<String?> _formatText(String _speechText) async {
           builder: (BuildContext context) {
             return AlertDialog(
               shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
-          ),
-              title: Text('Session Expired', style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),),
-              content: Text('Your token is expired and you are logged out.', style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),),
+                borderRadius: BorderRadius.circular(
+                    8.0), // Square shape with slightly rounded corners
+              ),
+              title: Text(
+                'Session Expired',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              content: Text(
+                'Your token is expired and you are logged out.',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
               actions: [
                 TextButton(
                   onPressed: () async {
@@ -1223,69 +1190,75 @@ Future<String?> _formatText(String _speechText) async {
                       (route) => false,
                     );
                   },
-                  child: Text('OK',style: TextStyle(color: Colors.white),), style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
-                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
-              ),
+                  child: Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(AppColors.ButtonColor2),
+                    padding: WidgetStateProperty.all(
+                        EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+                  ),
                 ),
               ],
             );
           },
         );
+      } else if (response.statusCode == 429) {
+        print('To many request or daily quota exceed');
+        _showErrorDialog(context, 'To many request or daily quota exceed');
+      } else if (response.statusCode == 500) {
+        print('Internal Server Error.');
+        _showErrorDialog(
+            context, 'The server had an error while processing your request');
+      } else {
+        // Handle API response errors
+        print("Error: ${response.statusCode} - ${response.body}");
+        final responseData = jsonDecode(response.body);
+        // _showErrorDialog(context ,responseData['message']);
 
-    }else if (response.statusCode == 429) {
-      print('To many request or daily quota exceed');
-      _showErrorDialog(context ,'To many request or daily quota exceed');
-
-    }else if (response.statusCode == 500) {
-      print('Internal Server Error.');
-      _showErrorDialog(context ,'The server had an error while processing your request');
+        return responseData['message']; // Return the "message"
+      }
+    } catch (e) {
+      // Handle exceptions
+      print("Error making POST request: $e");
+      _showErrorDialog(context, e as String);
+      // return _speechText;
+    } finally {
+      setState(() {
+        _isLoading = false; // End loading
+      });
     }
-
-
-
-    else {
-      // Handle API response errors
-      print("Error: ${response.statusCode} - ${response.body}");
-      final responseData = jsonDecode(response.body);
-      // _showErrorDialog(context ,responseData['message']);
-
-      return responseData['message']; // Return the "message"
-      
-    }
-  } catch (e) {
-    // Handle exceptions
-    print("Error making POST request: $e");
-    _showErrorDialog(context , e as String);
-    // return _speechText;
-  } finally {
-    setState(() {
-      _isLoading = false; // End loading
-    });
   }
-}
 
-
-void _showErrorDialog(BuildContext context, String errorMessage) {
+  void _showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(
       context: context,
       barrierDismissible: false, // Prevent dialog from closing on outside tap
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
+            borderRadius: BorderRadius.circular(
+                8.0), // Square shape with slightly rounded corners
           ),
-          title: const Text('Oops! an error occured',style: TextStyle(
+          title: const Text(
+            'Oops! an error occured',
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.red,
-            ),),
-          content: Text(errorMessage,style: TextStyle(
+            ),
+          ),
+          content: Text(
+            errorMessage,
+            style: TextStyle(
               fontWeight: FontWeight.w600,
               color: Colors.black,
-            ),), // Display error message dynamically
+            ),
+          ), // Display error message dynamically
           actions: [
             TextButton(
-              onPressed: ()async {
+              onPressed: () async {
                 // _isDialogOpen = false; // Mark dialog as closed
                 // Navigator.of(context).pop(); // Close the dialog
                 Navigator.of(context).pop();
@@ -1294,21 +1267,26 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
                 String profilePicUrl = prefs.getString('profilePicUrl') ?? '';
                 String transcribedata = prefs.getString('transcribedata') ?? '';
                 Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(
-            profileName: profileName,
-            profilePicUrl: profilePicUrl,
-            transcribedata: transcribedata,
-            tokenid: widget.tokenid,
-          ),
-        ),
-      );
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomePage(
+                      profileName: profileName,
+                      profilePicUrl: profilePicUrl,
+                      transcribedata: transcribedata,
+                      tokenid: widget.tokenid,
+                    ),
+                  ),
+                );
               },
-              child: const Text('OK',style: TextStyle(color: Colors.white),),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Colors.white),
+              ),
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
-                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+                backgroundColor:
+                    WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(
+                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
               ),
             ),
           ],
@@ -1317,17 +1295,14 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
     );
   }
 
-
   bool _hasTranscriptionBeenSent = false;
   bool _isProcessing = false;
-
 
   Future<void> _stopCurrentRecording({bool isRestarting = false}) async {
     if (!_isRecording) return; // Avoid multiple stops
 
     setState(() {
       _isRecording = false;
-
     });
 
     _timer?.cancel(); // Stop the timer
@@ -1342,7 +1317,8 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
         // Checking if formatting is needed
         final bool needsFormatting = _checkIfFormattingNeeded(_speechText);
 
-        String? formattedText = needsFormatting ? await _formatText(_speechText) : _speechText;
+        String? formattedText =
+            needsFormatting ? await _formatText(_speechText) : _speechText;
 
         if (formattedText != null) {
           // await _sendTranscriptionToBackend(formattedText);
@@ -1371,9 +1347,6 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
       }
     }
   }
-
-
-
 
   Future<void> _stopRecording() async {
     await _stopCurrentRecording();
@@ -1413,15 +1386,13 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
     }
   }
 
-
-
-
   Future<void> _startRecording() async {
     if (_speech == null || !_speech.isAvailable) {
-    print('SpeechToText is not initialized or unavailable.');
-    _showErrorDialog1('Speech recognition is not initialized. Please try restarting the app.');
-    return;
-  }
+      print('SpeechToText is not initialized or unavailable.');
+      _showErrorDialog1(
+          'Speech recognition is not initialized. Please try restarting the app.');
+      return;
+    }
     setState(() {
       _isRecording = true;
       _seconds = 0;
@@ -1429,71 +1400,68 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
     _startTimer();
 
     // Initialized the speech recognition and start listening with the specified parameters
-    try{
+    try {
       await _speech.listen(
-      onResult: (val) {
-        setState(() {
-          // _speechText = val.recognizedWords;
+        onResult: (val) {
+          setState(() {
+            // _speechText = val.recognizedWords;
 
-          if (val.finalResult) {
-            _completeSpeechText += ' ' + val.recognizedWords;
-            print('Appended text: $_completeSpeechText');
-          }
-        });
-        // if (val.finalResult) {
-        //   print('Final speech result: $_speechText');
-        // }
-      },
-      listenFor: Duration(minutes: 3), //  maximum listening duration to 1 minute
-      pauseFor: Duration(minutes: 20),  //  the time allowed for silence before stopping to 1 minute
-      onSoundLevelChange: (level) {
-        _stopCurrentRecording();
-        _startRecording();
-      },
-    );
-    }catch(e){
+            if (val.finalResult) {
+              _completeSpeechText += ' ' + val.recognizedWords;
+              print('Appended text: $_completeSpeechText');
+            }
+          });
+          // if (val.finalResult) {
+          //   print('Final speech result: $_speechText');
+          // }
+        },
+        listenFor:
+            Duration(minutes: 3), //  maximum listening duration to 1 minute
+        pauseFor: Duration(
+            minutes:
+                20), //  the time allowed for silence before stopping to 1 minute
+        onSoundLevelChange: (level) {
+          _stopCurrentRecording();
+          _startRecording();
+        },
+      );
+    } catch (e) {
       print('Error during recording: $e');
-    _showErrorDialog1('Error while recording. Please restart the session.');
+      _showErrorDialog1('Error while recording. Please restart the session.');
     }
   }
-  
-  
-  void _showErrorDialog1(String message) {
-  showDialog(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text('Error'),
-      content: Text(message),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(ctx).pop(),
-          child: Text('OK'),
-        ),
-      ],
-    ),
-  );
-}
 
+  void _showErrorDialog1(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 
   bool _checkIfFormattingNeeded(String _speechText) {
     if (_speechText.trim().isEmpty) {
-      print("Speech text is empty. Skipping formatting and sending to TranscribeResult.");
+      print(
+          "Speech text is empty. Skipping formatting and sending to TranscribeResult.");
       return false;
-      }
-      else{
-        return true;
-      }
+    } else {
+      return true;
+    }
   }
-
-
 
   String _formatTime(int seconds) {
     final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
     final secs = (seconds % 60).toString().padLeft(2, '0');
     return '$minutes:$secs';
   }
-
-
 
   void _showAlertBox() {
     setState(() {
@@ -1506,18 +1474,21 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
         var mq = MediaQuery.of(context).size;
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero,),
+            borderRadius: BorderRadius.circular(20), // Adjust the radius here
+          ),
+          backgroundColor: Colors.white,
           title: Text(
-            'Sure you want to exit?',
-            style: TextStyle(
-              fontSize: mq.width * 0.05,
-              fontWeight: FontWeight.bold,
+            'Discard Recording',
+            style: GoogleFonts.spectral(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
             ),
           ),
           content: Text(
             'You are exiting the recording. Recorded data will be lost.',
-            style: TextStyle(
-              fontSize: mq.width * 0.04,
+            style: GoogleFonts.karla(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
             ),
           ),
           actions: [
@@ -1537,7 +1508,13 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
                         Navigator.of(context).pop();
                         Navigator.of(context).pop();
                       },
-                      child: Text('Discard'),
+                      child: Text(
+                        'Discard',
+                        style: GoogleFonts.karla(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                       style: TextButton.styleFrom(
                         foregroundColor: _isDiscardButtonActive
                             ? Colors.white
@@ -1554,12 +1531,17 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
                   ),
                 ),
                 TextButton(
-                  child: Text('Start new Recording'),
+                  child: Text(
+                    'Keep Recording',
+                    style: GoogleFonts.karla(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
                   onPressed: () {
                     setState(() {
                       // Add _restartRecordingSession() this function for start recording for starting for solving bug related to arrow back button not working properly
                       _restartRecordingSession();
-                    
                     });
                     // context.read<NavigationState>().updateLastScreen('record');
                     Navigator.of(context).pop();
@@ -1585,163 +1567,193 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
-
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            _showAlertBox();
-          },
+        title: Row(
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios,
+                size: 20,
+              ),
+              onPressed: () {
+                _showAlertBox();
+              },
+            ),
+            Text(
+              "Record Transcript",
+              style:
+                  GoogleFonts.karla(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+          ],
         ),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (_isProcessing) // Show LinearProgressIndicator when processing
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: mq.height * 0.02),
-              child: LinearProgressIndicator(),
-            ),
-          Center(
-            child: Padding(
-              padding: EdgeInsets.all(mq.width * 0.025),
-              child: Container(
-                width: double.infinity,
-                height: mq.height * 0.2,
-                decoration: BoxDecoration(
-                  color: AppColors.ButtonColor,
-                  // color: Colors.red,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(mq.width * 0.03),
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (_isProcessing) // Show LinearProgressIndicator when processing
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: mq.height * 0.02),
+                    child: LinearProgressIndicator(),
                   ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _isRecording ? _formatTime(_seconds) : "00:00",
-                      style: TextStyle(
-                        fontSize: mq.width * 0.06,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    SizedBox(height: mq.height * 0.015),
-                    Image.asset(
-                      'assets1/audioWave.gif',
-                      fit: BoxFit.cover,
-                      height: mq.height * 0.12,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: mq.height * 0.1),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.ButtonColor2, // Red background color
-                  shape: BoxShape.circle, // Circular shape
-                ),
-                padding: EdgeInsets.all(mq.width * 0.02), // Padding for the icon inside the circle
-                child: IconButton(
-                  icon: Icon(
-                    Icons.restart_alt, // Restart icon
-                    color: Colors.white, // Icon color (white for visibility)
-                  ),
-                  iconSize: mq.width * 0.08, // Responsive icon size
-                  onPressed: () {
-                    if (_isRecording) {
-                      _showRestartAlert();
-                    }
-                  },
-                ),
-              ),
-
-              // Stop IconButton in a Circular Red Container
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.ButtonColor2, // Red background color
-                  shape: BoxShape.circle, // Circular shape
-                ),
-                padding: EdgeInsets.all(mq.width * 0.02), // Padding for the icon inside the circle
-                child: IconButton(
-                  icon: Icon(
-                    Icons.stop, // Stop icon
-                    color: Colors.white, // Icon color (white for visibility)
-                  ),
-                  iconSize: mq.width * 0.08, // Responsive icon size
-                  onPressed: _stopRecording,
-                ),
-              ),
-          
-            ],
-          ),
-          if (_isLoading)
-
-          // Show loading indicator if _isLoading is true
-            if (_isLoading)
-              Stack(
-                children: [
-                  // Blurred background
-                  BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Can adjust the blur strength as needed
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(mq.width * 0.025),
                     child: Container(
-                      color: Colors.black.withOpacity(0.2), // Slightly tinted background to improve readability
-                    ),
-                  ),
-                  // Custom loading UI
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: mq.width * 0.04, vertical: mq.height * 0.1),
+                      width: double.infinity,
+                      height: mq.height * 0.2,
+                      decoration: BoxDecoration(
+                        color: Color.fromRGBO(220, 236, 235, 1.0),
+                        // color: Colors.red,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(mq.width * 0.03),
+                        ),
+                      ),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-
-                          SizedBox(height: mq.height * 0.03),
-                          LinearProgressIndicator(
-                            color: Color.fromRGBO(81, 160, 155, 1.0),
-                            backgroundColor: Colors.grey[200],
-                            minHeight: 30,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          SizedBox(height: mq.height * 0.03),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: mq.width * 0.05),
-                            child: Text(
-                              'Please wait a moment while we prepare the text for you',
-                              style: TextStyle(
-                                fontSize: mq.width * 0.04,
-                                fontWeight: FontWeight.normal,
-                              ),
-                              textAlign: TextAlign.center,
+                          Text(
+                            _isRecording ? _formatTime(_seconds) : "00:00",
+                            style: GoogleFonts.karla(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
                             ),
+                          ),
+                          SizedBox(height: mq.height * 0.015),
+                          Image.asset(
+                            'assets1/audioWave.gif',
+                            fit: BoxFit.cover,
+                            height: mq.height * 0.12,
                           ),
                         ],
                       ),
                     ),
                   ),
-                ],
-              ),
-        ],
+                ),
+                SizedBox(height: mq.height * 0.25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.ButtonColor2, // Red background color
+                        shape: BoxShape.circle, // Circular shape
+                      ),
+                      padding: EdgeInsets.all(mq.width *
+                          0.02), // Padding for the icon inside the circle
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.restart_alt, // Restart icon
+                          color:
+                              Colors.white, // Icon color (white for visibility)
+                        ),
+                        iconSize: mq.width * 0.08, // Responsive icon size
+                        onPressed: () {
+                          if (_isRecording) {
+                            _showRestartAlert();
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 30,
+                    ),
+
+                    // Stop IconButton in a Circular Red Container
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.ButtonColor2, // Red background color
+                        shape: BoxShape.circle, // Circular shape
+                      ),
+                      padding: EdgeInsets.all(mq.width *
+                          0.02), // Padding for the icon inside the circle
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.stop, // Stop icon
+                          color:
+                              Colors.white, // Icon color (white for visibility)
+                        ),
+                        iconSize: mq.width * 0.08, // Responsive icon size
+                        onPressed: _stopRecording,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+              ],
+            ),
+            if (_isLoading)
+
+              // Show loading indicator if _isLoading is true
+              if (_isLoading)
+                Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        color: Colors.white,
+                      ),
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: mq.width * 0.04,
+                              vertical: mq.height * 0.1),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                  height: 120,
+                                  width: 120,
+                                  child: Image.asset(
+                                      "assets1/Sorting-Center.png")),
+                              SizedBox(height: mq.height * 0.03),
+                              Container(
+                                height: 16,
+                                width: 180,
+                                child: LinearProgressIndicator(
+                                  color: Color.fromRGBO(81, 160, 155, 1.0),
+                                  backgroundColor: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              SizedBox(height: mq.height * 0.03),
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: mq.width * 0.05),
+                                child: Text(
+                                  'Please wait a moment while we prepare the polished transcript',
+                                  style: GoogleFonts.karla(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+          ],
+        ),
       ),
     );
   }
 }
-
-
