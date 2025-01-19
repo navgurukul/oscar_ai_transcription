@@ -5,29 +5,21 @@ import 'package:http/http.dart' as http;
 import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
 
-// Below is the code of integrating open ai backend from meraki swagger
 
 class Detailpage extends StatefulWidget {
   final String transcribedText;
   final String? unformattedText;
   final String tokenid;
-  // final bool isEmptyInput;
-  // final date;
   final String id1;
   final String? title;
-
   const Detailpage({
     Key? key,
     required this.tokenid,
     required this.transcribedText,
     required this.unformattedText,
     required this.id1,
-    // required String date,
-    required this.title,
-    // required this.date,
-    // required this.isEmptyInput,
+    required this.title, required String formattedDate,
 
-    // required void Function() resetvalue
   }) : super(key: key);
 
   @override
@@ -35,16 +27,13 @@ class Detailpage extends StatefulWidget {
 }
 
 class _DetailpageState extends State<Detailpage> {
-  bool _isEditing = false;
   late TextEditingController _textController;
-  late TextEditingController _notFormattedText;
   bool _showTranscribedText = false;
 
   @override
   void initState() {
     super.initState();
-    // _textController = TextEditingController(text: widget.transcribedText);
-    // _notFormattedText = TextEditingController(text: widget.unformattedText);
+
   }
 
   void _handleBack() {
@@ -60,15 +49,6 @@ class _DetailpageState extends State<Detailpage> {
     }
   }
 
-  // Future<void> _deleteTranscription(BuildContext context) async {
-  //   // widget.onDelete(); // Perform the delete operation
-  //   Navigator.pop(context, 'Transcription deleted');
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(content: Text('Transcription deleted')),
-  //   );
-  //   // Pop the current screen with the message
-  // }
-
   void _copyText() {
     Clipboard.setData(ClipboardData(text: _textController.text));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -80,7 +60,6 @@ class _DetailpageState extends State<Detailpage> {
   void didUpdateWidget(covariant Detailpage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.transcribedText != oldWidget.transcribedText) {
-      // Update the text controller if the transcribed text changes
       _textController.text = widget.transcribedText;
     }
   }
@@ -161,7 +140,6 @@ class _DetailpageState extends State<Detailpage> {
         print('deleted successfully');
         Navigator.of(context).pop();
         setState(() {
-          // _transcriptionsFuture = _fetchTranscriptions(); // Refresh the data
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -186,7 +164,6 @@ class _DetailpageState extends State<Detailpage> {
         throw Exception('Failed to delete transcription');
       }
     } catch (e) {
-      // Handle the error
       print('Error: $e');
     }
   }
@@ -218,7 +195,6 @@ class _DetailpageState extends State<Detailpage> {
           actions: [
             TextButton(
               onPressed: () {
-                // _isDialogOpen = false; // Mark dialog as closed
                 Navigator.of(context).pop(); // Close the dialog
               },
               child: const Text(
@@ -300,15 +276,6 @@ class _DetailpageState extends State<Detailpage> {
                             SizedBox(
                               height: 2,
                             ),
-                            // Text(
-                            //   // _textController.text,
-                            //   widget.date == null ? '' : widget.date,
-                            //   style: GoogleFonts.roboto(
-                            //     fontSize: mq.width * 0.05,
-                            //     fontWeight: FontWeight.w600,
-                            //   ),
-                            //   textAlign: TextAlign.center,
-                            // ),
                             SizedBox(
                               height: 5,
                             ),
@@ -392,11 +359,7 @@ class _DetailpageState extends State<Detailpage> {
           ),
         ),
       ),
-      bottomSheet:
-          // widget.isEmptyInput
-          //     ? _buildEmptyInputBottomSheet(context)
-          //:
-          _buildFullInputBottomSheet(context),
+      bottomSheet: _buildFullInputBottomSheet(context),
     );
   }
 
@@ -412,8 +375,6 @@ class _DetailpageState extends State<Detailpage> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
-                // width: mq.width*0.2,
-                // height: mq.height*0.5,
                 margin: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
                 padding: EdgeInsets.symmetric(),
                 decoration: BoxDecoration(
@@ -442,22 +403,6 @@ class _DetailpageState extends State<Detailpage> {
                           color: AppColors.ButtonColor2),
                       onPressed: () {
                         _confirmDeleteTranscription(widget.id1);
-                        // _handleDeleteTranscription();
-                        // Navigator.pop(context);
-                        // _deleteTranscription(context);
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //   SnackBar(
-                        //     content: Text('Transcription deleted'),
-                        //   ),
-                        // );
-                        // _handleDeleteTranscription();
-                        // Navigator.pop(context);
-                        // onPressed: () {
-                        //     _confirmDeleteTranscription(
-                        //     widget.id1
-                        //     );
-                        //     // _deleteTranscription('3');
-                        // };
                       },
                       iconSize: mq.width * 0.07,
                     ),

@@ -396,98 +396,114 @@ class _HomePageState extends State<HomePage> {
                             final formattedDate =
                                 _formatDate(transcription['createdAt']);
 
-                            return Card(
-                              color: AppColors.ButtonColor,
-                              margin: EdgeInsets.symmetric(vertical: 10.0),
-                              child: Padding(
-                                padding: EdgeInsets.all(10.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                            return GestureDetector(
+                              onTap: (){
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Detailpage(
+                                      title: transcription['title'] ?? 'Untitled',
+                                      transcribedText: transcription['transcribedText'] ?? '',
+                                      formattedDate: formattedDate, tokenid: '', unformattedText: '', id1: '',
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                color: AppColors.ButtonColor,
+                                margin: EdgeInsets.symmetric(vertical: 10.0),
+                                child: Padding(
+                                  padding: EdgeInsets.all(10.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
 
-                                      children: [
-                                        Container(
-                                            height: 100.0,
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 8.0, left: 8.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    transcription['title'] ??
-                                                        'Untitled', // Display the title or fallback text
-                                                    style: TextStyle(
-                                                      fontSize: 18.0,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                        children: [
+                                          Container(
+                                              height: 120.0,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 8.0, left: 8.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      transcription['title'] ??
+                                                          'Untitled', // Display the title or fallback text
+                                                      style: TextStyle(
+                                                        fontSize: 18.0,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
                                                     ),
-                                                  ),
-                                                  Text(
-                                                    transcription[
-                                                        'transcribedText'],
-                                                    style: GoogleFonts.karla(
-                                                        fontSize: 16.0,
-                                                        color: AppColors.Text2),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  SizedBox(height: 8.0),
-                                                  Container(
-                                                    height: 30.0,
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        IconButton(
-                                                          icon: Icon(
-                                                            Icons.copy,
-                                                            color: Colors.black,
-                                                            size: 16.0,
-                                                          ),
-                                                          onPressed: () {
-                                                            Clipboard.setData(
-                                                              ClipboardData(
-                                                                  text: transcription[
-                                                                      'transcribedText']),
-                                                            );
-                                                            ScaffoldMessenger
-                                                                    .of(context)
-                                                                .showSnackBar(
-                                                              SnackBar(
-                                                                  content: Text(
-                                                                      'Copied to clipboard')),
-                                                            );
-                                                          },
-                                                        ),
-                                                        SizedBox(width: 8.0),
-                                                        Text(
-                                                          formattedDate,
-                                                          style:
-                                                              GoogleFonts.karla(
-                                                            fontSize: 14.0,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color:
-                                                                AppColors.Text3,
-                                                          ),
-                                                        ),
-                                                      ],
+                                                    Text(
+                                                      transcription[
+                                                          'transcribedText'],
+                                                      style: GoogleFonts.karla(
+                                                          fontSize: 16.0,
+                                                          color: AppColors.Text2),
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                     ),
-                                                  )
-                                                ],
-                                              ),
-                                            ))
-                                      ],
-                                      // >>>>>>> Stashed changes
-                                    )
-                                  ],
+                                                    SizedBox(height: 8.0),
+                                                    Container(
+                                                      height: 30.0,
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          IconButton(
+                                                            icon: Icon(
+                                                              Icons.copy,
+                                                              color: Colors.black,
+                                                              size: 16.0,
+                                                            ),
+                                                            onPressed: () {
+                                                              Clipboard.setData(
+                                                                ClipboardData(
+                                                                    text: transcription[
+                                                                        'transcribedText']),
+                                                              );
+                                                              ScaffoldMessenger
+                                                                      .of(context)
+                                                                  .showSnackBar(
+                                                                SnackBar(
+                                                                    content: Text(
+                                                                        'Copied to clipboard')),
+                                                              );
+                                                            },
+                                                          ),
+                                                          SizedBox(width: 8.0),
+                                                          Text(
+                                                            formattedDate,
+                                                            style:
+                                                                GoogleFonts.karla(
+                                                              fontSize: 14.0,
+                                                              fontWeight:
+                                                                  FontWeight.bold,
+                                                              color:
+                                                                  AppColors.Text3,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ))
+                                        ],
+                                        // >>>>>>> Stashed changes
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -550,6 +566,7 @@ class _HomePageState extends State<HomePage> {
                                     builder: (context) => TranscribeResult(
                                       transcribedText: transcribedText,
                                       unformattedText: '',
+                                      title_text: '',
                                       onDelete: () =>
                                           _deleteTranscription(transcribedText),
                                       tokenid: widget.tokenid,

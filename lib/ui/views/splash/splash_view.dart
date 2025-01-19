@@ -4,7 +4,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../auth/login_view.dart';
 import '../home/home_view.dart';
 
@@ -28,7 +27,6 @@ class _SplashScreenState extends State<SplashScreen> {
     bool? isLoggedIn = prefs.getBool(KEYLOGIN);
     String? tokenid = prefs.getString(
       'tokenid'
-      //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJodXBlbmRyYUBuYXZndXJ1a3VsLm9yZyIsInVzZXJJZCI6MSwiaWF0IjoxNzM0NjA3OTQwLCJleHAiOjE3MzUyMTI3NDB9.B7GjA5ZyMt6iXRUWAqzpkpC6QABcDO3XB_XfDlFeWN8'
     ); // Retrieve token
     print(isLoggedIn);
 
@@ -40,7 +38,6 @@ class _SplashScreenState extends State<SplashScreen> {
       String profilePicUrl = prefs.getString('profilePicUrl') ?? '';
       String transcribedata = prefs.getString('transcribedata') ?? '';
       print('token is not expired');
-      // Optionally, get the remaining time until expiry
       Duration timeRemaining = JwtDecoder.getRemainingTime(tokenid);
       print("Time remaining: ${timeRemaining.inMinutes} minutes");
     
