@@ -12,7 +12,7 @@ class Detailpage extends StatefulWidget {
   final String? unformattedText;
   final String tokenid;
   // final bool isEmptyInput;
-  // final date;
+  final date;
   final String id1;
   final String? title;
 
@@ -23,8 +23,8 @@ class Detailpage extends StatefulWidget {
     required this.unformattedText,
     required this.id1,
     // required String date,
-    required this.title,
-    // required this.date,
+    required this.title,this.date,
+  
     // required this.isEmptyInput,
 
     // required void Function() resetvalue
@@ -287,14 +287,27 @@ class _DetailpageState extends State<Detailpage> {
                         child: Column(
                           children: [
                             Center(
-                              child: Text(
-                                // _textController.text,
-                                widget.title == null ? '' : widget.title!,
-                                style: GoogleFonts.roboto(
-                                  fontSize: mq.width * 0.05,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
+                              child: Column(
+                                children: [
+                                    Text(
+                                    // _textController.text,
+                                    widget.title == null ? '' : widget.title!,
+                                    style: GoogleFonts.roboto(
+                                      fontSize: mq.width * 0.05,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    // _textController.text,
+                                    widget.date,
+                                    style: GoogleFonts.roboto(
+                                      fontSize: mq.width * 0.05,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
                             ),
                             SizedBox(
