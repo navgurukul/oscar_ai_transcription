@@ -10,6 +10,7 @@ class Detailpage extends StatefulWidget {
   final String transcribedText;
   final String? unformattedText;
   final String tokenid;
+
   final String id1;
   final String? title;
   const Detailpage({
@@ -18,7 +19,7 @@ class Detailpage extends StatefulWidget {
     required this.transcribedText,
     required this.unformattedText,
     required this.id1,
-    required this.title, required String formattedDate,
+
 
   }) : super(key: key);
 
@@ -263,14 +264,27 @@ class _DetailpageState extends State<Detailpage> {
                         child: Column(
                           children: [
                             Center(
-                              child: Text(
-                                // _textController.text,
-                                widget.title == null ? '' : widget.title!,
-                                style: GoogleFonts.roboto(
-                                  fontSize: mq.width * 0.05,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
+                              child: Column(
+                                children: [
+                                    Text(
+                                    // _textController.text,
+                                    widget.title == null ? '' : widget.title!,
+                                    style: GoogleFonts.roboto(
+                                      fontSize: mq.width * 0.05,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    // _textController.text,
+                                    widget.date,
+                                    style: GoogleFonts.roboto(
+                                      fontSize: mq.width * 0.05,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
                             ),
                             SizedBox(

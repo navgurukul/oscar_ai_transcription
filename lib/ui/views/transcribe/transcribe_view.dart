@@ -153,6 +153,8 @@ class _TranscribeResultState extends State<TranscribeResult> {
     }
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
