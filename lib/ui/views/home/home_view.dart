@@ -396,39 +396,7 @@ class _HomePageState extends State<HomePage> {
                             final formattedDate =
                                 _formatDate(transcription['createdAt']);
 
-                            return Card(
-                              color: AppColors.ButtonColor,
-                              margin: EdgeInsets.symmetric(vertical: 10.0),
-                              child: Padding(
-                                padding: EdgeInsets.all(10.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
 
-                                      children: [
-                                        GestureDetector(
-                                          onTap: (){
-                                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>Detailpage(
-                                            transcribedText: transcription[
-                                                'transcribedText'],
-                                                id1:transcription['id'].toString(),
-                                                date:formattedDate,
-                                        unformattedText:transcription['userTextInput'],
-                                        title:transcription['title'],
-                                      tokenid: widget.tokenid,
-                                          ),
-                                  ),
-                                );
-
-                                          },
-                                          child: Container(
-                                              height: 100.0,
                                               child: Padding(
                                                 padding: const EdgeInsets.only(
                                                     right: 8.0, left: 8.0),
@@ -444,17 +412,7 @@ class _HomePageState extends State<HomePage> {
                                                         fontWeight:
                                                             FontWeight.bold,
                                                       ),
-                                                    ),
-                                                    Text(
-                                                      transcription[
-                                                          'transcribedText'],
-                                                      style: GoogleFonts.karla(
-                                                          fontSize: 16.0,
-                                                          color: AppColors.Text2),
-                                                      maxLines: 2,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
+
                                                     SizedBox(height: 8.0),
                                                     Container(
                                                       height: 30.0,
@@ -501,12 +459,7 @@ class _HomePageState extends State<HomePage> {
                                                     )
                                                   ],
                                                 ),
-                                              )),
-                                        )
-                                      ],
-                                      // >>>>>>> Stashed changes
-                                    )
-                                  ],
+
                                 ),
                               ),
                             );
@@ -569,6 +522,7 @@ class _HomePageState extends State<HomePage> {
                                     builder: (context) => TranscribeResult(
                                       transcribedText: transcribedText,
                                       unformattedText: '',
+                                      title_text: '',
                                       onDelete: () =>
                                           _deleteTranscription(transcribedText),
                                       tokenid: widget.tokenid,
