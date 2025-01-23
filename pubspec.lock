@@ -360,6 +360,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  manual_speech_to_text:
+    dependency: "direct main"
+    description:
+      name: manual_speech_to_text
+      sha256: f17c2ba0f27407771324b604c023aa4061e4eefc51c9cdc4e1709ef2771cba8f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   matcher:
     dependency: transitive
     description:
