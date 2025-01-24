@@ -27,9 +27,9 @@ class _SecondPageState extends State<SecondPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+      backgroundColor: Color(0xFFEEF6F5),
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+        backgroundColor: Color(0xFFEEF6F5),
         title: Text(widget.heading,style: GoogleFonts.spectral(),),
       ),
       body: SingleChildScrollView(

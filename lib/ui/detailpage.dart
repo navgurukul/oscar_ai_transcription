@@ -439,8 +439,6 @@
 // }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -448,41 +446,52 @@ import 'package:http/http.dart' as http;
 import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
 
+// Below is the code of integrating open ai backend from meraki swagger
 
 class Detailpage extends StatefulWidget {
   final String transcribedText;
   final String? unformattedText;
   final String tokenid;
+  // final bool isEmptyInput;
+  final date;
   final String id1;
   final String? title;
-  final formattedDate ;
+  // final formattedDate ;
+
   const Detailpage({
     Key? key,
     required this.tokenid,
     required this.transcribedText,
     required this.unformattedText,
     required this.id1,
-    required this.title, this.formattedDate,
+    // required String date,
+    required this.title,
+    this.date,
+
+    // required this.isEmptyInput,
+
+    // required void Function() resetvalue
   }) : super(key: key);
 
   @override
   State<Detailpage> createState() => _DetailpageState();
 }
 
-class _DetailpageState extends State<Detailpage> {
+class _DetailpageState extends State<Detailpage>
+    with SingleTickerProviderStateMixin {
+  bool _isEditing = false;
   late TextEditingController _textController;
-  late TextEditingController _text_titleController;
   late TextEditingController _notFormattedText;
   bool _showTranscribedText = false;
-
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController(text: widget.transcribedText);
     _notFormattedText = TextEditingController(text: widget.unformattedText);
-    _text_titleController = TextEditingController(text: widget.title);
-
+    _tabController = TabController(length: 2, vsync: this);
+    
   }
 
   void _handleBack() {
@@ -498,17 +507,25 @@ class _DetailpageState extends State<Detailpage> {
     }
   }
 
-  void _copyText() {
+  // Future<void> _deleteTranscription(BuildContext context) async {
+  //   // widget.onDelete(); // Perform the delete operation
+  //   Navigator.pop(context, 'Transcription deleted');
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text('Transcription deleted')),
+  //   );
+  //   // Pop the current screen with the message
+  // }
+void _copyText() {
     Clipboard.setData(ClipboardData(text: _textController.text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Text copied to clipboard')),
     );
   }
-
   @override
   void didUpdateWidget(covariant Detailpage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.transcribedText != oldWidget.transcribedText) {
+      // Update the text controller if the transcribed text changes
       _textController.text = widget.transcribedText;
     }
   }
@@ -589,6 +606,7 @@ class _DetailpageState extends State<Detailpage> {
         print('deleted successfully');
         Navigator.of(context).pop();
         setState(() {
+          // _transcriptionsFuture = _fetchTranscriptions(); // Refresh the data
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -613,6 +631,7 @@ class _DetailpageState extends State<Detailpage> {
         throw Exception('Failed to delete transcription');
       }
     } catch (e) {
+      // Handle the error
       print('Error: $e');
     }
   }
@@ -644,6 +663,7 @@ class _DetailpageState extends State<Detailpage> {
           actions: [
             TextButton(
               onPressed: () {
+                // _isDialogOpen = false; // Mark dialog as closed
                 Navigator.of(context).pop(); // Close the dialog
               },
               child: const Text(
@@ -670,160 +690,271 @@ class _DetailpageState extends State<Detailpage> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
       appBar: AppBar(
-        scrolledUnderElevation: 0.0,
         automaticallyImplyLeading: false,
         elevation: 0,
         leading: IconButton(
             icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
             onPressed: _handleBack),
-        title: Center(
-          child: Text(
-            'Detail transcription',
-            style: TextStyle(
-                fontSize: mq.width * 0.05, fontWeight: FontWeight.bold),
-          ),
-        ),
         backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-        toolbarHeight: mq.height * 0.1,
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: const Color(0xFF51A09B), // Custom indicator color
+          indicatorWeight: 4.0,
+          indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0), // Padding
+          labelColor: const Color(0xFF51A09B), // Active tab text color
+          unselectedLabelColor:
+              const Color(0xFF6E6E6E), // Inactive tab text color
+          labelStyle: GoogleFonts.karla(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            // TextStyle for unselected tab
+          ),
+          unselectedLabelStyle: GoogleFonts.karla(
+            fontSize: 16,
+            fontWeight: FontWeight.w700, // TextStyle for unselected tab
+          ),
+          tabs: [
+            Tab(
+              text: "Polished Text",
+            ),
+            Tab(text: "Original Text"),
+          ],
+        ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(mq.width * 0.04),
-          child: SingleChildScrollView(
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Container(
-                    constraints: BoxConstraints(
-                      minHeight: mq.height * 0.2,
-                      maxHeight: mq.height * 0.5,
-                      minWidth: mq.width * 1.0,
-                      maxWidth: mq.width * 1.0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.ButtonColor,
-                      border: Border.all(color: AppColors.ButtonColor),
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    _text_titleController.text,
-                                    // widget.title == null ? '' : widget.title!,
-                                    style: GoogleFonts.roboto(
-                                      fontSize: mq.width * 0.05,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                SizedBox(height: 5,),
-                                  Text(
-                                    widget.formattedDate??'',
-                                style: GoogleFonts.roboto(
-                                  fontSize: mq.width * 0.05,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                                ],
-                              ),
-                              
-                            ),
-                            SizedBox(
-                              height: 2,
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              _textController.text??'',
-                              // widget.transcribedText == null
-                              //     ? 'No formatted text available'
-                              //     : widget.transcribedText!,
-                              style: GoogleFonts.roboto(
-                                fontSize: mq.width * 0.05,
-                                fontWeight: FontWeight.normal,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                Text(
+                  // _textController.text,
+                  widget.title == null ? 'Untitled' : widget.title!,
+                  style: GoogleFonts.spectral(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  // _textController.text,
+                  widget.date,
+                  style: GoogleFonts.karla(
+                    fontSize: 16,
+                    color: const Color(0xFF6E6E6E),
+                    fontWeight: FontWeight.w400,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  // _textController.text,
+                  widget.transcribedText == null
+                      ? 'No formatted text available'
+                      : widget.transcribedText!,
+                  style: GoogleFonts.karla(
+                    fontSize: 16,
+                    color: const Color(0xFF6E6E6E),
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
-                if (_showTranscribedText)
-                  Container(
-                    constraints: BoxConstraints(
-                      minWidth: mq.width * 0.8,
-                      maxWidth: mq.width * 0.8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.white),
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(20),
-                        bottomLeft: Radius.circular(20),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SingleChildScrollView(
-                        child: Text(
-                          // widget.unformattedText == null
-                          //     ? 'No original text is provided'
-                          //     : widget.unformattedText!,
-                          _notFormattedText.text,
-                          style: GoogleFonts.roboto(
-                            fontSize: mq.width * 0.05,
-                            fontWeight: FontWeight.normal,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    border: Border.all(color: Colors.orange),
-                    borderRadius: BorderRadius.only(
-                      bottomRight: Radius.circular(20),
-                      bottomLeft: Radius.circular(20),
-                    ),
-                  ),
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _showTranscribedText = !_showTranscribedText;
-                      });
-                    },
-                    child: Text(
-                      _showTranscribedText
-                          ? 'Hide Original Transcripts'
-                          : 'View Original Transcripts',
-                      style: GoogleFonts.roboto(
-                        fontSize: mq.width * 0.045,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: mq.height * 0.09),
               ],
             ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 43,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      color: Colors.white),
+                  child: Center(
+                    child: Text(
+                      "Unprocessed text as spoken to Oscar",
+                      style: TextStyle(
+                          color: const Color(0xFF4A4A4A),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  widget.unformattedText == null
+                      ? 'No original text is provided'
+                      : widget.unformattedText!,
+                  style: GoogleFonts.karla(
+                    fontSize: 16,
+                    color: const Color(0xFF6E6E6E),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      bottomSheet: _buildFullInputBottomSheet(context),
+      // body: SafeArea(
+      //   child: Padding(
+      //     padding: EdgeInsets.all(mq.width * 0.04),
+      //     child: SingleChildScrollView(
+      //       child: Column(
+      //         crossAxisAlignment: CrossAxisAlignment.center,
+      //         children: [
+      //           Center(
+      //             child: Container(
+      //               constraints: BoxConstraints(
+      //                 minHeight: mq.height * 0.2,
+      //                 maxHeight: mq.height * 0.5,
+      //                 minWidth: mq.width * 1.0,
+      //                 maxWidth: mq.width * 1.0,
+      //               ),
+      //               decoration: BoxDecoration(
+      //                 color: AppColors.ButtonColor,
+      //                 border: Border.all(color: AppColors.ButtonColor),
+      //                 borderRadius: BorderRadius.all(Radius.circular(20)),
+      //               ),
+      //               child: Padding(
+      //                 padding: const EdgeInsets.all(8.0),
+      //                 child: SingleChildScrollView(
+      //                   child: Column(
+      //                     children: [
+      //                       Center(
+      //                         child: Column(
+      //                           children: [
+      // Text(
+      //   // _textController.text,
+      //   widget.title == null ? '' : widget.title!,
+      //   style: GoogleFonts.roboto(
+      //     fontSize: mq.width * 0.05,
+      //     fontWeight: FontWeight.bold,
+      //   ),
+      //   textAlign: TextAlign.center,
+      // ),
+      // Text(
+      //   // _textController.text,
+      //   widget.date,
+      //   style: GoogleFonts.roboto(
+      //     fontSize: mq.width * 0.05,
+      //     fontWeight: FontWeight.bold,
+      //   ),
+      //   textAlign: TextAlign.center,
+      // ),
+      //                           ],
+      //                         ),
+      //                       ),
+      //                       SizedBox(
+      //                         height: 2,
+      //                       ),
+      //                       // Text(
+      //                       //   // _textController.text,
+      //                       //   widget.date == null ? '' : widget.date,
+      //                       //   style: GoogleFonts.roboto(
+      //                       //     fontSize: mq.width * 0.05,
+      //                       //     fontWeight: FontWeight.w600,
+      //                       //   ),
+      //                       //   textAlign: TextAlign.center,
+      //                       // ),
+      // SizedBox(
+      //   height: 5,
+      // ),
+      // Text(
+      //   // _textController.text,
+      //   widget.transcribedText == null
+      //       ? 'No formatted text available'
+      //       : widget.transcribedText!,
+      //   style: GoogleFonts.roboto(
+      //     fontSize: mq.width * 0.05,
+      //     fontWeight: FontWeight.normal,
+      //   ),
+      //   textAlign: TextAlign.center,
+      // ),
+      //                     ],
+      //                   ),
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //           if (_showTranscribedText)
+      //             Container(
+      //               constraints: BoxConstraints(
+      //                 minWidth: mq.width * 0.8,
+      //                 maxWidth: mq.width * 0.8,
+      //               ),
+      //               decoration: BoxDecoration(
+      //                 color: Colors.white,
+      //                 border: Border.all(color: Colors.white),
+      //                 borderRadius: BorderRadius.only(
+      //                   bottomRight: Radius.circular(20),
+      //                   bottomLeft: Radius.circular(20),
+      //                 ),
+      //               ),
+      //               child: Padding(
+      //                 padding: const EdgeInsets.all(8.0),
+      //                 child: SingleChildScrollView(
+      // child: Text(
+      //   widget.unformattedText == null
+      //       ? 'No original text is provided'
+      //       : widget.unformattedText!,
+      //   style: GoogleFonts.roboto(
+      //     fontSize: mq.width * 0.05,
+      //     fontWeight: FontWeight.normal,
+      //   ),
+      //   textAlign: TextAlign.center,
+      // ),
+      //                 ),
+      //               ),
+      //             ),
+      //           Container(
+      //             decoration: BoxDecoration(
+      //               color: Colors.orange,
+      //               border: Border.all(color: Colors.orange),
+      //               borderRadius: BorderRadius.only(
+      //                 bottomRight: Radius.circular(20),
+      //                 bottomLeft: Radius.circular(20),
+      //               ),
+      //             ),
+      //             child: TextButton(
+      //               onPressed: () {
+      //                 setState(() {
+      //                   _showTranscribedText = !_showTranscribedText;
+      //                 });
+      //               },
+      //               child: Text(
+      //                 _showTranscribedText
+      //                     ? 'Hide Original Transcripts'
+      //                     : 'View Original Transcripts',
+      //                 style: GoogleFonts.roboto(
+      //                   fontSize: mq.width * 0.045,
+      //                   fontWeight: FontWeight.bold,
+      //                   color: Colors.white,
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //           SizedBox(height: mq.height * 0.09),
+      //         ],
+      //       ),
+      //     ),
+      //   ),
+      // ),
+      bottomSheet:
+          // widget.isEmptyInput
+          //     ? _buildEmptyInputBottomSheet(context)
+          //:
+          _buildFullInputBottomSheet(context),
     );
   }
 
@@ -832,6 +963,7 @@ class _DetailpageState extends State<Detailpage> {
 
     return SafeArea(
       child: BottomAppBar(
+        height: 100,
         color: Color.fromRGBO(220, 236, 235, 1.0),
         child: Padding(
           padding: EdgeInsets.only(bottom: mq.height * 0.02),
@@ -839,6 +971,9 @@ class _DetailpageState extends State<Detailpage> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
+                // width: mq.width*0.2,
+                // height: mq.height*0.5,
+
                 margin: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
                 padding: EdgeInsets.symmetric(),
                 decoration: BoxDecoration(
@@ -853,20 +988,36 @@ class _DetailpageState extends State<Detailpage> {
                     IconButton(
                       icon: Icon(Icons.copy, color: AppColors.ButtonColor2),
                       onPressed: _copyText,
-                      iconSize: mq.width * 0.07,
+                      iconSize: 20,
                     ),
                     // SizedBox(width: 5,),
                     IconButton(
                       icon: Icon(Icons.share, color: AppColors.ButtonColor2),
                       onPressed: _shareText,
-                      iconSize: mq.width * 0.07,
+                      iconSize: 20,
                     ),
                     // SizedBox(width: 5,),
                     IconButton(
-                      icon: Icon(Icons.delete_outline_rounded,
-                          color: AppColors.ButtonColor2),
+                      icon:
+                          Icon(Icons.delete_outline_rounded, color: Colors.red),
                       onPressed: () {
                         _confirmDeleteTranscription(widget.id1);
+                        // _handleDeleteTranscription();
+                        // Navigator.pop(context);
+                        // _deleteTranscription(context);
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   SnackBar(
+                        //     content: Text('Transcription deleted'),
+                        //   ),
+                        // );
+                        // _handleDeleteTranscription();
+                        // Navigator.pop(context);
+                        // onPressed: () {
+                        //     _confirmDeleteTranscription(
+                        //     widget.id1
+                        //     );
+                        //     // _deleteTranscription('3');
+                        // };
                       },
                       iconSize: mq.width * 0.07,
                     ),
@@ -884,6 +1035,7 @@ class _DetailpageState extends State<Detailpage> {
   @override
   void dispose() {
     _textController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 }
