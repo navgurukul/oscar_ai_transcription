@@ -67,6 +67,8 @@ dependencies:
   date_format: ^2.0.9
   intl: ^0.20.1
   manual_speech_to_text: ^1.0.0
+  connectivity_bloc: ^0.0.3
+  connectivity_plus: ^4.0.2
 #  vosk_flutter: ^0.3.48
 #  permission_handler: ^10.2.0
 

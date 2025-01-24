@@ -118,7 +118,8 @@ class _SplashScreenState extends State<SplashScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageSize = screenWidth * 0.75;
 
-    return Scaffold(
+    return 
+    Scaffold(
       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
       body: Center(
         child: SvgPicture.asset(

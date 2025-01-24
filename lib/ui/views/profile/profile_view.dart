@@ -131,12 +131,12 @@ void handleback(){
     var mq = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+      backgroundColor:  Color(0xFFEEF6F5),
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         title: Text('Account Details',style: GoogleFonts.karla(fontSize: 25,fontWeight: FontWeight.w700),),
         automaticallyImplyLeading: false,
-        backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+        backgroundColor:  Color(0xFFEEF6F5),
         elevation: 0,
         leading: IconButton(
             icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.06),
