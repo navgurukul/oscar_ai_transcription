@@ -32,6 +32,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   int _remainingTime = 180; // 3 minutes in seconds
   Timer? _timer;
   bool _isLoading = false;
+  bool _isListening = false;
 
 
   @override
@@ -46,13 +47,18 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   void _initializeSpeechToText() {
     _sttController.listen(
       onListeningStateChanged: (isListening) {
-        setState(() {
-        });
+       if (mounted) {
+         setState(() {
+           _isListening = isListening == ManualSttState.listening;
+         });
+       }
       },
       onListeningTextChanged: (text) {
-        setState(() {
-          _recognizedText = text;
-        });
+        if (mounted) {
+          setState(() {
+            _recognizedText = text;
+          });
+        }
       },
     );
 
@@ -62,7 +68,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     _sttController.clearTextOnStart = true;
 
     // Set the pause time when mute is detected
-    _sttController.pauseIfMuteFor = Duration(seconds: 10);
+    _sttController.pauseIfMuteFor = Duration(seconds: 20);
   }
 
   Future<void> _checkPermissionAndStartListening() async {
@@ -107,6 +113,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   }
 
   void _startListening() {
+    _sttController.pauseIfMuteFor = Duration(seconds: 20);
     _sttController.startStt();
   }
 
@@ -281,6 +288,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this); // Stop observing lifecycle changes
+    _sttController.stopStt();
     _sttController.dispose();
     _pauseTimer();
     super.dispose();
