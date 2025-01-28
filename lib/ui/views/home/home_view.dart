@@ -1,17 +1,24 @@
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:do_not_disturb/do_not_disturb_plugin.dart';
+import 'package:do_not_disturb/types.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:oscar_stt/ui/detailpage.dart';
+import 'package:oscar_stt/ui/views/nointernet.dart';
 import 'package:oscar_stt/ui/views/transcribe/transcribe_view.dart';
 import '../../../core/viewmodels/api_service.dart';
 import '../../shared/styles/text_style.dart';
 import '../profile/profile_view.dart';
 import '../record/record_view.dart';
+import 'dart:async';
+
 
 class HomePage extends StatefulWidget {
   final String profileName;
@@ -34,7 +41,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<List<Map<String, dynamic>>> _transcriptionsFuture;
   List<Map<String, dynamic>> _currentTranscriptions = [];
-  bool _isDialogOpen = false;
+  final Connectivity _connectivity = Connectivity();
+  final dndPlugin = DoNotDisturbPlugin();
+  bool isListening = false;
+  late final Stream<ConnectivityResult> _connectivityStream;
 
   @override
   void didChangeDependencies() {
@@ -46,7 +56,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
+    _connectivityStream =  _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
+    _monitorInternet();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ModalRoute.of(context)?.settings.arguments == true) {
         _showRefreshAlertDialog();
@@ -54,9 +65,41 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
+  void _monitorInternet() {
+    _connectivityStream.listen((ConnectivityResult result) {
+      if (result == ConnectivityResult.none) {
+        // Navigate to the NoInternetScreen
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => NoInternetScreen(),
+        ));
+      }
+    });
+  }
 
   void dispose() {
     super.dispose();
+  }
+
+
+  Future<void> _enableDndMode() async {
+    if (await dndPlugin.isNotificationPolicyAccessGranted()) {
+      // Set DND to priority mode
+      await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
+      print("DND mode enabled.");
+    } else {
+      print("DND permission not granted.");
+      await dndPlugin.openNotificationPolicyAccessSettings();
+    }
+  }
+
+  Future<void> _disableDndMode() async {
+    if (await dndPlugin.isNotificationPolicyAccessGranted()) {
+      // Reset DND to all interruptions
+      await dndPlugin.setInterruptionFilter(InterruptionFilter.all);
+      print("DND mode disabled.");
+    } else {
+      print("DND permission not granted.");
+    }
   }
 
   void _showRefreshAlertDialog() {
@@ -206,7 +249,6 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                _isDialogOpen = false; // Mark dialog as closed
                 Navigator.of(context).pop(); // Close the dialog
               },
               child: const Text(
@@ -241,9 +283,9 @@ class _HomePageState extends State<HomePage> {
         return false;
       },
       child: Scaffold(
-        backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+          backgroundColor: Colors.white,
           scrolledUnderElevation: 0.0,
           automaticallyImplyLeading: false,
           elevation: 0,
@@ -321,8 +363,8 @@ class _HomePageState extends State<HomePage> {
                               child: Text(
                                 "My Transcripts (0)",
                                 style: TextStyles.defaultTextStyle(
-                                  fontSize: mq.width * 0.06,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -332,19 +374,20 @@ class _HomePageState extends State<HomePage> {
 
                           // The image
                           Image.asset(
-                            'assets1/homeimage.png',
-                            width: 100,
-                            height: 100,
+                            'assets1/Group-12307.png',
+                            width: 118.31,
+                            height: 118.31,
                           ),
 
                           Padding(
-                            padding: const EdgeInsets.all(10.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 80.0, vertical: 30),
                             child: Text(
-                              "We are excited to see what your first transcription will be",
+                              "Your first thought could be the best one - let it flow",
                               textAlign: TextAlign.center,
-                              style: TextStyles.defaultTextStyle(
-                                fontSize: mq.width * 0.05,
-                                fontWeight: FontWeight.bold,
+                              style: GoogleFonts.karla(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
                           ),
@@ -364,13 +407,12 @@ class _HomePageState extends State<HomePage> {
                       padding: EdgeInsets.all(mq.width * 0.05),
                       child: Text(
                         "My Transcripts (${transcriptions.length})",
-                        style: TextStyles.defaultTextStyle(
-                          fontSize: mq.width * 0.06,
-                          fontWeight: FontWeight.bold,
+                        style: GoogleFonts.karla(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    SizedBox(height: mq.height * 0.05),
                     Expanded(
                       child: Theme(
                         data: Theme.of(context).copyWith(
@@ -389,118 +431,146 @@ class _HomePageState extends State<HomePage> {
                               horizontal: mq.width *
                                   0.05), // Added padding on left and right
                           itemCount: transcriptions.length,
-
                           itemBuilder: (context, index) {
                             final transcription =
                                 transcriptions.reversed.toList()[index];
                             final formattedDate =
                                 _formatDate(transcription['createdAt']);
+                            // Determine maxLines based on the text length
+                            int maxLines;
+                            if (transcription.length <= 50) {
+                              maxLines = 1; // Short text
+                            } else if (transcription.length <= 150) {
+                              maxLines = 2; // Medium text
+                            } else {
+                              maxLines = 5; // Long text
+                            }
 
-                            return GestureDetector(
-                              onTap: (){
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Detailpage(
-                                      title: transcription['title'] ?? 'Untitled',
-                                      transcribedText: transcription['transcribedText'] ?? '',
-                                      formattedDate: formattedDate, tokenid: '', unformattedText: '', id1: '',
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Card(
-                                color: AppColors.ButtonColor,
-                                margin: EdgeInsets.symmetric(vertical: 10.0),
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 20.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    color: Color(0xFFEEF6F5),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10))),
                                 child: Padding(
                                   padding: EdgeInsets.all(10.0),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
 
                                         children: [
-                                          Container(
-                                              height: 120.0,
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 8.0, left: 8.0),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      transcription['title'] ??
-                                                          'Untitled', // Display the title or fallback text
-                                                      style: TextStyle(
-                                                        fontSize: 18.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    Text(
-                                                      transcription[
-                                                          'transcribedText'],
-                                                      style: GoogleFonts.karla(
-                                                          fontSize: 16.0,
-                                                          color: AppColors.Text2),
-                                                      maxLines: 2,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    SizedBox(height: 8.0),
-                                                    Container(
-                                                      height: 30.0,
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          IconButton(
-                                                            icon: Icon(
-                                                              Icons.copy,
-                                                              color: Colors.black,
-                                                              size: 16.0,
-                                                            ),
-                                                            onPressed: () {
-                                                              Clipboard.setData(
-                                                                ClipboardData(
-                                                                    text: transcription[
-                                                                        'transcribedText']),
-                                                              );
-                                                              ScaffoldMessenger
-                                                                      .of(context)
-                                                                  .showSnackBar(
-                                                                SnackBar(
-                                                                    content: Text(
-                                                                        'Copied to clipboard')),
-                                                              );
-                                                            },
-                                                          ),
-                                                          SizedBox(width: 8.0),
-                                                          Text(
-                                                            formattedDate,
-                                                            style:
-                                                                GoogleFonts.karla(
-                                                              fontSize: 14.0,
-                                                              fontWeight:
-                                                                  FontWeight.bold,
-                                                              color:
-                                                                  AppColors.Text3,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Detailpage(
+                                                    transcribedText:
+                                                        transcription[
+                                                            'transcribedText'],
+                                                    id1: transcription['id']
+                                                        .toString(),
+                                                    date: formattedDate,
+                                                    unformattedText:
+                                                        transcription[
+                                                            'userTextInput'],
+                                                    title:
+                                                        transcription['title'], 
+                                                    tokenid: widget.tokenid,
+                                                  ),
                                                 ),
-                                              ))
+                                              );
+                                            },
+                                            child: Container(
+                                                //height: 200.0,
+                                                child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    transcription['title'] ??
+                                                        'Untitled', // Display the title or fallback text
+                                                    style: GoogleFonts.karla(
+                                                      fontSize: 16.0,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  Text(
+                                                    transcription[
+                                                        'transcribedText'],
+                                                    maxLines: maxLines, // Dynamic number of lines
+                                                    overflow: TextOverflow.ellipsis, // Truncate extra text
+                                                    style: GoogleFonts.karla(
+                                                        fontSize: 14.0,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: AppColors.Text2),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  Container(
+                                                    height: 30,
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        InkWell(
+                                                          onTap: () {
+                                                            Clipboard.setData(
+                                                              ClipboardData(
+                                                                  text: transcription[
+                                                                      'transcribedText']),
+                                                            );
+                                                            ScaffoldMessenger
+                                                                    .of(context)
+                                                                .showSnackBar(
+                                                              SnackBar(
+                                                                  content: Text(
+                                                                      'Copied to clipboard')),
+                                                            );
+                                                          },
+                                                          child: Icon(
+                                                            Icons.copy,
+                                                            color: const Color(
+                                                                0xFF6E6E6E),
+                                                            size: 16.0,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          formattedDate,
+                                                          style:
+                                                              GoogleFonts.karla(
+                                                            fontSize: 16.0,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                AppColors.Text3,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            )),
+                                          )
                                         ],
-                                        // >>>>>>> Stashed changes
                                       )
                                     ],
                                   ),
@@ -522,14 +592,14 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             Container(
               // width: mq.width*1/7,
-              height: mq.height * 1 / 10,
+              height: 64,
               decoration: BoxDecoration(
-                color: AppColors.flotingButton,
+                // color: AppColors.flotingButton,
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Container(
-                  height: mq.height * 1 / 13,
+                  height: 64,
                   // width: mq.width*1/10,
                   decoration: BoxDecoration(
                     color: AppColors.ButtonColor2,
@@ -541,12 +611,13 @@ class _HomePageState extends State<HomePage> {
                       icon: Icon(
                         Icons.mic, // Microphone icon
                         color: Colors.white, // Icon color
-                        // size: 50.0,  // Icon size
+                        size: 32.0, // Icon size
                       ),
                       iconSize: mq.height * 1 / 18,
                       onPressed: () async {
-                        // Add your microphone handling logic here
+                        await _enableDndMode();
                         print("Microphone button pressed");
+
                         final newTranscription = await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -554,22 +625,23 @@ class _HomePageState extends State<HomePage> {
                               onRecordingComplete: (transcribedText) {
                                 _refreshData();
                                 Navigator.pop(context, true);
+                                _disableDndMode();
 
                                 setState(() {
                                   _transcriptionsFuture =
                                       _fetchTranscriptions();
                                 });
-
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => TranscribeResult(
                                       transcribedText: transcribedText,
                                       unformattedText: '',
-                                      title_text: '',
                                       onDelete: () =>
                                           _deleteTranscription(transcribedText),
-                                      tokenid: widget.tokenid,
+                                      tokenid: widget.tokenid, title_text: '', isEmptyInput: false,
+                                      // date: formattedDate ?? "",
+
                                     ),
                                   ),
                                 );

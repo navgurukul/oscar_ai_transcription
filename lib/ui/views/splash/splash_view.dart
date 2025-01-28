@@ -21,26 +21,34 @@ class _SplashScreenState extends State<SplashScreen> {
     _checkSessionAndNavigate();
   }
 
+
   Future<void> _checkSessionAndNavigate() async {
     await Future.delayed(Duration(seconds: 3)); // Splash delay
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? isLoggedIn = prefs.getBool(KEYLOGIN);
-    String? tokenid = prefs.getString(
-      'tokenid'
-    ); // Retrieve token
-    print(isLoggedIn);
+    String? tokenid = prefs.getString('tokenid'); // Retrieve token
 
-    // Check login and token expiry
-    if (isLoggedIn != null && isLoggedIn && tokenid != null && !_isTokenExpired(tokenid)) {
-      
-      // Retrieve user details if the token is valid
+    // If the user is not logged in or token doesn't exist, navigate to LoginView directly
+    if (isLoggedIn == null || !isLoggedIn || tokenid == null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginView()),
+      );
+      return;
+    }
+
+    // If the token is expired
+    if (_isTokenExpired(tokenid)) {
+      _showSessionExpiredDialog(); // Show dialog if token is expired or expiring soon
+    } else {
+      // Navigate to HomePage if everything is valid
       String profileName = prefs.getString('profileName') ?? '';
       String profilePicUrl = prefs.getString('profilePicUrl') ?? '';
       String transcribedata = prefs.getString('transcribedata') ?? '';
-      print('token is not expired');
+
       Duration timeRemaining = JwtDecoder.getRemainingTime(tokenid);
       print("Time remaining: ${timeRemaining.inMinutes} minutes");
-    
 
       Navigator.pushReplacement(
         context,
@@ -53,8 +61,6 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ),
       );
-    } else {
-      _showSessionExpiredDialog();
     }
   }
 
@@ -118,7 +124,8 @@ class _SplashScreenState extends State<SplashScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageSize = screenWidth * 0.75;
 
-    return Scaffold(
+    return 
+    Scaffold(
       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
       body: Center(
         child: SvgPicture.asset(
