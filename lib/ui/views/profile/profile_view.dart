@@ -11,35 +11,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import '../auth/login_view.dart';
 
-// AgreementHelper class
-// class AgreementHelper {
-//   static const _agreementFileName = 'user_agreement.txt';
-//   static const _termsOfUseFileName = 'user_terms_of_use.txt';
-
-//   static Future<bool> hasAgreed() async {
-//     final directory = await getApplicationDocumentsDirectory();
-//     final file = File('${directory.path}/$_agreementFileName');
-//     return file.exists();
-//   }
-
-//   static Future<void> markAsAgreed() async {
-//     final directory = await getApplicationDocumentsDirectory();
-//     final file = File('${directory.path}/$_agreementFileName');
-//     await file.writeAsString('Agreed');
-//   }
-
-//   static Future<bool> hasAgreedToTerms() async {
-//     final directory = await getApplicationDocumentsDirectory();
-//     final file = File('${directory.path}/$_termsOfUseFileName');
-//     return file.exists();
-//   }
-
-//   static Future<void> markAsAgreedToTerms() async {
-//     final directory = await getApplicationDocumentsDirectory();
-//     final file = File('${directory.path}/$_termsOfUseFileName');
-//     await file.writeAsString('Agreed');
-//   }
-// }
 
 class SettingsScreen extends StatefulWidget {
   final String profileName;
@@ -131,12 +102,14 @@ void handleback(){
     var mq = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor:  Color(0xFFEEF6F5),
+      backgroundColor:  Colors.white,
+      // Color(0xFFEEF6F5),
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         title: Text('Account Details',style: GoogleFonts.karla(fontSize: 25,fontWeight: FontWeight.w700),),
         automaticallyImplyLeading: false,
-        backgroundColor:  Color(0xFFEEF6F5),
+        backgroundColor: Colors.white,
+        // Color(0xFFEEF6F5),
         elevation: 0,
         leading: IconButton(
             icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.06),

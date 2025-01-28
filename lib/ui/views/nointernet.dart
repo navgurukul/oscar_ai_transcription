@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
 
+import 'auth/login_view.dart';
+
 class NoInternetScreen extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -28,7 +32,11 @@ class NoInternetScreen extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: (){
+                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LoginView()
+                ));
+
+              },
               child: Text(
                 'Retry',
                 style: GoogleFonts.karla(

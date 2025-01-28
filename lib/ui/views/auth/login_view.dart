@@ -30,11 +30,7 @@ class _LoginViewState extends State<LoginView> {
     print('Google login method called');
 
     GoogleSignIn _googleSignIn = GoogleSignIn(
-      // clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com",  //from this app
-//clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com", //Old one
-//clientId: "361814667544-pf7l8b9hik69709hh5hcujgcjrc6e1jg.apps.googleusercontent.com",
-//clientId: "361814667544-p0jkacu1vs23tbtv5sfil1dln4v410kv.apps.googleusercontent.com",
-clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
+      clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
 
     scopes: [
         'https://www.googleapis.com/auth/userinfo.email',
@@ -114,7 +110,6 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
 
   Future<void> _authWithMeraki(String firstName, String lastName,String email, String profilePicUrl, String id, BuildContext context) async {
     final String apiUrl = 'https://dev-oscar.merakilearn.org/api/v1/auth/android/login';
-        // 'https://dev-oscar.merakilearn.org/api#/auth/AuthController_register' ;
     try {
       final response = await http.post(
         Uri.parse(apiUrl),

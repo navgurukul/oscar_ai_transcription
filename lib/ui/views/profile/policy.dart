@@ -1,7 +1,3 @@
-// SecondPage (Second Page)
-
-
-
 import 'dart:io';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
@@ -27,9 +23,9 @@ class _SecondPageState extends State<SecondPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFEEF6F5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Color(0xFFEEF6F5),
+        backgroundColor: Colors.white,
         title: Text(widget.heading,style: GoogleFonts.spectral(),),
       ),
       body: SingleChildScrollView(
@@ -52,13 +48,6 @@ class _SecondPageState extends State<SecondPage> {
             
               ],
             ),
-        
-            // InkWell(
-            // onTap: () => _launchEmailClient(),
-            // child:
-            //  Text('platforms@samyarth.org',style: TextStyle(color: Colors.blue,),
-            //  ),
-            //  ),
             
           ),
         ),
