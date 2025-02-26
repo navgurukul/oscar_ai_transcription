@@ -272,7 +272,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         SizedBox(width: screenWidth * 0.03),
                         Text(
-                          'Login with Google',
+                          'Login With Google',
                           style: GoogleFonts.karla(
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
@@ -353,7 +353,7 @@ class _LoginViewState extends State<LoginView> {
           child: Column(
             children: [
               Text(
-                "Let AI Do it's magic",
+                "Let AI Do It's Magic",
                 style: GoogleFonts.spectral(
                   fontSize: 20.0,
                   color: Colors.black87,

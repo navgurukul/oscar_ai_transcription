@@ -19,7 +19,6 @@ import '../profile/profile_view.dart';
 import '../record/record_view.dart';
 import 'dart:async';
 
-
 class HomePage extends StatefulWidget {
   final String profileName;
   final String profilePicUrl;
@@ -56,7 +55,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _connectivityStream =  _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
+    _connectivityStream =
+        _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ModalRoute.of(context)?.settings.arguments == true) {
@@ -65,6 +65,7 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
+
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
@@ -79,7 +80,6 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     super.dispose();
   }
-
 
   Future<void> _enableDndMode() async {
     if (await dndPlugin.isNotificationPolicyAccessGranted()) {
@@ -292,10 +292,24 @@ class _HomePageState extends State<HomePage> {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SvgPicture.asset(
-                'assets1/Oscar Logo with Text.svg',
-                width: imageSize,
-                height: imageSize * 0.15,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'assets1/Frame 31584.svg',
+                    width: 98,
+                    height: 32,
+                  ),
+                  SizedBox(width: 5,),
+                  // Text(
+                  //   "OSCAR",
+                  //   style: GoogleFonts.spectral(
+                  //       color: const Color(0xFF51A09B),
+                  //       fontSize: 16,
+                  //       height: 11,
+                  //       fontWeight: FontWeight.w700),
+                  // ),
+                ],
               ),
               IconButton(
                 icon: CircleAvatar(
@@ -462,7 +476,6 @@ class _HomePageState extends State<HomePage> {
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-
                                         children: [
                                           GestureDetector(
                                             onTap: () {
@@ -481,7 +494,7 @@ class _HomePageState extends State<HomePage> {
                                                         transcription[
                                                             'userTextInput'],
                                                     title:
-                                                        transcription['title'], 
+                                                        transcription['title'],
                                                     tokenid: widget.tokenid,
                                                   ),
                                                 ),
@@ -512,8 +525,10 @@ class _HomePageState extends State<HomePage> {
                                                   Text(
                                                     transcription[
                                                         'transcribedText'],
-                                                    maxLines: maxLines, // Dynamic number of lines
-                                                    overflow: TextOverflow.ellipsis, // Truncate extra text
+                                                    maxLines:
+                                                        3, // Dynamic number of lines
+                                                    overflow: TextOverflow
+                                                        .ellipsis, // Truncate extra text
                                                     style: GoogleFonts.karla(
                                                         fontSize: 14.0,
                                                         fontWeight:
@@ -637,11 +652,11 @@ class _HomePageState extends State<HomePage> {
                                     builder: (context) => TranscribeResult(
                                       transcribedText: transcribedText,
                                       unformattedText: '',
-                                      onDelete: () =>
+                                      onDelete: () =>    
                                           _deleteTranscription(transcribedText),
-                                      tokenid: widget.tokenid, title_text: '', isEmptyInput: false,
+                                      tokenid: widget.tokenid, title_text: '',
+                                      isEmptyInput: false,
                                       // date: formattedDate ?? "",
-
                                     ),
                                   ),
                                 );

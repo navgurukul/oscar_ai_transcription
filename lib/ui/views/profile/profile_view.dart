@@ -159,7 +159,7 @@ void handleback(){
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text(widget.profileName, style: GoogleFonts.spectral(fontSize: mq.width * 0.05,)),
+                    Text(widget.profileName, style: GoogleFonts.spectral(fontSize: mq.width * 0.05,fontWeight: FontWeight.w700)),
                   ],
                 ),
             ),
@@ -174,16 +174,16 @@ void handleback(){
                   String title;
                   switch (index) {
                     case 0:
-                      iconData = Icons.book_outlined;
-                      title = "Terms of use";
+                      iconData = Icons.article;
+                      title = "Terms of Use";
                       break;
                     case 1:
-                      iconData = Icons.privacy_tip_outlined;
-                      title = "Privacy policy";
+                      iconData = Icons.security;
+                      title = "Privacy Policy";
                       break;
                     case 2:
-                      iconData = Icons.mail_outline;
-                      title = "Email us";
+                      iconData = Icons.email;
+                      title = "Email Us";
                       break;
                     default:
                       iconData = Icons.info_outline;
@@ -191,7 +191,7 @@ void handleback(){
                       break;
                   }
                   return ListTile(
-                    leading: Icon(iconData, color: greenContainerColor),
+                    leading: Icon(iconData, color:  Color(0xFF4A4A4A),),
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

@@ -244,6 +244,7 @@ void _copyText() {
           controller: _tabController,
           indicatorColor: const Color(0xFF51A09B), // Custom indicator color
           indicatorWeight: 4.0,
+          indicatorSize: TabBarIndicatorSize.tab,
           indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0), // Padding
           labelColor: const Color(0xFF51A09B), // Active tab text color
           unselectedLabelColor:
@@ -269,83 +270,88 @@ void _copyText() {
         controller: _tabController,
         children: [
           Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  // _textController.text,
-                  widget.title == null ? 'Untitled' : widget.title!,
-                  style: GoogleFonts.spectral(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+            padding: const EdgeInsets.only(top:20.0,left: 20.0, right: 20.0,bottom: 100),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    // _textController.text,
+                    widget.title == null ? 'Untitled' : widget.title!,
+                    style: GoogleFonts.spectral(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color:Color(0xFF4A4A4A),
+                    ),
+                    // textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  // _textController.text,
-                  widget.date,
-                  style: GoogleFonts.karla(
-                    fontSize: 16,
-                    color: const Color(0xFF6E6E6E),
-                    fontWeight: FontWeight.w400,
+                  SizedBox(
+                    height: 10,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  // _textController.text,
-                  widget.transcribedText == null
-                      ? 'No formatted text available'
-                      : widget.transcribedText!,
-                  style: GoogleFonts.karla(
-                    fontSize: 16,
-                    color: const Color(0xFF6E6E6E),
-                    fontWeight: FontWeight.w400,
+                  Text(
+                    // _textController.text,
+                    widget.date,
+                    style: GoogleFonts.karla(
+                      fontSize: 16,
+                      color: const Color(0xFF6E6E6E),
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ],
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    // _textController.text,
+                    widget.transcribedText == null
+                        ? 'No formatted text available'
+                        : widget.transcribedText!,
+                    style: GoogleFonts.karla(
+                      fontSize: 16,
+                      color: const Color(0xFF6E6E6E),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 43,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: Colors.white),
-                  child: Center(
-                    child: Text(
-                      "Unprocessed text as spoken to Oscar",
-                      style: TextStyle(
-                          color: const Color(0xFF4A4A4A),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700),
+            padding: const EdgeInsets.only(top:20.0,left: 20.0, right: 20.0,bottom: 100),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 43,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        color: Colors.white),
+                    child: Center(
+                      child: Text(
+                        "Unprocessed text as spoken to Oscar",
+                        style: TextStyle(
+                            color: const Color(0xFF4A4A4A),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  widget.unformattedText == null
-                      ? 'No original text is provided'
-                      : widget.unformattedText!,
-                  style: GoogleFonts.karla(
-                    fontSize: 16,
-                    color: const Color(0xFF6E6E6E),
-                    fontWeight: FontWeight.w400,
+                  SizedBox(
+                    height: 20,
                   ),
-                ),
-              ],
+                  Text(
+                    widget.unformattedText == null
+                        ? 'No original text is provided'
+                        : widget.unformattedText!,
+                    style: GoogleFonts.karla(
+                      fontSize: 16,
+                      color: Color(0xFF4A4A4A),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
