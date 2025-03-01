@@ -118,7 +118,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
           'title': _text_titleController.text ,// Added to check....
         }),
       );
-      if (response.statusCode == 201) {
+   if (response.statusCode == 201) {
         print('Transcription successfully sent: ${response.statusCode}');
         final headerDate = response.headers['date'];
         if (responseDate != null) {
@@ -128,6 +128,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         else {
           print('Date header not found');
         }
+
+
         Navigator.pop(context, 'Saved transcription');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Saved transcription')),

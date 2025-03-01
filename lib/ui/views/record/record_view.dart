@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:async';
@@ -6,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
-import 'package:oscar_stt/ui/views/record/restart_recording.dart';
-// import 'package:oscar_stt/ui/views/record/empty_input.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
@@ -143,15 +142,8 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
           _cumulativeText += " " + _finalRecognizedText.trim();
         });
         print("Final recognized text: $_cumulativeText");
-          Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EmptyScreen(),),);
-      
-          _sendFormattedTextToTranscribePage(_cumulativeText.trim());
-        }
-        // _sendFormattedTextToTranscribePage(_cumulativeText.trim());
-    
+        _sendFormattedTextToTranscribePage(_cumulativeText.trim());
+      }
     });
   }
 
@@ -213,7 +205,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
                 Navigator.of(context).pop(false); // Discard
               },
               child: Text(
-                'Cancel',
+                'Discard',
                 style: GoogleFonts.karla(
                   fontSize: 16,
                   color: AppColors.ButtonColor2,
@@ -358,11 +350,10 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     try {
 
       bool isEmptyInput = transcriptionToSend.isEmpty;
-      
+
       // Format the transcription text
-      print('transcription before formatting : $transcriptionToSend');
       Map<String, String>? formattedData = await _formatText(transcriptionToSend);
-      print('format text after formatting $transcriptionToSend');
+
       if (formattedData != null && mounted) {
         // Extract the formatted transcription and title
         String formattedText = formattedData["transcript"] ?? transcriptionToSend;
@@ -386,19 +377,17 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
           ),
         );
       } else {
-
         print('No formatted text available.');
       }
     } catch (e) {
       print('Error sending formatted text: $e');
     }
   }
-
   Future<Map<String, String>?> _formatText(String speechText) async {
-    // if (!mounted) return null;
-    // setState(() {
-    //   _isLoading = true; // Start loading
-    // });
+    if (!mounted) return null;
+    setState(() {
+      _isLoading = true; // Start loading
+    });
 
     const String apiUrl = "https://dev-oscar.merakilearn.org/api/v1/optimize/optimize-text";
 
@@ -428,17 +417,13 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
         final formattedText = responseData["data"]["transcript"] ?? speechText;
         final formattedTitle = responseData["data"]["title"] ?? 'Untitled';
         final formattedDate = responseData["data"]['createdAt']??'';
-        print(' format text after api call $formattedText');
+
         return {
           "title": formattedTitle,
           "transcript": formattedText,
           'date': formattedDate
         };
-      } else if (response.statusCode == 40) {
-        print('Please provide a text to optimize');
-        // _showSessionExpiredDialog();
-      } 
-      else if (response.statusCode == 401) {
+      } else if (response.statusCode == 401) {
         print('Unauthorized');
         // _showSessionExpiredDialog();
       } else if (response.statusCode == 429) {
