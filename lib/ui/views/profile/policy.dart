@@ -20,13 +20,19 @@ class SecondPage extends StatefulWidget {
 }
 
 class _SecondPageState extends State<SecondPage> {
+  
   @override
   Widget build(BuildContext context) {
+    var mq = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.06),
+            onPressed: (){Navigator.pop(context);},
+            ),
         backgroundColor: Colors.white,
-        title: Text(widget.heading,style: GoogleFonts.spectral(),),
+        title: Text(widget.heading,style: GoogleFonts.spectral(fontWeight: FontWeight.w700),),
       ),
       body: SingleChildScrollView(
         child: Padding(
