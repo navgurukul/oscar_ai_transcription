@@ -43,6 +43,8 @@ class _HomePageState extends State<HomePage> {
   final Connectivity _connectivity = Connectivity();
   final dndPlugin = DoNotDisturbPlugin();
   bool isListening = false;
+
+
   late final Stream<ConnectivityResult> _connectivityStream;
 
   @override
@@ -632,11 +634,13 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () async {
                         await _enableDndMode();
                         print("Microphone button pressed");
+                        // print('$widget.tokenid');
+
 
                         final newTranscription = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => RecordView(
+                            builder: (context, ) => RecordView(
                               onRecordingComplete: (transcribedText) {
                                 _refreshData();
                                 Navigator.pop(context, true);
@@ -646,13 +650,18 @@ class _HomePageState extends State<HomePage> {
                                   _transcriptionsFuture =
                                       _fetchTranscriptions();
                                 });
+                                
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
+
                                     builder: (context) => TranscribeResult(
+                                      
                                       transcribedText: transcribedText,
                                       unformattedText: '',
+
                                       onDelete: () =>    
+                                    
                                           _deleteTranscription(transcribedText),
                                       tokenid: widget.tokenid, title_text: '',
                                       isEmptyInput: false,

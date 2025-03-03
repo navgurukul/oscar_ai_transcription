@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
+import 'package:oscar_stt/ui/views/record/restart_recording.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
@@ -124,7 +125,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     _sttController.startStt();
 
     // Listen for recognized words and print them
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(Duration(milliseconds: 2), () {
       if (!_isListening && mounted) {
         _sttController.resumeStt();
       }
@@ -132,21 +133,58 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   }
 
   // When user taps Stop, we stop the engine and send the final transcription.
-  void _stopListening() {
-    _sttController.stopStt();
-    // Optionally, wait a moment to flush any final results.
-    Future.delayed(Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          // Accumulate recognized text into _cumulativeText
-          _cumulativeText += " " + _finalRecognizedText.trim();
-        });
-        print("Final recognized text: $_cumulativeText");
-        _sendFormattedTextToTranscribePage(_cumulativeText.trim());
-      }
-    });
-  }
+  // void _stopListening() {
+  //   _sttController.stopStt();
+  //   // Optionally, wait a moment to flush any final results.
+  //   Future.delayed(Duration(milliseconds: 500), () {
+  //     if (mounted) {
+  //       setState(() {
+  //         // Accumulate recognized text into _cumulativeText
+  //         _cumulativeText += " " + _finalRecognizedText.trim();
+  //       });
+  //       print("Final recognized text: $_cumulativeText");
+  //       // _sendFormattedTextToTranscribePage(_cumulativeText.trim());
+  //     }
+  //   });
+  // }
 
+  // void _pauseTimer() {
+  //   _timer?.cancel();
+  // }
+
+void _stopListening() async {
+  _sttController.stopStt();
+
+  try {
+    // Wait for a short delay to ensure all final results are processed
+    await Future.delayed(Duration(milliseconds: 500));
+
+    if (mounted) {
+      setState(() {
+        _cumulativeText += " " + _finalRecognizedText.trim();
+      });
+
+      print("Final recognized text: $_cumulativeText");
+
+      // Check if the text is empty before sending it
+      if (_cumulativeText.trim().isNotEmpty) {
+        await _sendFormattedTextToTranscribePage(_cumulativeText.trim());
+      } else {
+        // If empty, show a message and navigate back to the recording screen
+  
+        print("No transcription detected. Redirecting to empty screen...");
+       
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => EmptyScreen()),
+        );
+      }
+    }
+  } catch (e) {
+    print("Error during stop listening: $e");
+    // Optionally, show an error message to the user
+  }
+}
   void _pauseTimer() {
     _timer?.cancel();
   }
@@ -355,6 +393,8 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
       Map<String, String>? formattedData = await _formatText(transcriptionToSend);
 
       if (formattedData != null && mounted) {
+      
+
         // Extract the formatted transcription and title
         String formattedText = formattedData["transcript"] ?? transcriptionToSend;
         String titleText = formattedData["title"] ?? 'Untitled';
@@ -377,19 +417,22 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
           ),
         );
       } else {
-        print('No formatted text available.');
+          print('No formatted text available.');
+          // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EmptyScreen(),));
       }
     } catch (e) {
       print('Error sending formatted text: $e');
     }
   }
+
   Future<Map<String, String>?> _formatText(String speechText) async {
-    if (!mounted) return null;
+    // if (!mounted) return null;
     setState(() {
       _isLoading = true; // Start loading
     });
 
     const String apiUrl = "https://dev-oscar.merakilearn.org/api/v1/optimize/optimize-text";
+
 
     try {
       // Prepare the POST request body
@@ -411,6 +454,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
       // Handle the response
       if (response.statusCode == 201) {
         print('Request successful');
+        
         final responseData = jsonDecode(response.body);
 
         // Extract formatted text and title
@@ -423,24 +467,31 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
           "transcript": formattedText,
           'date': formattedDate
         };
-      } else if (response.statusCode == 401) {
+      } else if (response.statusCode == 400) {
+        // return null;
+        final responseData = jsonDecode(response.body);
+        print('Please provide a text to optimize');
+        _showErrorDialog('$responseData[message]');
+      }
+      else if (response.statusCode == 401) {
         print('Unauthorized');
-        // _showSessionExpiredDialog();
-      } else if (response.statusCode == 429) {
+        // _showSessionExpiredDialog('please ');
+      }
+      else if (response.statusCode == 429) {
         print('Too many requests or daily quota exceeded');
-        // _showErrorDialog( 'Too many requests or daily quota exceeded');
+        _showErrorDialog( 'Too many requests or daily quota exceeded');
       } else if (response.statusCode == 500) {
         print('Internal Server Error.');
-        // _showErrorDialog(
-        //     'The server encountered an error while processing your request');
+        _showErrorDialog(
+            'The server encountered an error while processing your request');
       } else {
         print("Error: ${response.statusCode} - ${response.body}");
         final responseData = jsonDecode(response.body);
-        // _showErrorDialog( responseData['message'] ?? 'An error occurred');
+        _showErrorDialog( responseData['message'] ?? 'An error occurred');
       }
     } catch (e) {
       print("Error making POST request: $e");
-      // _showErrorDialog( 'An unexpected error occurred: $e');
+      _showErrorDialog( 'An unexpected error occurred: $e');
     } finally {
       if (mounted) {
       setState(() {
@@ -450,30 +501,30 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     return null;
   }
 
-  // void _showErrorDialog(String message) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (ctx) => AlertDialog(
-  //       title: Text('Error', style: TextStyle(
-  //         fontWeight: FontWeight.bold,
-  //         color: Colors.black,
-  //       ),),
-  //       content: Text(message, style: TextStyle(
-  //         fontWeight: FontWeight.w500,
-  //         color: Colors.black,
-  //       ),),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.of(ctx).pop(),
-  //           child: Text('OK', style: TextStyle(
-  //             // fontWeight: FontWeight.bold,
-  //             color: Colors.white,
-  //           ),),
-  //           style: ButtonStyle(
-  //             backgroundColor:
-  //             WidgetStateProperty.all(AppColors.ButtonColor2),
-  //             padding: WidgetStateProperty.all(
-  //               EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),),),),],),);}
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Error', style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),),
+        content: Text(message, style: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: Colors.black,
+        ),),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('OK', style: TextStyle(
+              // fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),),
+            style: ButtonStyle(
+              backgroundColor:
+              WidgetStateProperty.all(AppColors.ButtonColor2),
+              padding: WidgetStateProperty.all(
+                EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),),),),],),);}
 
 
 
