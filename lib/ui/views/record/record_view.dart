@@ -132,25 +132,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     });
   }
 
-  // When user taps Stop, we stop the engine and send the final transcription.
-  // void _stopListening() {
-  //   _sttController.stopStt();
-  //   // Optionally, wait a moment to flush any final results.
-  //   Future.delayed(Duration(milliseconds: 500), () {
-  //     if (mounted) {
-  //       setState(() {
-  //         // Accumulate recognized text into _cumulativeText
-  //         _cumulativeText += " " + _finalRecognizedText.trim();
-  //       });
-  //       print("Final recognized text: $_cumulativeText");
-  //       // _sendFormattedTextToTranscribePage(_cumulativeText.trim());
-  //     }
-  //   });
-  // }
 
-  // void _pauseTimer() {
-  //   _timer?.cancel();
-  // }
 
 void _stopListening() async {
   _sttController.stopStt();
@@ -165,20 +147,7 @@ void _stopListening() async {
       });
 
       print("Final recognized text: $_cumulativeText");
-
-      // Check if the text is empty before sending it
-      if (_cumulativeText.trim().isNotEmpty) {
-        await _sendFormattedTextToTranscribePage(_cumulativeText.trim());
-      } else {
-        // If empty, show a message and navigate back to the recording screen
-  
-        print("No transcription detected. Redirecting to empty screen...");
-       
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => EmptyScreen()),
-        );
-      }
+      await _sendFormattedTextToTranscribePage(_cumulativeText.trim());
     }
   } catch (e) {
     print("Error during stop listening: $e");
@@ -418,7 +387,6 @@ void _stopListening() async {
         );
       } else {
           print('No formatted text available.');
-          // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EmptyScreen(),));
       }
     } catch (e) {
       print('Error sending formatted text: $e');
@@ -432,8 +400,6 @@ void _stopListening() async {
     });
 
     const String apiUrl = "https://dev-oscar.merakilearn.org/api/v1/optimize/optimize-text";
-
-
     try {
       // Prepare the POST request body
       final Map<String, String> body = {
@@ -468,13 +434,16 @@ void _stopListening() async {
           'date': formattedDate
         };
       } else if (response.statusCode == 400) {
-        // return null;
-        final responseData = jsonDecode(response.body);
         print('Please provide a text to optimize');
-        _showErrorDialog('$responseData[message]');
+        return  {
+          "title": '',
+          "transcript": '',
+          'date': '',
+        };
       }
       else if (response.statusCode == 401) {
         print('Unauthorized');
+        _showErrorDialog( 'Unauthorized');
         // _showSessionExpiredDialog('please ');
       }
       else if (response.statusCode == 429) {
