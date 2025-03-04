@@ -186,93 +186,95 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('MMMM dd, yyyy').format(now);
     bool isInputEmpty = widget.unformattedText != 'Listening for speech...' ;
-    // final formattedDate =
-    // _formatDate(response['createdAt']);
-    // final formattedDate =
-    // _formatDate(transcribedText['createdAt']);
-    // if (isInputEmpty){
-      return Scaffold(
+      return
+      Scaffold(
+      backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        elevation: 0,
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
+            onPressed: _handleBack),
         backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-        appBar: AppBar(
-          scrolledUnderElevation: 0.0,
-          automaticallyImplyLeading: false,
-          elevation: 0,
-          leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
-              onPressed: _handleBack),
-          backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-          bottom: TabBar(
-            controller: _tabController,
-            indicatorColor: const Color(0xFF51A09B), // Custom indicator color
-            indicatorWeight: 4.0,
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0), // Padding
-            labelColor: const Color(0xFF51A09B), // Active tab text color
-            unselectedLabelColor:
-            const Color(0xFF6E6E6E), // Inactive tab text color
-            labelStyle: GoogleFonts.karla(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            unselectedLabelStyle: GoogleFonts.karla(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            tabs: [
-              Tab(
-                text: "Polished Text",
-              ),
-              Tab(text: "Original Text"),
-            ],
-          ),),
-        body: TabBarView(
+        bottom: TabBar(
           controller: _tabController,
-          children: [
-            SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _text_titleController.text,
-                      style: GoogleFonts.spectral(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF4A4A4A),
-                      ),
+          indicatorColor: const Color(0xFF51A09B), // Custom indicator color
+          indicatorWeight: 4.0,
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0), // Padding
+          labelColor: const Color(0xFF51A09B), // Active tab text color
+          unselectedLabelColor:
+              const Color(0xFF6E6E6E), // Inactive tab text color
+          labelStyle: GoogleFonts.karla(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            // TextStyle for unselected tab
+          ),
+          unselectedLabelStyle: GoogleFonts.karla(
+            fontSize: 16,
+            fontWeight: FontWeight.w700, // TextStyle for unselected tab
+          ),
+          tabs: [
+            Tab(
+              text: "Polished Text",
+            ),
+            Tab(text: "Original Text"),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top:20.0,left: 20.0, right: 20.0,bottom: 100),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    // _textController.text,
+                    widget.title_text == null ? 'Untitled' : widget.title_text!,
+                    style: GoogleFonts.spectral(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color:Color(0xFF4A4A4A),
                     ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    // if (displayedDate != null)
-                      // Text(
-                      //   formattedDate,
-                      //   style: GoogleFonts.spectral(fontSize: 16),
-                      // ),
-                    Text(
-                      formattedDate,
-                      style: GoogleFonts.karla(
+                    // textAlign: TextAlign.center,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    // _textController.text,
+                    formattedDate,
+                    style: GoogleFonts.karla(
                       fontSize: 16,
                       color: const Color(0xFF6E6E6E),
-                      
                       fontWeight: FontWeight.w400,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                    SizedBox(height: 10,),
-                    Text(
-                      // _textController.text,
-                      widget.transcribedText == null
-                          ? 'No formatted text available'
-                          : widget.transcribedText!,
-                      style: GoogleFonts.karla(
-                        fontSize: 16,
-                        color: Color(0xFF4A4A4A),
-                        fontWeight: FontWeight.w400,),),],),),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    // _textController.text,
+                    widget.transcribedText == null
+                        ? 'No formatted text available'
+                        : widget.transcribedText!,
+                    style: GoogleFonts.karla(
+                      fontSize: 16,
+                      color: const Color(0xFF6E6E6E),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top:20.0,left: 20.0, right: 20.0,bottom: 100),
+            child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -300,83 +302,20 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         : widget.unformattedText!,
                     style: GoogleFonts.karla(
                       fontSize: 16,
-                      color: const Color(0xFF6E6E6E),
-                      fontWeight: FontWeight.w400,),),],),),],),
-        bottomSheet: _buildFullInputBottomSheet(context),
-      );
-    // }else{
-    //   var mq = MediaQuery.of(context).size;
-    //   return Scaffold(
-    //     backgroundColor:Color(0xFFEEF6F5),
-    //     appBar: AppBar(
-    //       automaticallyImplyLeading: false,
-    //       backgroundColor: Colors.transparent,
-    //       title: Row(
-    //         children: [
-    //           IconButton(
-    //             icon: Icon(
-    //               Icons.arrow_back_ios,
-    //               size: 20,
-    //             ),
-    //             onPressed: () {
-    //               Navigator.pop(context);
-    //             },
-    //           ),],),),
-    //     body: Center(
-    //       child: Column(
-    //         mainAxisSize: MainAxisSize.min,
-    //         children: [
-    //           SvgPicture.asset(
-    //             'assets1/Marketing 3 1.svg',
-    //             width: 120.31,
-    //             height: 90.31,
-    //           ),
-    //           Padding(
-    //             padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 30),
-    //             child: Text(
-    //               "It seems the mic was not working or no words were spoken",
-    //               textAlign: TextAlign.center,
-    //               style: GoogleFonts.karla(
-    //                   fontSize: 16,
-    //                   fontWeight: FontWeight.w400,
-    //                   color: const Color(0xFF4D4D4D)),),),],),),
-    //     floatingActionButton: Stack(
-    //       alignment: Alignment.center,
-    //       children: <Widget>[
-    //         Container(
-    //           height: 64,
-    //           decoration: BoxDecoration(
-    //             shape: BoxShape.circle,
-    //           ),
-    //           child: Center(
-    //             child: Container(
-    //               height: 64,
-    //               decoration: BoxDecoration(
-    //                 color: AppColors.ButtonColor2,
-    //                 shape: BoxShape.circle,
-    //               ),
-    //               child: Center(
-    //                 child: IconButton(
-    //                   icon: Icon(
-    //                     Icons.mic, // Microphone icon
-    //                     color: Colors.white, // Icon color
-    //                     size: 32.0, // Icon size
-    //                   ),
-    //                   iconSize: mq.height * 1 / 18,
-    //                   onPressed: () async {
-    //                     // Add your microphone handling logic here
-    //                     print("Microphone button pressed");
-    //                     Navigator.pushReplacement(
-    //                       context,
-    //                       MaterialPageRoute(
-    //                         builder: (context) => RecordView(
-    //                           onRecordingComplete: (String recording) {
-    //                             // Handle recording completion here
-    //                           },
-    //                           tokenid: widget.tokenid,),),);},),),),),),],),
-    //     floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-    //   );
-    // }
+                      color: Color(0xFF4A4A4A),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomSheet:
+          _buildFullInputBottomSheet(context),
+    );
+    
   }
   Widget _buildFullInputBottomSheet(BuildContext context) {
     var mq = MediaQuery.of(context).size;
