@@ -22,7 +22,7 @@ class TranscribeResult extends StatefulWidget {
   final VoidCallback? onDelete;
   final String tokenid;
   final bool isEmptyInput;
-  // final date;
+
 
 
   const TranscribeResult(
@@ -33,7 +33,7 @@ class TranscribeResult extends StatefulWidget {
         required this.isEmptyInput,
         required this.unformattedText,
         required this.title_text,
-        // required this.date
+        
       }) : super(key: key);
   @override
   State<TranscribeResult> createState() => _TranscribeResultState();
@@ -55,8 +55,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     _notFormattedText = TextEditingController(text: widget.unformattedText);
     _text_titleController = TextEditingController(text: widget.title_text);
     _tabController = TabController(length: 2, vsync: this);
-    // _textController = TextEditingController(text: widget.transcribedText);
-    // _notFormattedText = TextEditingController(text: widget.unformattedText);
+    
     super.initState();
     _connectivityStream = _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
@@ -65,7 +64,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
-        // Navigate to the NoInternetScreen
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => NoInternetScreen(),
         ));
@@ -81,7 +79,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     }
   }
   void _handleBack() {
-    Navigator.pop(context, 'show_popup'); // Pass a specific result
+    Navigator.pop(context, 'show_popup');
   }
   void _shareText() {
     try {
@@ -92,7 +90,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     }
   }
   Future<void> _deleteTranscription(BuildContext context) async {
-    widget.onDelete!(); // Perform the delete operation
+    widget.onDelete!();
     Navigator.pop(context, 'Transcription deleted');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Transcription deleted')),
@@ -115,15 +113,15 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         body: jsonEncode(<String, String>{
           'transcribedText': _textController.text,
           'userTextInput': _notFormattedText.text,
-          'title': _text_titleController.text ,// Added to check....
+          'title': _text_titleController.text ,
         }),
       );
-   if (response.statusCode == 201) {
+    if (response.statusCode == 201) {
         print('Transcription successfully sent: ${response.statusCode}');
         final headerDate = response.headers['date'];
         if (responseDate != null) {
           displayedDate = _formatDate(responseDate!);
-          setState(() {}); // Only call setState() if needed
+          setState(() {});
         }
         else {
           print('Date header not found');
@@ -136,11 +134,10 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       }
       else if (response.statusCode == 401) {
         print(' Invalid token: ${response.statusCode}');
-        // Show AlertDialog
         showDialog(
           context: context,
           barrierDismissible:
-          false, // Prevent dialog from closing on tap outside
+          false,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Session Expired'),
@@ -148,8 +145,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
               actions: [
                 TextButton(
                   onPressed: () async {
-                    Navigator.of(context).pop(); // Close the dialog
-                    // Sign out and clear session
+                    Navigator.of(context).pop();
+          
                     await GoogleSignIn().signOut();
                     SharedPreferences prefs =
                     await SharedPreferences.getInstance();
@@ -176,7 +173,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   }
   String _formatDate(String dateString) {
     final date = DateTime.parse(dateString).toLocal();
-    return DateFormat('MMM dd, yyyy').format(date); // Formats to Jan 10, 2025
+    return DateFormat('MMM dd, yyyy').format(date);
   }
 
   @override
@@ -198,12 +195,12 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
           backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
           bottom: TabBar(
             controller: _tabController,
-            indicatorColor: const Color(0xFF51A09B), // Custom indicator color
+            indicatorColor: const Color(0xFF51A09B),
             indicatorWeight: 4.0,
-            indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0), // Padding
-            labelColor: const Color(0xFF51A09B), // Active tab text color
+            indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0),
+            labelColor: const Color(0xFF51A09B),
             unselectedLabelColor:
-            const Color(0xFF6E6E6E), // Inactive tab text color
+            const Color(0xFF6E6E6E),
             labelStyle: GoogleFonts.karla(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -245,7 +242,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                       ),
                     SizedBox(height: 10,),
                     Text(
-                      // _textController.text,
                       widget.transcribedText == null
                           ? 'No formatted text available'
                           : widget.transcribedText!,
@@ -341,20 +337,18 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                   child: Center(
                     child: IconButton(
                       icon: Icon(
-                        Icons.mic, // Microphone icon
-                        color: Colors.white, // Icon color
-                        size: 32.0, // Icon size
+                        Icons.mic,
+                        color: Colors.white,
+                        size: 32.0,
                       ),
                       iconSize: mq.height * 1 / 18,
                       onPressed: () async {
-                        // Add your microphone handling logic here
                         print("Microphone button pressed");
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) => RecordView(
                               onRecordingComplete: (String recording) {
-                                // Handle recording completion here
                               },
                               tokenid: widget.tokenid,),),);},),),),),),],),
                               floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -399,7 +393,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                             color: Colors.red),
                         onPressed: () {
                           _deleteTranscription(context);
-                          // _handleDeleteTranscription();
                           Navigator.pop(context);
                         },
                         iconSize: 20,),],),),),
@@ -425,7 +418,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         ),
                         SizedBox(
                             width:
-                            mq.width * 0.02), // Space between icon and text
+                            mq.width * 0.02),
                         Text(
                           "Save",
                           style: TextStyle(
@@ -438,8 +431,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     _notFormattedText.dispose();
     _text_titleController.dispose();
     _tabController.dispose();
-    // _connectivitySubscription?.cancel();
-    // _connectivitySubscription = null;
     super.dispose();
   }
 }

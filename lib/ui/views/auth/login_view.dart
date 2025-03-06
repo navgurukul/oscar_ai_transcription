@@ -1,7 +1,5 @@
 
-
 import 'dart:convert';
-
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oscar_stt/ui/views/home/home_view.dart';
@@ -9,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../core/constants/app_colors.dart';
 
 class LoginView extends StatefulWidget {
@@ -18,11 +15,9 @@ class LoginView extends StatefulWidget {
   @override
   State<LoginView> createState() => _LoginViewState();
 }
-
 class _LoginViewState extends State<LoginView> {
 
-  static const String KEYLOGIN = "Login"; // Define the constant here
-
+  static const String KEYLOGIN = "Login";
   var googleSignInAccount;
   String? globalToken5;
 
@@ -49,14 +44,10 @@ class _LoginViewState extends State<LoginView> {
 
         String firstName = nameParts.length > 0 ? nameParts[0] : "";
         String lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : "";
-
         String email = result.email;
         String profilePicUrl = result.photoUrl ?? "";
         String? id = result.id;
-
-
-        globalToken5 = id;  /// when i use here then able to do login
-
+        globalToken5 = id;
         print("Google Sign-In successful");
         print("First Name: $firstName");
         print("Last Name: $lastName");
@@ -68,9 +59,7 @@ class _LoginViewState extends State<LoginView> {
 
         await _authWithMeraki(fullName,lastName, email, profilePicUrl, id, context);
 
-
         if (globalToken5 != null) {
-
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setBool(KEYLOGIN, true);
           await prefs.setString('profileName', fullName);
@@ -105,9 +94,6 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
-
-  // Post API,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-
   Future<void> _authWithMeraki(String firstName, String lastName,String email, String profilePicUrl, String id, BuildContext context) async {
     final String apiUrl = 'https://dev-oscar.merakilearn.org/api/v1/auth/android/login';
     try {
@@ -119,11 +105,9 @@ class _LoginViewState extends State<LoginView> {
         body: json.encode({
           'firstName': firstName,
           'lastName': lastName,
-          // 'lastName': "",
           'profilePicUrl': profilePicUrl,
           'id': id,
           'email': email,
-          // 'lastName' : lastName,
         }),);
       if (response.statusCode == 201) {
         final responseBody = json.decode(response.body);
@@ -132,7 +116,6 @@ class _LoginViewState extends State<LoginView> {
         });
         print("this is token $globalToken5");
         print("Backend Authentication successful: $responseBody");
-
       } else {
         print('Failed to authenticate. Status code: ${response.statusCode}');
         print('Response body: ${response.body}');
@@ -142,13 +125,11 @@ class _LoginViewState extends State<LoginView> {
       }
     } catch (error) {
       print('Error occurred: $error');
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An error occurred')),
       );
     }
   }
-
 
   PageController _pageController = PageController();
   int _currentPage = 0;
@@ -211,7 +192,7 @@ class _LoginViewState extends State<LoginView> {
                               ? AppColors.ButtonColor2
                               : Colors.grey[400],
                           borderRadius: BorderRadius.circular(
-                              20), // Set the border radius
+                              20),
                         ),
                       ),
                     ),
@@ -226,7 +207,7 @@ class _LoginViewState extends State<LoginView> {
                               ? AppColors.ButtonColor2
                               : Colors.grey[400],
                           borderRadius: BorderRadius.circular(
-                              20), // Set the border radius
+                              20),
                         ),
                       ),
                     ),

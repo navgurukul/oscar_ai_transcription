@@ -6,17 +6,13 @@ import 'package:http/http.dart' as http;
 import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
 
-// Below is the code of integrating open ai backend from meraki swagger
-
 class Detailpage extends StatefulWidget {
   final String transcribedText;
   final String? unformattedText;
   final String tokenid;
-  // final bool isEmptyInput;
   final date;
   final String id1;
   final String? title;
-  // final formattedDate ;
 
   const Detailpage({
     Key? key,
@@ -24,7 +20,6 @@ class Detailpage extends StatefulWidget {
     required this.transcribedText,
     required this.unformattedText,
     required this.id1,
-    // required String date,
     required this.title,
     this.date,
 
@@ -48,7 +43,7 @@ class _DetailpageState extends State<Detailpage>
   }
 
   void _handleBack() {
-    Navigator.pop(context, 'show_popup'); // Pass a specific result
+    Navigator.pop(context, 'show_popup');
   }
 
   void _shareText() {
@@ -70,7 +65,6 @@ void _copyText() {
   void didUpdateWidget(covariant Detailpage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.transcribedText != oldWidget.transcribedText) {
-      // Update the text controller if the transcribed text changes
       _textController.text = widget.transcribedText;
     }
   }
@@ -79,11 +73,11 @@ void _copyText() {
     print('click on delete');
     return showDialog<void>(
       context: context,
-      barrierDismissible: true, // user can tap outside to dismiss the dialog
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero, // No border radius
+            borderRadius: BorderRadius.zero,
           ),
           title: Text(
             'Confirm Delete',
@@ -109,10 +103,10 @@ void _copyText() {
               child: TextButton(
                 child: Text('Cancel'),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white, // Text color
+                  foregroundColor: Colors.white,
                 ),
                 onPressed: () {
-                  Navigator.of(context).pop(); // Dismiss the dialog
+                  Navigator.of(context).pop();
                 },
               ),
             ),
@@ -128,8 +122,8 @@ void _copyText() {
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: () {
-                  Navigator.of(context).pop(); // Dismiss the dialog
-                  _deleteTranscription(id1); // Perform deletion
+                  Navigator.of(context).pop();
+                  _deleteTranscription(id1);
                 },
               ),
             ),
@@ -175,7 +169,6 @@ void _copyText() {
         throw Exception('Failed to delete transcription');
       }
     } catch (e) {
-      // Handle the error
       print('Error: $e');
     }
   }
@@ -183,12 +176,12 @@ void _copyText() {
   void _showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dialog from closing on outside tap
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-                8.0), // Square shape with slightly rounded corners
+                8.0),
           ),
           title: const Text(
             'Oops! an error occured',
@@ -203,12 +196,11 @@ void _copyText() {
               fontWeight: FontWeight.w600,
               color: Colors.black,
             ),
-          ), // Display error message dynamically
+          ),
           actions: [
             TextButton(
               onPressed: () {
-                // _isDialogOpen = false; // Mark dialog as closed
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text(
                 'OK',
@@ -242,21 +234,20 @@ void _copyText() {
         backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF51A09B), // Custom indicator color
+          indicatorColor: const Color(0xFF51A09B),
           indicatorWeight: 4.0,
           indicatorSize: TabBarIndicatorSize.tab,
-          indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0), // Padding
-          labelColor: const Color(0xFF51A09B), // Active tab text color
+          indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0),
+          labelColor: const Color(0xFF51A09B),
           unselectedLabelColor:
-              const Color(0xFF6E6E6E), // Inactive tab text color
+              const Color(0xFF6E6E6E),
           labelStyle: GoogleFonts.karla(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            // TextStyle for unselected tab
           ),
           unselectedLabelStyle: GoogleFonts.karla(
             fontSize: 16,
-            fontWeight: FontWeight.w700, // TextStyle for unselected tab
+            fontWeight: FontWeight.w700,
           ),
           tabs: [
             Tab(
@@ -276,20 +267,17 @@ void _copyText() {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    // _textController.text,
                     widget.title == null ? 'Untitled' : widget.title!,
                     style: GoogleFonts.spectral(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       color:Color(0xFF4A4A4A),
                     ),
-                    // textAlign: TextAlign.center,
                   ),
                   SizedBox(
                     height: 10,
                   ),
                   Text(
-                    // _textController.text,
                     widget.date,
                     style: GoogleFonts.karla(
                       fontSize: 16,
@@ -302,7 +290,6 @@ void _copyText() {
                     height: 10,
                   ),
                   Text(
-                    // _textController.text,
                     widget.transcribedText == null
                         ? 'No formatted text available'
                         : widget.transcribedText!,
@@ -356,154 +343,7 @@ void _copyText() {
           ),
         ],
       ),
-      // body: SafeArea(
-      //   child: Padding(
-      //     padding: EdgeInsets.all(mq.width * 0.04),
-      //     child: SingleChildScrollView(
-      //       child: Column(
-      //         crossAxisAlignment: CrossAxisAlignment.center,
-      //         children: [
-      //           Center(
-      //             child: Container(
-      //               constraints: BoxConstraints(
-      //                 minHeight: mq.height * 0.2,
-      //                 maxHeight: mq.height * 0.5,
-      //                 minWidth: mq.width * 1.0,
-      //                 maxWidth: mq.width * 1.0,
-      //               ),
-      //               decoration: BoxDecoration(
-      //                 color: AppColors.ButtonColor,
-      //                 border: Border.all(color: AppColors.ButtonColor),
-      //                 borderRadius: BorderRadius.all(Radius.circular(20)),
-      //               ),
-      //               child: Padding(
-      //                 padding: const EdgeInsets.all(8.0),
-      //                 child: SingleChildScrollView(
-      //                   child: Column(
-      //                     children: [
-      //                       Center(
-      //                         child: Column(
-      //                           children: [
-      // Text(
-      //   // _textController.text,
-      //   widget.title == null ? '' : widget.title!,
-      //   style: GoogleFonts.roboto(
-      //     fontSize: mq.width * 0.05,
-      //     fontWeight: FontWeight.bold,
-      //   ),
-      //   textAlign: TextAlign.center,
-      // ),
-      // Text(
-      //   // _textController.text,
-      //   widget.date,
-      //   style: GoogleFonts.roboto(
-      //     fontSize: mq.width * 0.05,
-      //     fontWeight: FontWeight.bold,
-      //   ),
-      //   textAlign: TextAlign.center,
-      // ),
-      //                           ],
-      //                         ),
-      //                       ),
-      //                       SizedBox(
-      //                         height: 2,
-      //                       ),
-      //                       // Text(
-      //                       //   // _textController.text,
-      //                       //   widget.date == null ? '' : widget.date,
-      //                       //   style: GoogleFonts.roboto(
-      //                       //     fontSize: mq.width * 0.05,
-      //                       //     fontWeight: FontWeight.w600,
-      //                       //   ),
-      //                       //   textAlign: TextAlign.center,
-      //                       // ),
-      // SizedBox(
-      //   height: 5,
-      // ),
-      // Text(
-      //   // _textController.text,
-      //   widget.transcribedText == null
-      //       ? 'No formatted text available'
-      //       : widget.transcribedText!,
-      //   style: GoogleFonts.roboto(
-      //     fontSize: mq.width * 0.05,
-      //     fontWeight: FontWeight.normal,
-      //   ),
-      //   textAlign: TextAlign.center,
-      // ),
-      //                     ],
-      //                   ),
-      //                 ),
-      //               ),
-      //             ),
-      //           ),
-      //           if (_showTranscribedText)
-      //             Container(
-      //               constraints: BoxConstraints(
-      //                 minWidth: mq.width * 0.8,
-      //                 maxWidth: mq.width * 0.8,
-      //               ),
-      //               decoration: BoxDecoration(
-      //                 color: Colors.white,
-      //                 border: Border.all(color: Colors.white),
-      //                 borderRadius: BorderRadius.only(
-      //                   bottomRight: Radius.circular(20),
-      //                   bottomLeft: Radius.circular(20),
-      //                 ),
-      //               ),
-      //               child: Padding(
-      //                 padding: const EdgeInsets.all(8.0),
-      //                 child: SingleChildScrollView(
-      // child: Text(
-      //   widget.unformattedText == null
-      //       ? 'No original text is provided'
-      //       : widget.unformattedText!,
-      //   style: GoogleFonts.roboto(
-      //     fontSize: mq.width * 0.05,
-      //     fontWeight: FontWeight.normal,
-      //   ),
-      //   textAlign: TextAlign.center,
-      // ),
-      //                 ),
-      //               ),
-      //             ),
-      //           Container(
-      //             decoration: BoxDecoration(
-      //               color: Colors.orange,
-      //               border: Border.all(color: Colors.orange),
-      //               borderRadius: BorderRadius.only(
-      //                 bottomRight: Radius.circular(20),
-      //                 bottomLeft: Radius.circular(20),
-      //               ),
-      //             ),
-      //             child: TextButton(
-      //               onPressed: () {
-      //                 setState(() {
-      //                   _showTranscribedText = !_showTranscribedText;
-      //                 });
-      //               },
-      //               child: Text(
-      //                 _showTranscribedText
-      //                     ? 'Hide Original Transcripts'
-      //                     : 'View Original Transcripts',
-      //                 style: GoogleFonts.roboto(
-      //                   fontSize: mq.width * 0.045,
-      //                   fontWeight: FontWeight.bold,
-      //                   color: Colors.white,
-      //                 ),
-      //               ),
-      //             ),
-      //           ),
-      //           SizedBox(height: mq.height * 0.09),
-      //         ],
-      //       ),
-      //     ),
-      //   ),
-      // ),
       bottomSheet:
-          // widget.isEmptyInput
-          //     ? _buildEmptyInputBottomSheet(context)
-          //:
           _buildFullInputBottomSheet(context),
     );
   }
@@ -521,9 +361,7 @@ void _copyText() {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
-                // width: mq.width*0.2,
-                // height: mq.height*0.5,
-
+          
                 margin: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
                 padding: EdgeInsets.symmetric(),
                 decoration: BoxDecoration(
@@ -534,44 +372,29 @@ void _copyText() {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // SizedBox(width: 10,),
+                
                     IconButton(
                       icon: Icon(Icons.copy, color: AppColors.ButtonColor2),
                       onPressed: _copyText,
                       iconSize: 20,
                     ),
-                    // SizedBox(width: 5,),
+                  
                     IconButton(
                       icon: Icon(Icons.share, color: AppColors.ButtonColor2),
                       onPressed: _shareText,
                       iconSize: 20,
                     ),
-                    // SizedBox(width: 5,),
+              
                     IconButton(
                       icon:
                           Icon(Icons.delete_outline_rounded, color: Colors.red),
                       onPressed: () {
                         _confirmDeleteTranscription(widget.id1);
-                        // _handleDeleteTranscription();
-                        // Navigator.pop(context);
-                        // _deleteTranscription(context);
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //   SnackBar(
-                        //     content: Text('Transcription deleted'),
-                        //   ),
-                        // );
-                        // _handleDeleteTranscription();
-                        // Navigator.pop(context);
-                        // onPressed: () {
-                        //     _confirmDeleteTranscription(
-                        //     widget.id1
-                        //     );
-                        //     // _deleteTranscription('3');
-                        // };
+                      
                       },
                       iconSize: mq.width * 0.07,
                     ),
-                    // SizedBox(width: 10,),
+                    
                   ],
                 ),
               ),

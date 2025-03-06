@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,13 +23,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
 
   Future<void> _checkSessionAndNavigate() async {
-    await Future.delayed(Duration(seconds: 3)); // Splash delay
+    await Future.delayed(Duration(seconds: 3));
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? isLoggedIn = prefs.getBool(KEYLOGIN);
-    String? tokenid = prefs.getString('tokenid'); // Retrieve token
-
-    // If the user is not logged in or token doesn't exist, navigate to LoginView directly
+    String? tokenid = prefs.getString('tokenid');
     if (isLoggedIn == null || !isLoggedIn || tokenid == null) {
       Navigator.pushReplacement(
         context,
@@ -39,11 +36,9 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
 
-    // If the token is expired
     if (_isTokenExpired(tokenid)) {
-      _showSessionExpiredDialog(); // Show dialog if token is expired or expiring soon
+      _showSessionExpiredDialog(); 
     } else {
-      // Navigate to HomePage if everything is valid
       String profileName = prefs.getString('profileName') ?? '';
       String profilePicUrl = prefs.getString('profilePicUrl') ?? '';
       String transcribedata = prefs.getString('transcribedata') ?? '';
@@ -65,31 +60,23 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-
-
-
-  // Function to check if the token is expired
   bool _isTokenExpired(String token) {
     try {
-      // Decode the token to extract the expiry time
+      
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
       int expiryTimestamp = decodedToken['exp'] ?? 0;
 
-      // Check if the expiry timestamp is within the next 24 hours (1440 minutes)
       DateTime expiryDate = DateTime.fromMillisecondsSinceEpoch(expiryTimestamp * 1000);
       DateTime currentDate = DateTime.now();
       Duration remainingDuration = expiryDate.difference(currentDate);
 
-      // Check if remaining duration is greater than 24 hours
       return remainingDuration.isNegative || remainingDuration.inMinutes <= 1440;
     } catch (e) {
       debugPrint("Error decoding token: $e");
-      return true; // Treat invalid tokens as expired
-      // return false;
+      return true; 
     }
   }
 
-  //Function to show session expired alert dialog
   void _showSessionExpiredDialog() {
     showDialog(
       context: context,
@@ -106,13 +93,13 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Container(
                 // width: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.ButtonColor2, // Replace with your desired color
+                  color: AppColors.ButtonColor2,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: EdgeInsets.all(16.0), // Adjust for size
+                padding: EdgeInsets.all(16.0),
                 child: Text(
                   "OK",
-                  style: TextStyle(color: Colors.white), // Text color
+                  style: TextStyle(color: Colors.white),
                 ),
               ),)
         ],
