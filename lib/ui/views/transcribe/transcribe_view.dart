@@ -22,7 +22,7 @@ class TranscribeResult extends StatefulWidget {
   final VoidCallback? onDelete;
   final String tokenid;
   final bool isEmptyInput;
-  // final date;
+
 
 
   const TranscribeResult(
@@ -33,7 +33,7 @@ class TranscribeResult extends StatefulWidget {
         required this.isEmptyInput,
         required this.unformattedText,
         required this.title_text,
-        // required this.date
+        
       }) : super(key: key);
   @override
   State<TranscribeResult> createState() => _TranscribeResultState();
@@ -55,8 +55,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     _notFormattedText = TextEditingController(text: widget.unformattedText);
     _text_titleController = TextEditingController(text: widget.title_text);
     _tabController = TabController(length: 2, vsync: this);
-    // _textController = TextEditingController(text: widget.transcribedText);
-    // _notFormattedText = TextEditingController(text: widget.unformattedText);
+    
     super.initState();
     _connectivityStream = _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
@@ -65,7 +64,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
-        // Navigate to the NoInternetScreen
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => NoInternetScreen(),
         ));
@@ -81,7 +79,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     }
   }
   void _handleBack() {
-    Navigator.pop(context, 'show_popup'); // Pass a specific result
+    Navigator.pop(context, 'show_popup');
   }
   void _shareText() {
     try {
@@ -92,7 +90,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     }
   }
   Future<void> _deleteTranscription(BuildContext context) async {
-    widget.onDelete!(); // Perform the delete operation
+    widget.onDelete!();
     Navigator.pop(context, 'Transcription deleted');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Transcription deleted')),
@@ -115,20 +113,19 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         body: jsonEncode(<String, String>{
           'transcribedText': _textController.text,
           'userTextInput': _notFormattedText.text,
-          'title': _text_titleController.text ,// Added to check....
+          'title': _text_titleController.text ,
         }),
       );
-   if (response.statusCode == 201) {
+    if (response.statusCode == 201) {
         print('Transcription successfully sent: ${response.statusCode}');
         final headerDate = response.headers['date'];
         if (responseDate != null) {
           displayedDate = _formatDate(responseDate!);
-          setState(() {}); // Only call setState() if needed
+          setState(() {});
         }
         else {
           print('Date header not found');
         }
-
 
         Navigator.pop(context, 'Saved transcription');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -137,11 +134,10 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       }
       else if (response.statusCode == 401) {
         print(' Invalid token: ${response.statusCode}');
-        // Show AlertDialog
         showDialog(
           context: context,
           barrierDismissible:
-          false, // Prevent dialog from closing on tap outside
+          false,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Session Expired'),
@@ -149,8 +145,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
               actions: [
                 TextButton(
                   onPressed: () async {
-                    Navigator.of(context).pop(); // Close the dialog
-                    // Sign out and clear session
+                    Navigator.of(context).pop();
+          
                     await GoogleSignIn().signOut();
                     SharedPreferences prefs =
                     await SharedPreferences.getInstance();
@@ -177,7 +173,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   }
   String _formatDate(String dateString) {
     final date = DateTime.parse(dateString).toLocal();
-    return DateFormat('MMM dd, yyyy').format(date); // Formats to Jan 10, 2025
+    return DateFormat('MMM dd, yyyy').format(date);
   }
 
   @override
@@ -185,96 +181,77 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     var mq = MediaQuery.of(context).size;
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('MMMM dd, yyyy').format(now);
-    bool isInputEmpty = widget.unformattedText != 'Listening for speech...' ;
-      return
-      Scaffold(
-      backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
-            onPressed: _handleBack),
+    bool isInputEmpty = widget.unformattedText != '' ;
+    if (isInputEmpty){
+      return Scaffold(
         backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: const Color(0xFF51A09B), // Custom indicator color
-          indicatorWeight: 4.0,
-          indicatorSize: TabBarIndicatorSize.tab,
-          indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0), // Padding
-          labelColor: const Color(0xFF51A09B), // Active tab text color
-          unselectedLabelColor:
-              const Color(0xFF6E6E6E), // Inactive tab text color
-          labelStyle: GoogleFonts.karla(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            // TextStyle for unselected tab
-          ),
-          unselectedLabelStyle: GoogleFonts.karla(
-            fontSize: 16,
-            fontWeight: FontWeight.w700, // TextStyle for unselected tab
-          ),
-          tabs: [
-            Tab(
-              text: "Polished Text",
+        appBar: AppBar(
+          scrolledUnderElevation: 0.0,
+          automaticallyImplyLeading: false,
+          elevation: 0,
+          leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
+              onPressed: _handleBack),
+          backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: const Color(0xFF51A09B),
+            indicatorWeight: 4.0,
+            indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0),
+            labelColor: const Color(0xFF51A09B),
+            unselectedLabelColor:
+            const Color(0xFF6E6E6E),
+            labelStyle: GoogleFonts.karla(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
             ),
-            Tab(text: "Original Text"),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top:20.0,left: 20.0, right: 20.0,bottom: 100),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    // _textController.text,
-                    widget.title_text == null ? 'Untitled' : widget.title_text!,
-                    style: GoogleFonts.spectral(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color:Color(0xFF4A4A4A),
-                    ),
-                    // textAlign: TextAlign.center,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    // _textController.text,
-                    formattedDate,
-                    style: GoogleFonts.karla(
-                      fontSize: 16,
-                      color: const Color(0xFF6E6E6E),
-                      fontWeight: FontWeight.w400,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    // _textController.text,
-                    widget.transcribedText == null
-                        ? 'No formatted text available'
-                        : widget.transcribedText!,
-                    style: GoogleFonts.karla(
-                      fontSize: 16,
-                      color: const Color(0xFF6E6E6E),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
+            unselectedLabelStyle: GoogleFonts.karla(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+            tabs: [
+              Tab(
+                text: "Polished Text",
               ),
+              Tab(text: "Original Text"),
+            ],
+          ),),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _text_titleController.text,
+                      style: GoogleFonts.spectral(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    if (displayedDate != null)
+                      Text(
+                        'Date: $displayedDate',
+                        style: GoogleFonts.spectral(fontSize: 16),
+                      ),
+                    SizedBox(height: 10,),
+                    Text(
+                      widget.transcribedText == null
+                          ? 'No formatted text available'
+                          : widget.transcribedText!,
+                      style: GoogleFonts.karla(
+                        fontSize: 16,
+                        color: const Color(0xFF6E6E6E),
+                        fontWeight: FontWeight.w400,),),],),),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top:20.0,left: 20.0, right: 20.0,bottom: 100),
-            child: SingleChildScrollView(
+            Padding(
+              padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -302,19 +279,81 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         : widget.unformattedText!,
                     style: GoogleFonts.karla(
                       fontSize: 16,
-                      color: Color(0xFF4A4A4A),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
+                      color: const Color(0xFF6E6E6E),
+                      fontWeight: FontWeight.w400,),),],),),],),
+        bottomSheet: _buildFullInputBottomSheet(context),
+      );
+    }else{
+      var mq = MediaQuery.of(context).size;
+      return Scaffold(
+        backgroundColor:Color(0xFFEEF6F5),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.transparent,
+          title: Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios,
+                  size: 20,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),],),),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                'assets1/Marketing 3 1.svg',
+                width: 120.31,
+                height: 90.31,
               ),
-            ),
-          ),
-        ],
-      ),
-      bottomSheet:
-          _buildFullInputBottomSheet(context),
-    );
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 30),
+                child: Text(
+                  "It seems the mic was not working or no words were spoken",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.karla(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF4D4D4D)),),),],),),
+        floatingActionButton: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Container(
+              height: 64,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Container(
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: AppColors.ButtonColor2,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.mic,
+                        color: Colors.white,
+                        size: 32.0,
+                      ),
+                      iconSize: mq.height * 1 / 18,
+                      onPressed: () async {
+                        print("Microphone button pressed");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RecordView(
+                              onRecordingComplete: (String recording) {
+                              },
+                              tokenid: widget.tokenid,),),);},),),),),),],),
+                              floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      );
+    }
     
   }
   Widget _buildFullInputBottomSheet(BuildContext context) {
@@ -354,7 +393,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                             color: Colors.red),
                         onPressed: () {
                           _deleteTranscription(context);
-                          // _handleDeleteTranscription();
                           Navigator.pop(context);
                         },
                         iconSize: 20,),],),),),
@@ -380,7 +418,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         ),
                         SizedBox(
                             width:
-                            mq.width * 0.02), // Space between icon and text
+                            mq.width * 0.02),
                         Text(
                           "Save",
                           style: TextStyle(
@@ -393,8 +431,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     _notFormattedText.dispose();
     _text_titleController.dispose();
     _tabController.dispose();
-    // _connectivitySubscription?.cancel();
-    // _connectivitySubscription = null;
     super.dispose();
   }
 }

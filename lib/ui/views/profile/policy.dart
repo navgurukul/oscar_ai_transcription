@@ -1,13 +1,6 @@
-import 'dart:io';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:oscar_stt/core/constants/app_colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:path_provider/path_provider.dart';
-import '../auth/login_view.dart';
-
 
 class SecondPage extends StatefulWidget {
   final String terms;
@@ -51,7 +44,6 @@ class _SecondPageState extends State<SecondPage> {
               child: Text('platforms@samyarth.org',style:GoogleFonts.karla(color: Colors.blue,fontSize: 18),
               ),
             ),
-            
               ],
             ),
             

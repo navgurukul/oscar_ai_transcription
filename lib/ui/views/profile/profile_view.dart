@@ -1,14 +1,10 @@
 
-
-import 'dart:io';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:oscar_stt/ui/views/profile/policy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:path_provider/path_provider.dart';
 import '../auth/login_view.dart';
 
 
@@ -30,7 +26,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final Color greenContainerColor = Color(0xFF51A09B);
   final Color signOutColor = Color(0xFF4D4D4D);
   final String contactEmail = 'platforms@samyarth.org';
-  bool _hasAgreed = false;
 
   @override
   void initState() {
@@ -39,10 +34,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkAgreementStatus() async {
-    // final hasAgreed = await AgreementHelper.hasAgreed();
-    // setState(() {
-      // _hasAgreed = hasAgreed;
-    // });
   }
 
   final String termsOfUseText =  '''
@@ -103,37 +94,22 @@ void handleback(){
 
     return Scaffold(
       backgroundColor:  Colors.white,
-      // Color(0xFFEEF6F5),
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         title: Text('Account Details',style: GoogleFonts.karla(fontSize: 25,fontWeight: FontWeight.w700),),
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
-        // Color(0xFFEEF6F5),
         elevation: 0,
         leading: IconButton(
             icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.06),
             onPressed: handleback,
             ),),
-
-      // backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
         
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // SizedBox(height: mq.height * 0.05),
-            // Center(
-              // child: Text(
-              //   'Account Details',
-              //   style: TextStyle(
-              //     fontSize: mq.width * 0.09,
-              //     fontWeight: FontWeight.bold,
-              //   ),
-              // ),
-            // ),
-            // SizedBox(height: mq.height * 0.10),
           Center(
             child: Padding(
               padding: const EdgeInsets.only(top:50.0),
@@ -210,9 +186,7 @@ void handleback(){
                         Navigator.push(context , MaterialPageRoute(builder: (context) => 
                         SecondPage(termsOfUseText,'Terms of Use',_launchEmailClient,),));
                         Text(termsOfUseText);
-                        // _showTermsOfUseDialog(context, termsOfUseText);
                       } else if (index == 1) {
-                        // _showPrivacyPolicyDialog(context, privacyPolicyText);
                         Text(privacyPolicyText);
                         Navigator.push(context , MaterialPageRoute(builder: (context) => 
                         SecondPage(privacyPolicyText, 'Privacy Policy',_launchEmailClient,),));
@@ -225,10 +199,7 @@ void handleback(){
                 },
               ),
             ),
-
             _buildCustomSignOutButton(context),
-
-
           ],
         ),
       ),
@@ -237,7 +208,7 @@ void handleback(){
 
 
   Widget _buildCustomSignOutButton(BuildContext context) {
-    const String KEYLOGIN = "Login"; // Define the constant here
+    const String KEYLOGIN = "Login";
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       child: Align(
@@ -247,15 +218,10 @@ void handleback(){
             await GoogleSignIn().signOut();
             SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.remove('isLoggedIn');
-            // Added some line below for solving the bug related to credentials get stored after logout
-            // await prefs.remove('profileName');
-            // await prefs.remove('profilePicUrl');
-            // await prefs.remove('tokenid');
-            // await prefs.remove('KEYLOGIN');
             await prefs.setBool(KEYLOGIN, false);
-            print("Profile Name after logout: ${prefs.getString('profileName')}"); // should print null
-            print("Profile Pic URL after logout: ${prefs.getString('profilePicUrl')}"); // should print null
-            print("Token ID after logout: ${prefs.getString('tokenid')}"); // should print null
+            print("Profile Name after logout: ${prefs.getString('profileName')}"); 
+            print("Profile Pic URL after logout: ${prefs.getString('profilePicUrl')}");
+            print("Token ID after logout: ${prefs.getString('tokenid')}");
 
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => LoginView()),
@@ -270,7 +236,6 @@ void handleback(){
               width: 120,
               height: 50,
               decoration: BoxDecoration(
-                // color:AppColors.ButtonColor2,
                 color: Colors.white,
                 border: Border.all(color: Colors.redAccent),
                 borderRadius: BorderRadius.circular(50),
@@ -292,90 +257,7 @@ void handleback(){
     );
   }
 
-  // Future<void> _showTermsOfUseDialog(BuildContext context, String termsOfUseText) async {
-  //   // final hasAgreedToTerms = await AgreementHelper.hasAgreedToTerms();
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text("Terms of Use",style: GoogleFonts.karla(),),
-  //         content: SingleChildScrollView(
-  //           child: Column(
-  //             children: [
-  //               Text(termsOfUseText),
-  //               InkWell(
-  //               onTap: () => _launchEmailClient(),
-  //               child: Text('platforms@samyarth.org',style: TextStyle(color: Colors.blue,),),),
-          
-  //             ],
-  //           ),
-            
-            
-  //         ),
-  //         actions: [
-  //           // if (!hasAgreedToTerms)
-  //             TextButton(
-  //               child: Text("Agree",style: GoogleFonts.karla(color: Colors.green),),
-  //               onPressed: () async {
-  //                 // await AgreementHelper.markAsAgreedToTerms();
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //           TextButton(
-  //             child: Text("Close"),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
-  // Future<void> _showPrivacyPolicyDialog(BuildContext context, String privacyPolicyText) async {
-  //   // final hasAgreedToTerms = await AgreementHelper.hasAgreedToTerms();
-
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text("Privacy Policy"),
-  //         content: SingleChildScrollView(
-  //           child: Column(
-  //             children: [
-  //               Text(privacyPolicyText),
-  //               InkWell(
-  //               onTap: () => _launchEmailClient(),
-  //               child: Text('platforms@samyarth.org',style: TextStyle(color: Colors.blue,),),),
-          
-  //             ],
-  //           ),
-  //         ),
-  //         actions: [
-  //           // if (!hasAgreedToTerms)
-  //             TextButton(
-  //               child: Text("Agree",style: GoogleFonts.karla(color: Colors.green),),
-  //               onPressed: () async {
-  //                 // await AgreementHelper.markAsAgreedToTerms();
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //           TextButton(
-  //             child: Text("Close"),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
-
-
-    Future<void> _launchEmailClient() async {
+Future<void> _launchEmailClient() async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: contactEmail,
@@ -387,66 +269,8 @@ void handleback(){
     }
   }
 
-
-  String? encodeQueryParameters(Map<String, String> params) {
+String? encodeQueryParameters(Map<String, String> params) {
     return params.entries.map((MapEntry<String, String> e) =>
     '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
   }
 }
-
-// // SecondPage (Second Page)
-// class SecondPage extends StatefulWidget {
-//   final String terms;
-//   final String heading ;
-//   final launchmail;
-//   SecondPage( this.terms, this.heading,this.launchmail);
-
-//   @override
-//   State<SecondPage> createState() => _SecondPageState();
-// }
-
-// class _SecondPageState extends State<SecondPage> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-//       appBar: AppBar(
-//         backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-//         title: Text(widget.heading,style: GoogleFonts.spectral(),),
-//       ),
-//       body: SingleChildScrollView(
-//         child: Padding(
-//           padding: const EdgeInsets.only(left: 20, right: 20,bottom: 20),
-//           child: Center(
-//             child: Column(
-//               children: [
-//                 Text(
-//                   widget.terms,
-//                   style: GoogleFonts.karla(fontSize: 18),
-//                 ),
-//                 SizedBox(width: 15,),
-                
-//             InkWell(
-//               onTap: widget.launchmail,
-//               child: Text('platforms@samyarth.org',style:GoogleFonts.karla(color: Colors.blue,fontSize: 18),
-//               ),
-//             ),
-            
-//               ],
-//             ),
-        
-//             // InkWell(
-//             // onTap: () => _launchEmailClient(),
-//             // child:
-//             //  Text('platforms@samyarth.org',style: TextStyle(color: Colors.blue,),
-//             //  ),
-//             //  ),
-            
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-

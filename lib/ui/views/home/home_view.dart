@@ -8,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:oscar_stt/ui/detailpage.dart';
 import 'package:oscar_stt/ui/views/nointernet.dart';
@@ -50,7 +49,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Fetch fresh data every time the dependencies change,
     _transcriptionsFuture = ApiService().fetchTranscriptions(widget.tokenid);
   }
 
@@ -63,7 +61,7 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ModalRoute.of(context)?.settings.arguments == true) {
         _showRefreshAlertDialog();
-        _refreshData(); // Refresh data when returning from another page
+        _refreshData();
       }
     });
   }
@@ -71,7 +69,6 @@ class _HomePageState extends State<HomePage> {
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
-        // Navigate to the NoInternetScreen
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => NoInternetScreen(),
         ));
@@ -85,7 +82,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _enableDndMode() async {
     if (await dndPlugin.isNotificationPolicyAccessGranted()) {
-      // Set DND to priority mode
       await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
       print("DND mode enabled.");
     } else {
@@ -96,7 +92,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _disableDndMode() async {
     if (await dndPlugin.isNotificationPolicyAccessGranted()) {
-      // Reset DND to all interruptions
       await dndPlugin.setInterruptionFilter(InterruptionFilter.all);
       print("DND mode disabled.");
     } else {
@@ -114,7 +109,7 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: Text('OK'),
             ),
@@ -158,7 +153,7 @@ class _HomePageState extends State<HomePage> {
       if (response.statusCode == 200) {
         print('deleted successfully');
         setState(() {
-          _transcriptionsFuture = _fetchTranscriptions(); // Refresh the data
+          _transcriptionsFuture = _fetchTranscriptions();
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -183,7 +178,6 @@ class _HomePageState extends State<HomePage> {
         throw Exception('Failed to delete transcription');
       }
     } catch (e) {
-      // Handle the error
       print('Error: $e');
       _showErrorDialog(context, '$e');
     }
@@ -201,41 +195,40 @@ class _HomePageState extends State<HomePage> {
     } else if (response.statusCode == 400) {
       final data = jsonDecode(response.body);
       _showErrorDialog(context, data['message']);
-      return data['message']; // Return the message from the API response
+      return data['message'];
     } else if (response.statusCode == 404) {
       final data = jsonDecode(response.body);
       _showErrorDialog(context, data['message']);
-      return data['message']; // Return the message from the API response
+      return data['message'];
     } else if (response.statusCode == 500) {
       final data = jsonDecode(response.body);
       _showErrorDialog(context, data['message']);
-      return data['message']; // Return the message from the API response
+      return data['message'];
     } else if (response.statusCode == 401) {
       final data = jsonDecode(response.body);
       _showErrorDialog(context, data['message']);
-      return data['message']; // Return the message from the API response
+      return data['message'];
     } else {
       _showErrorDialog(context, 'Failed to load transcription');
       throw Exception('Failed to load transcriptions');
     }
   }
 
-  // Function to format date
   String _formatDate(String dateString) {
     final date = DateTime.parse(dateString).toLocal();
-    return DateFormat('MMM dd, yyyy').format(date); // Formats to Jan 10, 2025
+    return DateFormat('MMM dd, yyyy').format(date);
   }
 
   void _showErrorDialog(BuildContext context, String errorMessage) {
     var mq = MediaQuery.of(context).size;
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dialog from closing on outside tap
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-                8.0), // Square shape with slightly rounded corners
+                8.0),
           ),
           title: const Text('Oops! an error occured',
               style: TextStyle(
@@ -247,11 +240,11 @@ class _HomePageState extends State<HomePage> {
                 fontWeight: FontWeight.w400,
                 fontSize: mq.width * 0.04,
                 color: Colors.black,
-              )), // Display error message dynamically
+              )),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text(
                 'OK',
@@ -273,14 +266,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    final imageSize = screenWidth * 0.75;
 
     return WillPopScope(
       onWillPop: () async {
-        // Exit the app directly
         await SystemNavigator.pop();
         return false;
       },
@@ -303,14 +291,6 @@ class _HomePageState extends State<HomePage> {
                     height: 32,
                   ),
                   SizedBox(width: 5,),
-                  // Text(
-                  //   "OSCAR",
-                  //   style: GoogleFonts.spectral(
-                  //       color: const Color(0xFF51A09B),
-                  //       fontSize: 16,
-                  //       height: 11,
-                  //       fontWeight: FontWeight.w700),
-                  // ),
                 ],
               ),
               IconButton(
@@ -361,16 +341,16 @@ class _HomePageState extends State<HomePage> {
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return SingleChildScrollView(
                   physics:
-                      AlwaysScrollableScrollPhysics(), // Ensures scroll even when empty
+                      AlwaysScrollableScrollPhysics(),
                   child: Container(
                     height:
-                        mq.height - kToolbarHeight, // Full height minus AppBar
+                        mq.height - kToolbarHeight,
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment
-                            .center, // Center the content vertically
+                            .center,
                         crossAxisAlignment: CrossAxisAlignment
-                            .center, // Center the content horizontally
+                            .center,
                         children: [
                           Align(
                             alignment: Alignment.topLeft,
@@ -385,16 +365,12 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
-
                           SizedBox(height: mq.height * 0.20),
-
-                          // The image
                           Image.asset(
                             'assets1/Group-12307.png',
                             width: 118.31,
                             height: 118.31,
                           ),
-
                           Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 80.0, vertical: 30),
@@ -407,7 +383,6 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
-
                           Spacer(),
                         ],
                       ),
@@ -445,21 +420,20 @@ class _HomePageState extends State<HomePage> {
                         child: ListView.builder(
                           padding: EdgeInsets.symmetric(
                               horizontal: mq.width *
-                                  0.05), // Added padding on left and right
+                                  0.05),
                           itemCount: transcriptions.length,
                           itemBuilder: (context, index) {
                             final transcription =
                                 transcriptions.reversed.toList()[index];
                             final formattedDate =
                                 _formatDate(transcription['createdAt']);
-                            // Determine maxLines based on the text length
                             int maxLines;
                             if (transcription.length <= 50) {
-                              maxLines = 1; // Short text
+                              maxLines = 1;
                             } else if (transcription.length <= 150) {
-                              maxLines = 2; // Medium text
+                              maxLines = 2;
                             } else {
-                              maxLines = 5; // Long text
+                              maxLines = 5;
                             }
 
                             return Padding(
@@ -503,7 +477,6 @@ class _HomePageState extends State<HomePage> {
                                               );
                                             },
                                             child: Container(
-                                                //height: 200.0,
                                                 child: Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
@@ -514,7 +487,7 @@ class _HomePageState extends State<HomePage> {
                                                 children: [
                                                   Text(
                                                     transcription['title'] ??
-                                                        'Untitled', // Display the title or fallback text
+                                                        'Untitled',
                                                     style: GoogleFonts.karla(
                                                       fontSize: 16.0,
                                                       fontWeight:
@@ -527,10 +500,9 @@ class _HomePageState extends State<HomePage> {
                                                   Text(
                                                     transcription[
                                                         'transcribedText'],
-                                                    maxLines:
-                                                        3, // Dynamic number of lines
+                                                    maxLines:3,
                                                     overflow: TextOverflow
-                                                        .ellipsis, // Truncate extra text
+                                                        .ellipsis,
                                                     style: GoogleFonts.karla(
                                                         fontSize: 14.0,
                                                         fontWeight:
@@ -608,35 +580,28 @@ class _HomePageState extends State<HomePage> {
           alignment: Alignment.center,
           children: <Widget>[
             Container(
-              // width: mq.width*1/7,
               height: 64,
               decoration: BoxDecoration(
-                // color: AppColors.flotingButton,
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Container(
                   height: 64,
-                  // width: mq.width*1/10,
                   decoration: BoxDecoration(
                     color: AppColors.ButtonColor2,
                     shape: BoxShape.circle,
                   ),
-
                   child: Center(
                     child: IconButton(
                       icon: Icon(
-                        Icons.mic, // Microphone icon
-                        color: Colors.white, // Icon color
-                        size: 32.0, // Icon size
+                        Icons.mic,
+                        color: Colors.white,
+                        size: 32.0,
                       ),
                       iconSize: mq.height * 1 / 18,
                       onPressed: () async {
                         await _enableDndMode();
                         print("Microphone button pressed");
-                        // print('$widget.tokenid');
-
-
                         final newTranscription = await Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -645,27 +610,20 @@ class _HomePageState extends State<HomePage> {
                                 _refreshData();
                                 Navigator.pop(context, true);
                                 _disableDndMode();
-
                                 setState(() {
                                   _transcriptionsFuture =
                                       _fetchTranscriptions();
                                 });
-                                
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-
                                     builder: (context) => TranscribeResult(
-                                      
                                       transcribedText: transcribedText,
                                       unformattedText: '',
-
-                                      onDelete: () =>    
-                                    
+                                      onDelete: () =>
                                           _deleteTranscription(transcribedText),
                                       tokenid: widget.tokenid, title_text: '',
                                       isEmptyInput: false,
-                                      // date: formattedDate ?? "",
                                     ),
                                   ),
                                 );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oscar_stt/core/constants/app_colors.dart';
-
 import 'auth/login_view.dart';
 
 class NoInternetScreen extends StatelessWidget {
