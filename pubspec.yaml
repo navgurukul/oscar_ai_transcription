@@ -62,6 +62,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: "^0.13.1"
+#  manual_speech_to_text:
+#      path: manual_speech_to_text
 
 flutter_launcher_icons:
   android: "launcher_icon"

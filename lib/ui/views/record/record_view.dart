@@ -1,31 +1,39 @@
+<<<<<<< HEAD
 
 import 'dart:convert';
 import 'dart:developer';
+=======
+import 'dart:convert';
+>>>>>>> transcription_list
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import 'package:permission_handler/permission_handler.dart';
+<<<<<<< HEAD
+=======
+import 'package:provider/provider.dart';
+// import 'package:testing_oscar/ui/views/CombinedScreenProvider.dart';
+>>>>>>> transcription_list
 import '../../../core/constants/app_colors.dart';
 import 'package:http/http.dart' as http;
+import '../CombinedScreenProvider.dart';
 import '../nointernet.dart';
 import '../transcribe/transcribe_view.dart';
 
 class RecordView extends StatefulWidget {
-  final Function(String) onRecordingComplete;
+  final ManualSttController controller;
   final String tokenid;
 
-  RecordView({
-    required this.onRecordingComplete,
-    required this.tokenid,
-  });
+  const RecordView({Key? key, required this.controller,required this.tokenid,}) : super(key: key);
 
   @override
   _RecordViewState createState() => _RecordViewState();
 }
 
 class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
+<<<<<<< HEAD
   late ManualSttController _sttController;
   String _finalRecognizedText = "";
   int _remainingTime = 180;
@@ -35,11 +43,21 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   final Connectivity _connectivity = Connectivity();
   late final Stream<ConnectivityResult> _connectivityStream;
   String _cumulativeText = "";
+=======
+  int _remainingTime = 180; // 3 minutes in seconds
+  Timer? _timer;
+  final Connectivity _connectivity = Connectivity();
+  late final Stream<ConnectivityResult> _connectivityStream;
+  bool _isProcessing = false;
+  bool _isLoading = false;
+
+>>>>>>> transcription_list
 
 
   @override
   void initState() {
     super.initState();
+<<<<<<< HEAD
     WidgetsBinding.instance.addObserver(this);
     _sttController = ManualSttController(context);
     _initializeSpeech();
@@ -144,6 +162,111 @@ void _stopListening() async {
 }
   void _pauseTimer() {
     _timer?.cancel();
+=======
+    widget.controller.startStt();
+    _startCountdown();
+    WidgetsBinding.instance.addObserver(this);
+    // Provider.of<AppState>(context, listen: false).monitorInternet(context);
+    _connectivityStream = _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
+    _monitorInternet();
+
+  }
+
+  void _monitorInternet() {
+    _connectivityStream.listen((ConnectivityResult result) {
+      if (result == ConnectivityResult.none) {
+        widget.controller.stopStt();
+
+        // Navigate to the NoInternetScreen
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => NoInternetScreen(),
+        ));
+      }
+    });
+  }
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      widget.controller.stopStt(); // Stop recording when app goes to background
+    }
+  }
+
+  Future<void> _sendFormattedTextToTranscribePage(String transcriptionToSend)  async {
+    try{
+      setState(() {
+        _isLoading = true; // Show loading indicator
+      });
+      Map<String,String>? formattedData = await _formatText(transcriptionToSend);
+      if (formattedData != null && mounted) {
+        String titleText = formattedData["title"] ?? 'Untitled';
+        String formattedText = formattedData["transcript"] ?? transcriptionToSend;
+        final appState = Provider.of<AppState> (context, listen: false);
+        appState.updateFormattedText(formattedText, transcriptionToSend, titleText);
+        appState.navigateToTranscriptionPage();
+      } else {
+        print('No formatted text available.');
+      }
+    } catch (e){
+      print('Error sending formatted text: $e');
+    }
+  }
+
+  Future<Map<String, String>?> _formatText(String speechText) async {
+    if (!mounted) return null;
+    setState(() {
+      _isLoading = true;
+    });
+    const String apiurl = "https://dev-oscar.merakilearn.org/api/v1/optimize/optimize-text";
+
+    try {
+      final Map<String, String> body = {
+        "user_input": speechText,
+        "device_tag": '3',
+      };
+      final response = await http.post(
+          Uri.parse(apiurl),
+          headers: {
+            'Authorization': 'Bearer ${widget.tokenid}',
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(body)
+      );
+      if (response.statusCode == 201) {
+        print("Request successful");
+        final responseData = jsonDecode(response.body);
+        final formattedText = responseData["data"]["transcript"] ?? speechText;
+        final formattedTitle = responseData["data"]["title"] ?? 'Untitled';
+        final formattedDate = responseData["data"]['createdAt'] ?? '';
+        return {
+          "title": formattedTitle,
+          "transcript": formattedText,
+          'date': formattedDate,
+        };
+      } else if (response.statusCode == 401) {
+        print('Unauthorized');
+      } else if (response.statusCode == 429) {
+        print('Too many requests or daily quota exceeded');
+      } else if (response.statusCode == 500) {
+        print('Internal Server Error.');
+      } else {
+        print("Error: ${response.statusCode} - ${response.body}");
+        jsonDecode(response.body);
+      }}
+
+    catch (e) {
+      print("Error making POST request: $e");
+    }
+
+    finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+>>>>>>> transcription_list
   }
 
   void _resumeTimer() {
@@ -154,17 +277,132 @@ void _stopListening() async {
           if (_remainingTime > 0) {
             _remainingTime--;
           } else {
+<<<<<<< HEAD
             _stopListening();
+=======
+            widget.controller.stopStt();
+>>>>>>> transcription_list
           }
         });
       });
     }
+<<<<<<< HEAD
+=======
+  }
+  void _startCountdown() {
+    _timer?.cancel();
+    _remainingTime = 180;
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() {
+        if (_remainingTime > 0) {
+          _remainingTime--;
+        } else {
+          widget.controller.stopStt();
+        }
+      });
+    });
+>>>>>>> transcription_list
   }
 
+  void _stopCountdown() {
+    _timer?.cancel();
+    _remainingTime = 180;
+    if (!mounted) return;
+    setState(() {});
+  }
+
+
+  void _pauseTimer() {
+    _timer?.cancel();}
+
   Future<void> _onBackPressed() async {
+<<<<<<< HEAD
     print("Back arrow pressed");
+=======
+    // Print("Back arrow pressed");
+>>>>>>> transcription_list
     _pauseTimer();
-    _sttController.stopStt();
+    widget.controller.pauseStt();
+    bool? result = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              backgroundColor: Colors.white,
+              title: Text('Discard Recording',
+                style: GoogleFonts.spectral(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700
+                ),),
+              content: Text(
+                'You are exiting the recording. Recorded data will be lost.',
+                style: GoogleFonts.karla(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              actions: <Widget> [
+                TextButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(Colors.white),
+                    side: WidgetStateProperty.all(
+                        BorderSide(color: AppColors.ButtonColor2)),
+                    padding: WidgetStateProperty.all(
+                        EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: Text(
+                    'Discard',
+                    style: GoogleFonts.karla(
+                      fontSize: 16,
+                      color: AppColors.ButtonColor2,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  style: ButtonStyle(
+                    backgroundColor:
+                    WidgetStateProperty.all(AppColors.ButtonColor2),
+                    padding: WidgetStateProperty.all(
+                        EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                    // Keep Recording
+                  },
+                  child: Text(
+                    'Keep Recording',
+                    style: GoogleFonts.karla(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+
+              ]
+          );
+        }
+    );
+    if (result == true) {
+      widget.controller.resumeStt();
+      _startCountdown();
+    } else {
+      Provider.of<AppState>(context, listen: false).navigateToHomePage();
+    }
+  }
+
+  void _onRestartPressed() async {
+    _pauseTimer(); // Pause the timer
+    print("Timer paused");
+    widget.controller.pauseStt(); // Stop the recording
+    print("Recording paused");
     bool? result = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -173,6 +411,7 @@ void _stopListening() async {
             borderRadius: BorderRadius.circular(20),
           ),
           backgroundColor: Colors.white,
+<<<<<<< HEAD
           title: Text(
             'Discard Recording',
             style: GoogleFonts.spectral(
@@ -180,13 +419,11 @@ void _stopListening() async {
               fontWeight: FontWeight.w700,
             ),
           ),
+=======
+          title: Text('Reset Recording'),
+>>>>>>> transcription_list
           content: Text(
-            'You are exiting the recording. Recorded data will be lost.',
-            style: GoogleFonts.karla(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
+              'Curent recording will be erased an a new one will be started '),
           actions: <Widget>[
             TextButton(
               style: ButtonStyle(
@@ -197,7 +434,11 @@ void _stopListening() async {
                     EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
               ),
               onPressed: () {
+<<<<<<< HEAD
                 Navigator.of(context).pop(false);
+=======
+                Navigator.of(context).pop(); // Close the dialog
+>>>>>>> transcription_list
               },
               child: Text(
                 'Discard',
@@ -212,6 +453,11 @@ void _stopListening() async {
               style: ButtonStyle(
                 backgroundColor:
                 WidgetStateProperty.all(AppColors.ButtonColor2),
+<<<<<<< HEAD
+=======
+                side: WidgetStateProperty.all(
+                    BorderSide(color: AppColors.ButtonColor2)),
+>>>>>>> transcription_list
                 padding: WidgetStateProperty.all(
                     EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
               ),
@@ -219,12 +465,17 @@ void _stopListening() async {
                 Navigator.of(context).pop(true);
               },
               child: Text(
+<<<<<<< HEAD
                 'Keep Recording',
+=======
+                'Reset',
+>>>>>>> transcription_list
                 style: GoogleFonts.karla(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                   color: Colors.white,
                 ),
+<<<<<<< HEAD
               ),
             ),
           ],
@@ -305,10 +556,15 @@ void _stopListening() async {
                 ),
               ),
             ),
+=======
+              ),
+            ),
+>>>>>>> transcription_list
           ],
         );
       },
     );
+<<<<<<< HEAD
     if (result == true) {
       setState(() {
         _finalRecognizedText = ""; 
@@ -326,9 +582,22 @@ void _stopListening() async {
       });
       _resumeTimer();
       _sttController.startStt();
+=======
+    if (result == true){
+      widget.controller.startStt();
+      _startCountdown();
+    } else {
+      widget.controller.resumeStt();
+>>>>>>> transcription_list
     }
+    // if (result == true) {
+    //   _resetRecording(); // Call method to restart recording
+    // } else {
+    //   _resumeRecording(); // Resume recording if discarded
+    // }
   }
 
+<<<<<<< HEAD
   Future<void> _sendFormattedTextToTranscribePage(String transcriptionToSend) async {
     try {
 
@@ -647,12 +916,52 @@ void _stopListening() async {
                       ),
                     ),
                   ],
+=======
+
+  @override
+  void dispose() {
+    widget.controller.stopStt();
+    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var mq = MediaQuery.of(context).size;
+    final appState = Provider.of<AppState>(context);
+
+    return
+      WillPopScope(
+        onWillPop: () async {
+          Provider.of<AppState>(context, listen: false).navigateToHomePage();
+          return false; // Prevent default back navigation
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.transparent,
+            title: Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.arrow_back_ios,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    _onBackPressed();
+                  },
+>>>>>>> transcription_list
                 ),
-                SizedBox(
-                  height: 20,
+                Text(
+                  "Record Transcript",
+                  style:
+                  GoogleFonts.karla(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ],
             ),
+<<<<<<< HEAD
             if (_isLoading)
               Center(
                 child: Stack(
@@ -696,18 +1005,180 @@ void _stopListening() async {
                                   fontWeight: FontWeight.w400,
                                 ),
                                 textAlign: TextAlign.center,
+=======
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Stack(
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (_isProcessing)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: mq.height * 0.02),
+                        child: LinearProgressIndicator(),
+                      ),
+                    Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(mq.width * 0.025),
+                        child: Container(
+                          width: double.infinity,
+                          height: mq.height * 0.2,
+                          decoration: BoxDecoration(
+                            color: Color.fromRGBO(220, 236, 235, 1.0),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(mq.width * 0.03),
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+
+                              Text(
+                                _remainingTime > 0
+                                    ? '${(_remainingTime ~/ 60).toString().padLeft(2, '0')}:${(_remainingTime % 60).toString().padLeft(2, '0')}'
+                                    : 'Time is up!',
+                                style: GoogleFonts.karla(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              SizedBox(height: mq.height * 0.015),
+
+                              Image.asset(
+                                'assets1/audioWave.gif',
+                                fit: BoxFit.cover,
+                                height: mq.height * 0.12,
+>>>>>>> transcription_list
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
+<<<<<<< HEAD
                   ],
                 ),
               ),
           ],
+=======
+
+                    Text("Final text: ${appState.finalRecognizedText}",style: TextStyle(fontSize: 12),),
+
+                    SizedBox(height: mq.height * 0.25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.ButtonColor2,
+                            shape: BoxShape.circle, // Circular shape
+                          ),
+                          padding: EdgeInsets.all(mq.width *
+                              0.02), // Padding for the icon inside the circle
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.restart_alt,
+                              color: Colors.white,
+                            ),
+                            iconSize: mq.width * 0.08,
+                            onPressed: () {
+                              _onRestartPressed();
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          width: 30,
+                        ),
+
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.ButtonColor2,
+                            shape: BoxShape.circle,
+                          ),
+                          padding: EdgeInsets.all(mq.width * 0.02),
+                          child:
+                          // _buildRecordingButton(),
+
+                          IconButton(
+                              icon: Icon(
+                                // isPaused ? Icons.stop : Icons.play_arrow,
+                                Icons.stop,
+                                color: Colors.white,
+                              ),
+                              iconSize: mq.width * 0.08,
+                              onPressed: () async {
+                                widget.controller.stopStt();
+                                await _sendFormattedTextToTranscribePage(appState.finalRecognizedText);                              }
+
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+
+                if (_isLoading)
+                  Center(
+                    child: Stack(
+                      children: [
+                        Container(
+                          color: Colors.white,
+                        ),
+                        Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: mq.width * 0.04,
+                                vertical: mq.height * 0.1),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                    height: 120,
+                                    width: 120,
+                                    child:
+                                    Image.asset("assets1/Sorting-Center.png")),
+                                SizedBox(height: mq.height * 0.03),
+                                Container(
+                                  height: 16,
+                                  width: 180,
+                                  child: LinearProgressIndicator(
+                                    color: Color.fromRGBO(81, 160, 155, 1.0),
+                                    backgroundColor: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                SizedBox(height: mq.height * 0.03),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: mq.width * 0.05),
+                                  child: Text(
+                                    'Please wait a moment while we prepare the polished transcript',
+                                    style: GoogleFonts.karla(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+              ],
+            ),
+          ),
+>>>>>>> transcription_list
         ),
-      ),
-    );
+      );
   }
 }
+

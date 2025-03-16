@@ -2,8 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:oscar_stt/core/constants/app_colors.dart';
+import 'package:manual_speech_to_text/manual_speech_to_text.dart';
+// import 'package:jwt_decoder/jwt_decoder.dart';
+// import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:testing_oscar/ui/views/CombinedScreen.dart';
+import '../../../core/constants/app_colors.dart';
+import '../CombinedScreen.dart';
 import '../auth/login_view.dart';
 import '../home/home_view.dart';
 
@@ -49,12 +54,14 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => HomePage(
-            profileName: profileName,
-            profilePicUrl: profilePicUrl,
-            transcribedata: transcribedata,
-            tokenid: tokenid,
-          ),
+            builder: (context) =>
+                CombinedPage(profileName: profileName, profilePicUrl: profilePicUrl, tokenid: tokenid, controller: ManualSttController(context),)
+          //     HomePage(
+          //   profileName: profileName,
+          //   profilePicUrl: profilePicUrl,
+          //   transcribedata: transcribedata,
+          //   tokenid: tokenid,
+          // ),
         ),
       );
     }
@@ -79,17 +86,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _showSessionExpiredDialog() {
     showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text("Session Expired"),
-        content: Text("Your session has expired. Please log in again."),
-        actions: [
-          TextButton(onPressed: () {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => LoginView()));
-          },
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: Text("Session Expired"),
+          content: Text("Your session has expired. Please log in again."),
+          actions: [
+            TextButton(onPressed: () {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginView()));
+            },
               child: Container(
                 // width: 5,
                 decoration: BoxDecoration(
@@ -102,8 +109,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   style: TextStyle(color: Colors.white),
                 ),
               ),)
-        ],
-      )
+          ],
+        )
     );
   }
 
@@ -112,6 +119,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageSize = screenWidth * 0.75;
 
+<<<<<<< HEAD
     return Scaffold(
       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
       body: Center(
@@ -119,8 +127,18 @@ class _SplashScreenState extends State<SplashScreen> {
           'assets1/logo.svg',
           width: 116,
           height: 120,
+=======
+    return
+      Scaffold(
+        backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+        body: Center(
+          child: SvgPicture.asset(
+            'assets1/Oscar Logo with Text.svg',
+            width: imageSize,
+            height: imageSize * 0.75,
+          ),
+>>>>>>> transcription_list
         ),
-      ),
-    );
+      );
   }
 }
