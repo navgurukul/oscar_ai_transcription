@@ -7,12 +7,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:oscar_stt/ui/views/auth/login_view.dart';
-import 'package:oscar_stt/ui/views/nointernet.dart';
+import 'package:manual_speech_to_text/manual_speech_to_text.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
-import '../record/record_view.dart';
+import '../CombinedScreenProvider.dart';
+import '../auth/login_view.dart';
+import '../nointernet.dart';
 import 'dart:async';
 
 class TranscribeResult extends StatefulWidget {
@@ -21,7 +23,11 @@ class TranscribeResult extends StatefulWidget {
   final String unformattedText;
   final VoidCallback? onDelete;
   final String tokenid;
-  final bool isEmptyInput;
+  final ManualSttController controller;
+  final String transcriptionId;
+  final String id1;
+
+  // final bool isEmptyInput;
   // final date;
 
 
@@ -30,11 +36,14 @@ class TranscribeResult extends StatefulWidget {
         required this.transcribedText,
         this.onDelete,
         required this.tokenid,
-        required this.isEmptyInput,
+        // required this.isEmptyInput,
+        required this.transcriptionId,
         required this.unformattedText,
-        required this.title_text,
+        required this.title_text, required this.controller,
+        required this.id1,
         // required this.date
       }) : super(key: key);
+
   @override
   State<TranscribeResult> createState() => _TranscribeResultState();
 }
@@ -43,10 +52,11 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   late TextEditingController _text_titleController;
   late TextEditingController _notFormattedText;
   late TabController _tabController;
-  final Connectivity _connectivity = Connectivity();
   late final Stream<ConnectivityResult> _connectivityStream;
   String? responseDate;
   String? displayedDate;
+  final Connectivity _connectivity = Connectivity();
+
 
   @override
   void initState() {
@@ -55,23 +65,207 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     _notFormattedText = TextEditingController(text: widget.unformattedText);
     _text_titleController = TextEditingController(text: widget.title_text);
     _tabController = TabController(length: 2, vsync: this);
-    _textController = TextEditingController(text: widget.transcribedText);
-    _notFormattedText = TextEditingController(text: widget.unformattedText);
-    super.initState();
     _connectivityStream = _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
   }
 
+
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
+        widget.controller.stopStt();
+
         // Navigate to the NoInternetScreen
-        Navigator.of(context).push(MaterialPageRoute(
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => NoInternetScreen(),
         ));
       }
     });
   }
+
+  // Future<void> _deleteTranscription(String transcriptionId) async {
+  //   try {
+  //     final response = await http.delete(
+  //       Uri.parse('https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
+  //       headers: {'Authorization': 'Bearer ${widget.tokenid}'},
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       print('deleted successfully');
+  //       // Update the state in HomePage
+  //       final appState = Provider.of<AppState>(context, listen: false);
+  //       await appState.refreshData();
+  //
+  //       // Hide the transcription result and show the homepage
+  //       setState(() {
+  //         _showTranscriptionResult = false;
+  //       });
+  //
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Transcription deleted')),
+  //       );
+  //     } else {
+  //       throw Exception('Failed to delete transcription');
+  //     }
+  //   } catch (e) {
+  //     print('Error: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error deleting transcription: $e')),
+  //     );
+  //   }
+  // }
+
+
+  Future<void> _confirmDeleteTranscription(String id1) async {
+    print('click on delete');
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user can tap outside to dismiss the dialog
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero, // No border radius
+          ),
+          title: Text(
+            'Confirm Delete',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to delete this note?',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          actions: <Widget>[
+            SizedBox(height: 20.0),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 5.0),
+              child: TextButton(
+                child: Text('Cancel'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white, // Text color
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Dismiss the dialog
+                },
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.ButtonColor2,
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 5.0),
+              child: TextButton(
+                child: Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Dismiss the dialog
+                  _deleteTranscription(id1); // Perform deletion
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteTranscription(String transcriptionId) async {
+    print('Deleting transcription with ID: $transcriptionId'); // Debug log
+
+    try {
+      final response = await http.delete(
+        Uri.parse(
+            'https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
+        headers: {'Authorization': 'Bearer ${widget.tokenid}'},
+      );
+
+      if (response.statusCode == 200) {
+        print('deleted successfully');
+        Navigator.of(context).pop();
+        setState(() {
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Transcription deleted'),
+          ),
+        );
+      } else if (response.statusCode == 400) {
+        print('Bad Request');
+        _showErrorDialog(
+            context, 'Failed to delete transcription due to Bad Request');
+      } else if (response.statusCode == 404) {
+        print('Transcription not found');
+        _showErrorDialog(
+            context, 'Failed to delete due to Transcription not found');
+      } else if (response.statusCode == 500) {
+        print('Internal server error ');
+        _showErrorDialog(context,
+            'Failed to delete transcription due to Internal server error ');
+      } else {
+        _showErrorDialog(context, 'Failed to delete transcription');
+        throw Exception('Failed to delete transcription');
+      }
+    } catch (e) {
+      // Handle the error
+      print('Error: $e');
+    }
+  }
+  void _showErrorDialog(BuildContext context, String errorMessage) {
+    var mq = MediaQuery.of(context).size;
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dialog from closing on outside tap
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+                8.0), // Square shape with slightly rounded corners
+          ),
+          title: const Text('Oops! an error occured',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              )),
+          content: Text(errorMessage,
+              style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: mq.width * 0.04,
+                color: Colors.black,
+              )), // Display error message dynamically
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ButtonStyle(
+                backgroundColor:
+                WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(
+                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   void checkInput({required bool isEmptyInput}) {
     if (isEmptyInput) {
@@ -80,9 +274,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       print("Input is provided.");
     }
   }
-  void _handleBack() {
-    Navigator.pop(context, 'show_popup'); // Pass a specific result
-  }
+
   void _shareText() {
     try {
       Share.share(_textController.text);
@@ -91,18 +283,24 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       print('Error sharing text: $e');
     }
   }
-  Future<void> _deleteTranscription(BuildContext context) async {
-    widget.onDelete!(); // Perform the delete operation
-    Navigator.pop(context, 'Transcription deleted');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Transcription deleted')),
-    );}
+
+
+  // Future<void> _deleteTranscription(BuildContext context) async {
+  //   widget.onDelete!(); // Perform the delete operation
+  //   Navigator.pop(context, 'Transcription deleted');
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text('Transcription deleted')),
+  //   );}
+
+
+
   void _copyText() {
     Clipboard.setData(ClipboardData(text: _textController.text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Text copied to clipboard')),
     );
   }
+
   Future<void> _sendTranscriptionToBackend() async {
     final String apiUrl = 'https://dev-oscar.merakilearn.org/api/v1/transcriptions/add';
     try {
@@ -115,35 +313,25 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         body: jsonEncode(<String, String>{
           'transcribedText': _textController.text,
           'userTextInput': _notFormattedText.text,
-          'title': _text_titleController.text ,// Added to check....
+          'title': _text_titleController.text,
         }),
       );
+
       if (response.statusCode == 201) {
         print('Transcription successfully sent: ${response.statusCode}');
-        final headerDate = response.headers['date'];
-        if (responseDate != null) {
-          final formattedDate = _formatDate(responseDate!);
-          setState(() {
-            // Store the date to display it
-            var displayedDate = formattedDate;
-          });
-        } else {
-          print('Date header not found');
-        }
 
+        // Refresh the transcriptions in AppState
+        final appState = Provider.of<AppState>(context, listen: false);
+        await appState.refreshData();
 
-        Navigator.pop(context, 'Saved transcription');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved transcription')),
-        );
-      }
-      else if (response.statusCode == 401) {
-        print(' Invalid token: ${response.statusCode}');
+        // Navigate back to the HomePage
+        appState.navigateToHomePage();
+      } else if (response.statusCode == 401) {
+        print('Invalid token: ${response.statusCode}');
         // Show AlertDialog
         showDialog(
           context: context,
-          barrierDismissible:
-          false, // Prevent dialog from closing on tap outside
+          barrierDismissible: false, // Prevent dialog from closing on tap outside
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Session Expired'),
@@ -154,22 +342,27 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                     Navigator.of(context).pop(); // Close the dialog
                     // Sign out and clear session
                     await GoogleSignIn().signOut();
-                    SharedPreferences prefs =
-                    await SharedPreferences.getInstance();
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
                     await prefs.remove('isLoggedIn');
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (context) => LoginView()),
                           (route) => false,
                     );
                   },
-                  child: Text('OK'),),],);},);}
-      else {
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
         print('Failed to send transcription: ${response.statusCode}');
       }
     } catch (e) {
       print('Error during sending transcription: $e');
     }
   }
+
   @override
   void didUpdateWidget(covariant TranscribeResult oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -177,123 +370,127 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       _textController.text = widget.transcribedText;
     }
   }
-  String _formatDate(String dateString) {
-    final date = DateTime.parse(dateString).toLocal();
-    return DateFormat('MMM dd, yyyy').format(date); // Formats to Jan 10, 2025
-  }
+
 
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
     bool isInputEmpty = widget.unformattedText != 'Listening for speech...' ;
-    // final formattedDate =
-    // _formatDate(response['createdAt']);
-    // final formattedDate =
-    // _formatDate(transcribedText['createdAt']);
+    final appState = Provider.of<AppState>(context);
     if (isInputEmpty){
-      return Scaffold(
-        backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-        appBar: AppBar(
-          scrolledUnderElevation: 0.0,
-          automaticallyImplyLeading: false,
-          elevation: 0,
-          leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
-              onPressed: _handleBack),
+      return WillPopScope(
+        onWillPop: () async {
+          Provider.of<AppState>(context, listen: false).navigateToHomePage();
+          return false; // Prevent default back navigation
+        },
+        child: Scaffold(
           backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-          bottom: TabBar(
-            controller: _tabController,
-            indicatorColor: const Color(0xFF51A09B), // Custom indicator color
-            indicatorWeight: 4.0,
-            indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0), // Padding
-            labelColor: const Color(0xFF51A09B), // Active tab text color
-            unselectedLabelColor:
-            const Color(0xFF6E6E6E), // Inactive tab text color
-            labelStyle: GoogleFonts.karla(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            unselectedLabelStyle: GoogleFonts.karla(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            tabs: [
-              Tab(
-                text: "Polished Text",
+          appBar: AppBar(
+            scrolledUnderElevation: 0.0,
+            automaticallyImplyLeading: false,
+            elevation: 0,
+            leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
+                onPressed: (){
+                  appState.navigateToHomePage();
+                }),
+            backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+            bottom: TabBar(
+              controller: _tabController,
+              indicatorColor: const Color(0xFF51A09B), // Custom indicator color
+              indicatorWeight: 4.0,
+              indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0), // Padding
+              labelColor: const Color(0xFF51A09B), // Active tab text color
+              unselectedLabelColor:
+              const Color(0xFF6E6E6E), // Inactive tab text color
+              labelStyle: GoogleFonts.karla(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
-              Tab(text: "Original Text"),
-            ],
-          ),),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            SingleChildScrollView(
-              child: Padding(
+              unselectedLabelStyle: GoogleFonts.karla(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+              tabs: [
+                Tab(
+                  text: "Polished Text",
+                ),
+                Tab(text: "Original Text"),
+              ],
+            ),),
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _text_titleController.text,
+                        style: GoogleFonts.spectral(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      if (displayedDate != null)
+                        Text(
+                          'Date: $displayedDate',
+                          style: GoogleFonts.spectral(fontSize: 16),
+                        ),
+                      SizedBox(height: 10,),
+                      Text(
+                        // _textController.text,
+                        widget.transcribedText == null
+                            ? 'No formatted text available'
+                            : widget.transcribedText!,
+                        style: GoogleFonts.karla(
+                          fontSize: 16,
+                          color: const Color(0xFF6E6E6E),
+                          fontWeight: FontWeight.w400,),),],),),
+              ),
+              Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _text_titleController.text,
-                      style: GoogleFonts.spectral(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+                    Container(
+                      height: 43,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          color: Colors.white),
+                      child: Center(
+                        child: Text(
+                          "Unprocessed text as spoken to Oscar",
+                          style: TextStyle(
+                              color: const Color(0xFF4A4A4A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
                     SizedBox(
-                      height: 5,
+                      height: 20,
                     ),
-                    if (displayedDate != null)
-                      Text(
-                        'Date: $displayedDate',
-                        style: GoogleFonts.spectral(fontSize: 16),
-                      ),
-                    SizedBox(height: 10,),
                     Text(
-                      // _textController.text,
-                      widget.transcribedText == null
-                          ? 'No formatted text available'
-                          : widget.transcribedText!,
+                      widget.unformattedText == null
+                          ? 'No original text is provided'
+                          : widget.unformattedText!,
                       style: GoogleFonts.karla(
                         fontSize: 16,
                         color: const Color(0xFF6E6E6E),
-                        fontWeight: FontWeight.w400,),),],),),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 43,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        color: Colors.white),
-                    child: Center(
-                      child: Text(
-                        "Unprocessed text as spoken to Oscar",
-                        style: TextStyle(
-                            color: const Color(0xFF4A4A4A),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    widget.unformattedText == null
-                        ? 'No original text is provided'
-                        : widget.unformattedText!,
-                    style: GoogleFonts.karla(
-                      fontSize: 16,
-                      color: const Color(0xFF6E6E6E),
-                      fontWeight: FontWeight.w400,),),],),),],),
-        bottomSheet: _buildFullInputBottomSheet(context),
+                        fontWeight: FontWeight.w400,),),],),),],),
+          bottomSheet: _buildFullInputBottomSheet(context),
+        ),
       );
     }else{
       var mq = MediaQuery.of(context).size;
+      final appState = Provider.of<AppState>(context);
+
       return Scaffold(
         backgroundColor:Color(0xFFEEF6F5),
         appBar: AppBar(
@@ -307,7 +504,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                   size: 20,
                 ),
                 onPressed: () {
-                  Navigator.pop(context);
+                  appState.navigateToHomePage();
+
                 },
               ),],),),
         body: Center(
@@ -352,20 +550,13 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                       ),
                       iconSize: mq.height * 1 / 18,
                       onPressed: () async {
-                        // Add your microphone handling logic here
-                        print("Microphone button pressed");
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RecordView(
-                              onRecordingComplete: (String recording) {
-                                // Handle recording completion here
-                              },
-                              tokenid: widget.tokenid,),),);},),),),),),],),
+
+                      },),),),),),],),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       );
     }
   }
+
   Widget _buildFullInputBottomSheet(BuildContext context) {
     var mq = MediaQuery.of(context).size;
     return SafeArea(
@@ -402,14 +593,20 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         icon: Icon(Icons.delete_outline_rounded,
                             color: Colors.red),
                         onPressed: () {
-                          _deleteTranscription(context);
+                          _confirmDeleteTranscription(widget.id1);
+
+                          // _deleteTranscription(widget.transcriptionId);
                           // _handleDeleteTranscription();
-                          Navigator.pop(context);
+                          // Navigator.pop(context);
                         },
-                        iconSize: 20,),],),),),
+                        iconSize: 20,),
+                    ],),),),
               SafeArea(
                 child: GestureDetector(
-                  onTap: _sendTranscriptionToBackend,
+                  onTap: () async {
+                    await _sendTranscriptionToBackend();
+                    Provider.of<AppState>(context, listen: false).navigateToHomePage();
+                  },
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 20,
@@ -442,7 +639,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     _notFormattedText.dispose();
     _text_titleController.dispose();
     _tabController.dispose();
-    // _connectivitySubscription?.cancel();
+    // _connectivitySubscription.cancel();
     // _connectivitySubscription = null;
     super.dispose();
   }

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import '../../../core/constants/app_colors.dart';
 
 class LoginView extends StatefulWidget {
@@ -88,7 +88,7 @@ class _LoginViewState extends State<LoginView> {
                 tokenid: globalToken5!,
                 profileName: result.displayName ?? "User's Name",
                 profilePicUrl: result.photoUrl ?? "",
-                transcribedata: '',
+                transcribedata: '',controller: ManualSttController(context),
               ),
             ),
           );

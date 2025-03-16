@@ -1,40 +1,41 @@
-import 'package:oscar_stt/core/viewmodels/splash_viewmodel.dart';
-import 'package:oscar_stt/ui/views/auth/login_view.dart';
+// import 'package:oscar_stt/core/viewmodels/splash_viewmodel.dart';
+// import 'package:oscar_stt/ui/views/auth/login_view.dart';
 import 'package:flutter/material.dart';
-import 'package:oscar_stt/ui/views/home/home_view.dart';
+import 'package:manual_speech_to_text/manual_speech_to_text.dart';
+import 'package:oscar_stt/ui/views/CombinedScreenProvider.dart';
+// import 'package:oscar_stt/ui/views/home/home_view.dart';
 import 'package:provider/provider.dart';
 import 'core/viewmodels/auth_viewmodel.dart';
+import 'core/viewmodels/splash_viewmodel.dart';
 import 'ui/views/splash/splash_view.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  // final ManualSttController sttController = ManualSttController();
+
+
+  MyApp({super.key});
+
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => SplashViewModel()),
-        ChangeNotifierProvider(create: (_) => LoginViewModel()),
+        providers: [
+          ChangeNotifierProvider(create: (_) => SplashViewModel()),
+          ChangeNotifierProvider(create: (_) => LoginViewModel()),
+          ChangeNotifierProvider(create: (_) => AppState(tokenid: '')),
+          // ChangeNotifierProvider(create: (_) => CombinedScreenProvider()), // Add this
 
-      ],
-      child: MaterialApp(
-        title: 'Oscar',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        initialRoute: '/',
-        // routes: {
-        //   '/': (context) => SplashView(),
-        //   '/auth': (context) => LoginView(),
-        //   // '/record': (context) => RecordView(),
-        //   // '/profile': (context) => ProfileView(),
-        // },
+        ],
+        child: MaterialApp(
+          title: 'Oscar',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          initialRoute: '/',
+          home:          SplashScreen(),
 
-        // home: HomePage(transcribedata: '', profileName: '', profilePicUrl: '', tokenid: '',)
-        home: SplashScreen(),
-// home: LoginView(),
-      )
+        )
     );
   }
 }
