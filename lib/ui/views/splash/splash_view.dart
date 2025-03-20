@@ -28,11 +28,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
 
   Future<void> _checkSessionAndNavigate() async {
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: 3)); // Splash delay
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? isLoggedIn = prefs.getBool(KEYLOGIN);
-    String? tokenid = prefs.getString('tokenid');
+    String? tokenid = prefs.getString('tokenid'); // Retrieve token
+
+    // If the user is not logged in or token doesn't exist, navigate to LoginView directly
     if (isLoggedIn == null || !isLoggedIn || tokenid == null) {
       Navigator.pushReplacement(
         context,
@@ -41,9 +43,11 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
 
+    // If the token is expired
     if (_isTokenExpired(tokenid)) {
-      _showSessionExpiredDialog(); 
+      _showSessionExpiredDialog(); // Show dialog if token is expired or expiring soon
     } else {
+      // Navigate to HomePage if everything is valid
       String profileName = prefs.getString('profileName') ?? '';
       String profilePicUrl = prefs.getString('profilePicUrl') ?? '';
       String transcribedata = prefs.getString('transcribedata') ?? '';
@@ -67,23 +71,31 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
+
+
+
+  // Function to check if the token is expired
   bool _isTokenExpired(String token) {
     try {
-      
+      // Decode the token to extract the expiry time
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
       int expiryTimestamp = decodedToken['exp'] ?? 0;
 
+      // Check if the expiry timestamp is within the next 24 hours (1440 minutes)
       DateTime expiryDate = DateTime.fromMillisecondsSinceEpoch(expiryTimestamp * 1000);
       DateTime currentDate = DateTime.now();
       Duration remainingDuration = expiryDate.difference(currentDate);
 
+      // Check if remaining duration is greater than 24 hours
       return remainingDuration.isNegative || remainingDuration.inMinutes <= 1440;
     } catch (e) {
       debugPrint("Error decoding token: $e");
-      return true; 
+      return true; // Treat invalid tokens as expired
+      // return false;
     }
   }
 
+  //Function to show session expired alert dialog
   void _showSessionExpiredDialog() {
     showDialog(
         context: context,
@@ -100,13 +112,13 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Container(
                 // width: 5,
                 decoration: BoxDecoration(
-                  color: AppColors.ButtonColor2,
+                  color: AppColors.ButtonColor2, // Replace with your desired color
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0), // Adjust for size
                 child: Text(
                   "OK",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.white), // Text color
                 ),
               ),)
           ],
@@ -119,15 +131,6 @@ class _SplashScreenState extends State<SplashScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageSize = screenWidth * 0.75;
 
-<<<<<<< HEAD
-    return Scaffold(
-      backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-      body: Center(
-        child: SvgPicture.asset(
-          'assets1/logo.svg',
-          width: 116,
-          height: 120,
-=======
     return
       Scaffold(
         backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
@@ -137,7 +140,6 @@ class _SplashScreenState extends State<SplashScreen> {
             width: imageSize,
             height: imageSize * 0.75,
           ),
->>>>>>> transcription_list
         ),
       );
   }

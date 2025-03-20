@@ -1,3 +1,6 @@
+
+
+
 import 'package:flutter/material.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import 'package:oscar_stt/ui/views/record/record_view.dart';
@@ -60,7 +63,7 @@ class CombinedPage extends StatelessWidget {
               onDelete: () {
                 // Handle delete logic if needed
               },
-              title_text: appState.titleText, controller: controller, id1: '', transcriptionId: '',
+              title_text: appState.titleText, controller: controller, transcriptionId: '',
             ),
             // TranscriptionsPage(tokenid: tokenid),
           ),

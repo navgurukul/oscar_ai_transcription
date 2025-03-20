@@ -23,17 +23,11 @@ class TranscribeResult extends StatefulWidget {
   final String unformattedText;
   final VoidCallback? onDelete;
   final String tokenid;
-<<<<<<< HEAD
-  final bool isEmptyInput;
-
-=======
   final ManualSttController controller;
   final String transcriptionId;
-  final String id1;
 
   // final bool isEmptyInput;
   // final date;
->>>>>>> transcription_list
 
 
   const TranscribeResult(
@@ -44,14 +38,8 @@ class TranscribeResult extends StatefulWidget {
         // required this.isEmptyInput,
         required this.transcriptionId,
         required this.unformattedText,
-<<<<<<< HEAD
-        required this.title_text,
-        
-=======
         required this.title_text, required this.controller,
-        required this.id1,
         // required this.date
->>>>>>> transcription_list
       }) : super(key: key);
 
   @override
@@ -75,11 +63,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     _notFormattedText = TextEditingController(text: widget.unformattedText);
     _text_titleController = TextEditingController(text: widget.title_text);
     _tabController = TabController(length: 2, vsync: this);
-<<<<<<< HEAD
-    
-    super.initState();
-=======
->>>>>>> transcription_list
     _connectivityStream = _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
   }
@@ -88,12 +71,9 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
-<<<<<<< HEAD
-=======
         widget.controller.stopStt();
 
         // Navigate to the NoInternetScreen
->>>>>>> transcription_list
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => NoInternetScreen(),
         ));
@@ -133,113 +113,31 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   //   }
   // }
 
-
-  Future<void> _confirmDeleteTranscription(String id1) async {
-    print('click on delete');
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: true, // user can tap outside to dismiss the dialog
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero, // No border radius
-          ),
-          title: Text(
-            'Confirm Delete',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(
-            'Are you sure you want to delete this note?',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-            ),
-          ),
-          actions: <Widget>[
-            SizedBox(height: 20.0),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-              padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 5.0),
-              child: TextButton(
-                child: Text('Cancel'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white, // Text color
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Dismiss the dialog
-                },
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.ButtonColor2,
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-              padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 5.0),
-              child: TextButton(
-                child: Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Dismiss the dialog
-                  _deleteTranscription(id1); // Perform deletion
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _deleteTranscription(String transcriptionId) async {
-    print('Deleting transcription with ID: $transcriptionId'); // Debug log
-
+  Future<void> _deleteTranscription(String transcriptionId) async {
     try {
       final response = await http.delete(
-        Uri.parse(
-            'https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
+        Uri.parse('https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
         headers: {'Authorization': 'Bearer ${widget.tokenid}'},
       );
 
       if (response.statusCode == 200) {
         print('deleted successfully');
-        Navigator.of(context).pop();
-        setState(() {
-        });
-
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Transcription deleted'),
-          ),
+          SnackBar(content: Text('Transcription deleted')),
         );
-      } else if (response.statusCode == 400) {
-        print('Bad Request');
-        _showErrorDialog(
-            context, 'Failed to delete transcription due to Bad Request');
-      } else if (response.statusCode == 404) {
-        print('Transcription not found');
-        _showErrorDialog(
-            context, 'Failed to delete due to Transcription not found');
-      } else if (response.statusCode == 500) {
-        print('Internal server error ');
-        _showErrorDialog(context,
-            'Failed to delete transcription due to Internal server error ');
+        Navigator.pop(context); // Navigate back to homepage
       } else {
-        _showErrorDialog(context, 'Failed to delete transcription');
         throw Exception('Failed to delete transcription');
       }
     } catch (e) {
-      // Handle the error
       print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting transcription: $e')),
+      );
     }
   }
+
+
   void _showErrorDialog(BuildContext context, String errorMessage) {
     var mq = MediaQuery.of(context).size;
     showDialog(
@@ -292,13 +190,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       print("Input is provided.");
     }
   }
-<<<<<<< HEAD
-  void _handleBack() {
-    Navigator.pop(context, 'show_popup');
-  }
-=======
 
->>>>>>> transcription_list
   void _shareText() {
     try {
       Share.share(_textController.text);
@@ -307,14 +199,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       print('Error sharing text: $e');
     }
   }
-<<<<<<< HEAD
-  Future<void> _deleteTranscription(BuildContext context) async {
-    widget.onDelete!();
-    Navigator.pop(context, 'Transcription deleted');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Transcription deleted')),
-    );}
-=======
 
 
   // Future<void> _deleteTranscription(BuildContext context) async {
@@ -326,7 +210,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
 
 
 
->>>>>>> transcription_list
   void _copyText() {
     Clipboard.setData(ClipboardData(text: _textController.text));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -346,33 +229,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         body: jsonEncode(<String, String>{
           'transcribedText': _textController.text,
           'userTextInput': _notFormattedText.text,
-<<<<<<< HEAD
-          'title': _text_titleController.text ,
-        }),
-      );
-    if (response.statusCode == 201) {
-        print('Transcription successfully sent: ${response.statusCode}');
-        final headerDate = response.headers['date'];
-        if (responseDate != null) {
-          displayedDate = _formatDate(responseDate!);
-          setState(() {});
-        }
-        else {
-          print('Date header not found');
-        }
-
-        Navigator.pop(context, 'Saved transcription');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved transcription')),
-        );
-      }
-      else if (response.statusCode == 401) {
-        print(' Invalid token: ${response.statusCode}');
-        showDialog(
-          context: context,
-          barrierDismissible:
-          false,
-=======
           'title': _text_titleController.text,
         }),
       );
@@ -392,7 +248,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         showDialog(
           context: context,
           barrierDismissible: false, // Prevent dialog from closing on tap outside
->>>>>>> transcription_list
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Session Expired'),
@@ -400,8 +255,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
               actions: [
                 TextButton(
                   onPressed: () async {
-                    Navigator.of(context).pop();
-          
+                    Navigator.of(context).pop(); // Close the dialog
+                    // Sign out and clear session
                     await GoogleSignIn().signOut();
                     SharedPreferences prefs = await SharedPreferences.getInstance();
                     await prefs.remove('isLoggedIn');
@@ -431,27 +286,32 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       _textController.text = widget.transcribedText;
     }
   }
-<<<<<<< HEAD
   String _formatDate(String dateString) {
     final date = DateTime.parse(dateString).toLocal();
-    return DateFormat('MMM dd, yyyy').format(date);
+    return DateFormat('MMM dd, yyyy').format(date); // Formats to Jan 10, 2025
   }
-=======
-
->>>>>>> transcription_list
 
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
-<<<<<<< HEAD
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('MMMM dd, yyyy').format(now);
-    bool isInputEmpty = widget.unformattedText != '' ;
-=======
-    bool isInputEmpty = widget.unformattedText != 'Listening for speech...' ;
+    // bool isInputEmpty = widget.unformattedText != widget.unformattedText.trim().isEmpty;
+
+    bool isInputEmpty = widget.unformattedText.trim().isEmpty; // Corrected condition
+
+    // bool isInputEmpty = widget.unformattedText != 'Listening for speech...' ;
     final appState = Provider.of<AppState>(context);
->>>>>>> transcription_list
-    if (isInputEmpty){
+
+    print("Unformatted Text: '${widget.unformattedText}'");
+    print("Is Input Empty: $isInputEmpty");
+
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   appState.navigateToRecordingPage(); // Navigate to RecordView
+    // });
+    // final formattedDate =
+    // _formatDate(response['createdAt']);
+    // final formattedDate =
+    // _formatDate(transcribedText['createdAt']);
+    if (!isInputEmpty){
       return WillPopScope(
         onWillPop: () async {
           Provider.of<AppState>(context, listen: false).navigateToHomePage();
@@ -459,27 +319,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         },
         child: Scaffold(
           backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-<<<<<<< HEAD
-          bottom: TabBar(
-            controller: _tabController,
-            indicatorColor: const Color(0xFF51A09B),
-            indicatorWeight: 4.0,
-            indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0),
-            labelColor: const Color(0xFF51A09B),
-            unselectedLabelColor:
-            const Color(0xFF6E6E6E),
-            labelStyle: GoogleFonts.karla(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            unselectedLabelStyle: GoogleFonts.karla(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            tabs: [
-              Tab(
-                text: "Polished Text",
-=======
           appBar: AppBar(
             scrolledUnderElevation: 0.0,
             automaticallyImplyLeading: false,
@@ -501,7 +340,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
               labelStyle: GoogleFonts.karla(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
->>>>>>> transcription_list
               ),
               unselectedLabelStyle: GoogleFonts.karla(
                 fontSize: 16,
@@ -573,15 +411,9 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                       height: 20,
                     ),
                     Text(
-<<<<<<< HEAD
-                      widget.transcribedText == null
-                          ? 'No formatted text available'
-                          : widget.transcribedText!,
-=======
                       widget.unformattedText == null
                           ? 'No original text is provided'
                           : widget.unformattedText!,
->>>>>>> transcription_list
                       style: GoogleFonts.karla(
                         fontSize: 16,
                         color: const Color(0xFF6E6E6E),
@@ -628,6 +460,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
                       color: const Color(0xFF4D4D4D)),),),],),),
+
         floatingActionButton: Stack(
           alignment: Alignment.center,
           children: <Widget>[
@@ -646,30 +479,18 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                   child: Center(
                     child: IconButton(
                       icon: Icon(
-                        Icons.mic,
-                        color: Colors.white,
-                        size: 32.0,
+                        Icons.mic, // Microphone icon
+                        color: Colors.white, // Icon color
+                        size: 32.0, // Icon size
                       ),
                       iconSize: mq.height * 1 / 18,
                       onPressed: () async {
-<<<<<<< HEAD
-                        print("Microphone button pressed");
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RecordView(
-                              onRecordingComplete: (String recording) {
-                              },
-                              tokenid: widget.tokenid,),),);},),),),),),],),
-                              floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-=======
-
+                        appState.navigateToTranscriptionPage();
+                        Provider.of<AppState>(context, listen: false).navigateToRecordingPage(ManualSttController(context));
                       },),),),),),],),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
->>>>>>> transcription_list
       );
     }
-    
   }
 
   Widget _buildFullInputBottomSheet(BuildContext context) {
@@ -708,16 +529,13 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         icon: Icon(Icons.delete_outline_rounded,
                             color: Colors.red),
                         onPressed: () {
-<<<<<<< HEAD
-                          _deleteTranscription(context);
-                          Navigator.pop(context);
-=======
-                          _confirmDeleteTranscription(widget.id1);
+                          Provider.of<AppState>(context, listen: false).navigateToHomePage();
+                          // appState.navigateToHomePage();
 
+                          // Navigator.of(context).pop();
                           // _deleteTranscription(widget.transcriptionId);
                           // _handleDeleteTranscription();
                           // Navigator.pop(context);
->>>>>>> transcription_list
                         },
                         iconSize: 20,),
                     ],),),),
@@ -746,7 +564,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         ),
                         SizedBox(
                             width:
-                            mq.width * 0.02),
+                            mq.width * 0.02), // Space between icon and text
                         Text(
                           "Save",
                           style: TextStyle(
@@ -759,11 +577,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     _notFormattedText.dispose();
     _text_titleController.dispose();
     _tabController.dispose();
-<<<<<<< HEAD
-=======
     // _connectivitySubscription.cancel();
     // _connectivitySubscription = null;
->>>>>>> transcription_list
     super.dispose();
   }
 }

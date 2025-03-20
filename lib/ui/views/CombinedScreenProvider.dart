@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/viewmodels/api_service.dart';
 import 'nointernet.dart';
@@ -26,7 +27,8 @@ class AppState with ChangeNotifier {
   List<Map<String, dynamic>> _transcriptions = [];
 
   final String tokenid;
-  AppState({required this.tokenid});
+  final ManualSttController controller;
+  AppState({required this.tokenid,required this.controller});
 
 
   bool get showHomePage => _showHomePage;
@@ -41,12 +43,15 @@ class AppState with ChangeNotifier {
   String get unformattedText => _unformattedText;
   String get titleText => _titleText;
 
-  void navigateToRecordingPage() {
+
+  void navigateToRecordingPage(ManualSttController controller) {
+    print("Navigating to Recording Page");
     _showHomePage = false;
     _showRecordingPage = true;
     _showTranscriptionPage = false;
     notifyListeners();
   }
+
 
   void navigateToTranscriptionPage() {
     _showHomePage = false;
@@ -82,6 +87,10 @@ class AppState with ChangeNotifier {
     _finalRecognizedText = text;
     notifyListeners();
   }
+  void clearFinalRecognizedText() {
+    _finalRecognizedText = ''; // Clear the final recognized text
+    notifyListeners(); // Notify listeners to update the UI
+  }
 
   void updateSoundLevel(double level) {
     _soundLevel = level;
@@ -102,3 +111,54 @@ class AppState with ChangeNotifier {
   }
 }
 
+/////////////////////
+// Future<void> navigateToRecordingPage({bool startRecording = false}) async {
+//   var status = await Permission.microphone.status;
+//   if (!status.isGranted) {
+//     status = await Permission.microphone.request();
+//   }
+//   if (status.isGranted) {
+//     _showHomePage = false;
+//     _showRecordingPage = true; // Show recording page
+//     _showTranscriptionPage = false;
+//     notifyListeners(); // Notify listeners to update the UI
+//
+//     if (startRecording) {
+//       // Start recording after navigating to the recording page
+//       WidgetsBinding.instance.addPostFrameCallback((_) {
+//         if (_currentState != ManualSttState.listening) {
+//           controller.startStt(); // Start recording
+//         }
+//       });
+//     }
+//   } else {
+//     print("Microphone permission denied");
+//   }
+// }
+/////////////////////////
+
+// Future<void> navigateToRecordingPage({bool startRecording = false}) async {
+//   var status = await Permission.microphone.status;
+//   if (!status.isGranted) {
+//     status = await Permission.microphone.request();
+//   }
+//   if (status.isGranted) {
+//     _showHomePage = false;
+//     _showRecordingPage = true;
+//     _showTranscriptionPage = false;
+//     notifyListeners();
+//
+//     if (startRecording) {
+//       // Start recording after navigating to the recording page
+//       WidgetsBinding.instance.addPostFrameCallback((_) {
+//         if (_currentState != ManualSttState.listening) {
+//           // Assuming you have access to the controller here
+//           // If not, you need to pass the controller to AppState
+//           controller.startStt(); // Start recording
+//         }
+//       });
+//     }
+//   } else {
+//     print("Microphone permission denied");
+//   }
+// }
