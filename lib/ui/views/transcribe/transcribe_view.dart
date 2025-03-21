@@ -235,9 +235,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                     SizedBox(
                       height: 5,
                     ),
-                    if (displayedDate != null)
                       Text(
-                        'Date: $displayedDate',
+                        formattedDate,
                         style: GoogleFonts.spectral(fontSize: 16),
                       ),
                     SizedBox(height: 10,),
