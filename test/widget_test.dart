@@ -10,8 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oscar_stt/app.dart';
 
 import 'package:oscar_stt/main.dart';
-import 'package:oscar_stt/testingpac.dart';
-import 'package:oscar_stt/ui/combined_poc.dart';
+// import 'package:oscar_stt/testingpac.dart';
+// import 'package:oscar_stt/ui/combined_poc.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

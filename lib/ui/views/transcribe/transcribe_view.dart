@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
+import 'package:oscar_stt/ui/views/record/record_view.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,10 +24,10 @@ class TranscribeResult extends StatefulWidget {
   final String unformattedText;
   final VoidCallback? onDelete;
   final String tokenid;
-  final ManualSttController controller;
-  final String transcriptionId;
+  // final ManualSttController controller;
+  // final String transcriptionId;
 
-  // final bool isEmptyInput;
+  final bool isEmptyInput;
   // final date;
 
 
@@ -35,10 +36,11 @@ class TranscribeResult extends StatefulWidget {
         required this.transcribedText,
         this.onDelete,
         required this.tokenid,
-        // required this.isEmptyInput,
-        required this.transcriptionId,
+        required this.isEmptyInput,
+        // required this.transcriptionId,
         required this.unformattedText,
-        required this.title_text, required this.controller,
+        required this.title_text, 
+        // required this.controller
         // required this.date
       }) : super(key: key);
 
@@ -71,7 +73,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
-        widget.controller.stopStt();
+        // widget.controller.stopStt();
 
         // Navigate to the NoInternetScreen
         Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -112,30 +114,33 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   //     );
   //   }
   // }
+  
+  
 
-  Future<void> _deleteTranscription(String transcriptionId) async {
-    try {
-      final response = await http.delete(
-        Uri.parse('https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
-        headers: {'Authorization': 'Bearer ${widget.tokenid}'},
-      );
 
-      if (response.statusCode == 200) {
-        print('deleted successfully');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Transcription deleted')),
-        );
-        Navigator.pop(context); // Navigate back to homepage
-      } else {
-        throw Exception('Failed to delete transcription');
-      }
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting transcription: $e')),
-      );
-    }
-  }
+  // Future<void> _deleteTranscription(String transcriptionId) async {
+  //   try {
+  //     final response = await http.delete(
+  //       Uri.parse('https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
+  //       headers: {'Authorization': 'Bearer ${widget.tokenid}'},
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       print('deleted successfully');
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Transcription deleted')),
+  //       );
+  //       Navigator.pop(context); // Navigate back to homepage
+  //     } else {
+  //       throw Exception('Failed to delete transcription');
+  //     }
+  //   } catch (e) {
+  //     print('Error: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error deleting transcription: $e')),
+  //     );
+  //   }
+  // }
 
 
   void _showErrorDialog(BuildContext context, String errorMessage) {
@@ -201,12 +206,12 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   }
 
 
-  // Future<void> _deleteTranscription(BuildContext context) async {
-  //   widget.onDelete!(); // Perform the delete operation
-  //   Navigator.pop(context, 'Transcription deleted');
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(content: Text('Transcription deleted')),
-  //   );}
+  Future<void> _deleteTranscription(BuildContext context) async {
+    widget.onDelete!(); // Perform the delete operation
+    Navigator.pop(context, 'Transcription deleted');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Transcription deleted')),
+    );}
 
 
 
@@ -236,12 +241,25 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       if (response.statusCode == 201) {
         print('Transcription successfully sent: ${response.statusCode}');
 
-        // Refresh the transcriptions in AppState
-        final appState = Provider.of<AppState>(context, listen: false);
-        await appState.refreshData();
+        // // Refresh the transcriptions in AppState
+        // final appState = Provider.of<AppState>(context, listen: false);
+        // await appState.refreshData();
 
-        // Navigate back to the HomePage
-        appState.navigateToHomePage();
+        // // Navigate back to the HomePage
+        // appState.navigateToHomePage();
+        final headerDate = response.headers['date'];
+        if (responseDate != null) {
+          displayedDate = _formatDate(responseDate!);
+          setState(() {});
+        }
+        else {
+          print('Date header not found');
+        }
+
+        Navigator.pop(context, 'Saved transcription');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Saved transcription')),
+        );
       } else if (response.statusCode == 401) {
         print('Invalid token: ${response.statusCode}');
         // Show AlertDialog
@@ -291,15 +309,24 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     return DateFormat('MMM dd, yyyy').format(date); // Formats to Jan 10, 2025
   }
 
+  
+  void _handleBack() {
+    Navigator.pop(context, 'show_popup');
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('MMMM dd, yyyy').format(now);
     // bool isInputEmpty = widget.unformattedText != widget.unformattedText.trim().isEmpty;
-
-    bool isInputEmpty = widget.unformattedText.trim().isEmpty; // Corrected condition
+    bool isInputEmpty = widget.unformattedText as bool ;
+    // bool isInputEmpty = widget.unformattedText.trim().isEmpty; // Corrected condition
 
     // bool isInputEmpty = widget.unformattedText != 'Listening for speech...' ;
-    final appState = Provider.of<AppState>(context);
+    // final appState = Provider.of<AppState>(context);
 
     print("Unformatted Text: '${widget.unformattedText}'");
     print("Is Input Empty: $isInputEmpty");
@@ -312,12 +339,14 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     // final formattedDate =
     // _formatDate(transcribedText['createdAt']);
     if (!isInputEmpty){
-      return WillPopScope(
-        onWillPop: () async {
-          Provider.of<AppState>(context, listen: false).navigateToHomePage();
-          return false; // Prevent default back navigation
-        },
-        child: Scaffold(
+      return 
+      // WillPopScope(
+        // onWillPop: () async {
+        //   Provider.of<AppState>(context, listen: false).navigateToHomePage();
+        //   return false; // Prevent default back navigation
+        // },
+        // child: 
+        Scaffold(
           backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
           appBar: AppBar(
             scrolledUnderElevation: 0.0,
@@ -325,9 +354,11 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
             elevation: 0,
             leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
-                onPressed: (){
-                  appState.navigateToHomePage();
-                }),
+                onPressed:  _handleBack,
+                // (){
+                //   appState.navigateToHomePage();
+                // }
+                ),
             backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
             bottom: TabBar(
               controller: _tabController,
@@ -410,6 +441,11 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                     SizedBox(
                       height: 20,
                     ),
+                      Text(
+                        formattedDate,
+                        style: GoogleFonts.spectral(fontSize: 16),
+                      ),
+                    SizedBox(height: 10,),
                     Text(
                       widget.unformattedText == null
                           ? 'No original text is provided'
@@ -419,11 +455,11 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         color: const Color(0xFF6E6E6E),
                         fontWeight: FontWeight.w400,),),],),),],),
           bottomSheet: _buildFullInputBottomSheet(context),
-        ),
-      );
+        );
+      
     }else{
       var mq = MediaQuery.of(context).size;
-      final appState = Provider.of<AppState>(context);
+      // final appState = Provider.of<AppState>(context);
 
       return Scaffold(
         backgroundColor:Color(0xFFEEF6F5),
@@ -438,7 +474,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                   size: 20,
                 ),
                 onPressed: () {
-                  appState.navigateToHomePage();
+                  // appState.navigateToHomePage();
+                  Navigator.pop(context);
 
                 },
               ),],),),
@@ -485,9 +522,18 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                       ),
                       iconSize: mq.height * 1 / 18,
                       onPressed: () async {
-                        appState.navigateToTranscriptionPage();
-                        Provider.of<AppState>(context, listen: false).navigateToRecordingPage(ManualSttController(context));
-                      },),),),),),],),
+                      //   appState.navigateToTranscriptionPage();
+                      //   Provider.of<AppState>(context, listen: false).navigateToRecordingPage(ManualSttController(context));
+                      // },
+                      print("Microphone button pressed");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RecordView(
+                              onRecordingComplete: (String recording) {
+                              },
+                              tokenid: widget.tokenid,),),);}
+                      ),),),),),],),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       );
     }
@@ -529,13 +575,13 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         icon: Icon(Icons.delete_outline_rounded,
                             color: Colors.red),
                         onPressed: () {
-                          Provider.of<AppState>(context, listen: false).navigateToHomePage();
+                          // Provider.of<AppState>(context, listen: false).navigateToHomePage();
                           // appState.navigateToHomePage();
 
                           // Navigator.of(context).pop();
-                          // _deleteTranscription(widget.transcriptionId);
+                          _deleteTranscription(context);
                           // _handleDeleteTranscription();
-                          // Navigator.pop(context);
+                          Navigator.pop(context);
                         },
                         iconSize: 20,),
                     ],),),),
@@ -543,7 +589,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                 child: GestureDetector(
                   onTap: () async {
                     await _sendTranscriptionToBackend();
-                    Provider.of<AppState>(context, listen: false).navigateToHomePage();
+                    // Provider.of<AppState>(context, listen: false).navigateToHomePage();
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(

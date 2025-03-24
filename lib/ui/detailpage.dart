@@ -412,3 +412,4 @@ void _copyText() {
     super.dispose();
   }
 }
+// detailed page end

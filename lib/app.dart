@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (_) => SplashViewModel()),
           ChangeNotifierProvider(create: (_) => LoginViewModel()),
-          ChangeNotifierProvider(create: (_) => AppState(tokenid: '', controller: ManualSttController(context))),
+          // ChangeNotifierProvider(create: (_) => AppState(tokenid: '', controller: ManualSttController(context))),
           // ChangeNotifierProvider(create: (_) => CombinedScreenProvider()), // Add this
 
         ],

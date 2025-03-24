@@ -10,7 +10,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../core/constants/app_colors.dart';
 import '../home/home_view.dart';
 
@@ -32,6 +31,7 @@ class _LoginViewState extends State<LoginView> {
     print('Google login method called');
 
     GoogleSignIn _googleSignIn = GoogleSignIn(
+      clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
       // clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com",  //from this app
       // clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com",
 
@@ -88,7 +88,8 @@ class _LoginViewState extends State<LoginView> {
                     tokenid: globalToken5!,
                     profileName: result.displayName ?? "User's Name",
                     profilePicUrl: result.photoUrl ?? "",
-                    transcribedata: '', controller: ManualSttController(context),
+                    transcribedata: '',
+                    // controller: ManualSttController(context),
 
                   ),
             ),
@@ -190,7 +191,7 @@ class _LoginViewState extends State<LoginView> {
                 controller: _pageController,
                 onPageChanged: _onPageChanged,
                 children: [
-                  _buildPage1(imageSize),
+                  // _buildPage1(imageSize),
                   _buildPage2(imageSize),
                   _buildPage3(imageSize),
 
@@ -384,102 +385,4 @@ class _LoginViewState extends State<LoginView> {
       ],
     );
   }
-  Widget _buildPage1(double imageSize) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-
-        Center(
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Column(
-              children: [
-                SizedBox(height: 35),
-
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Speak it',
-                        style: GoogleFonts.spectral(
-                          fontSize: 38.0,
-                          color: Colors.black87, // 'Speak it' in black
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '. ', // Dot in green
-                        style: GoogleFonts.francoisOne(
-                          fontSize: 25.0,
-                          color: AppColors.ButtonColor2, // Dot color in green
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'See it',
-                        style: GoogleFonts.spectral(
-                          fontSize: 38.0,
-                          color: Colors.black87, // 'See it' in black
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '. ', // Dot in green
-                        style: GoogleFonts.francoisOne(
-                          fontSize: 25.0,
-                          color: AppColors.ButtonColor2, // Dot color in green
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                SizedBox(height: 5),
-
-
-
-
-                Text(
-                  "Save it or Share it.",
-                  style: GoogleFonts.spectral(
-                    fontSize: 35.0,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 5),
-                Text(
-                  "Effortlessly.",
-                  style: GoogleFonts.spectral(
-                    fontSize: 35.0,
-                    color: AppColors.ButtonColor2,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
 }
-
-
-
-
-
-
-
-
