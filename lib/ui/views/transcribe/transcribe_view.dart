@@ -237,11 +237,11 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         print('Transcription successfully sent: ${response.statusCode}');
 
         // Refresh the transcriptions in AppState
-        final appState = Provider.of<AppState>(context, listen: false);
-        await appState.refreshData();
+        // final appState = Provider.of<AppState>(context, listen: false);
+        // await appState.refreshData();
 
         // Navigate back to the HomePage
-        appState.navigateToHomePage();
+        // appState.navigateToHomePage();
       } else if (response.statusCode == 401) {
         print('Invalid token: ${response.statusCode}');
         // Show AlertDialog
@@ -299,7 +299,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     bool isInputEmpty = widget.unformattedText.trim().isEmpty; // Corrected condition
 
     // bool isInputEmpty = widget.unformattedText != 'Listening for speech...' ;
-    final appState = Provider.of<AppState>(context);
+    // final appState = Provider.of<AppState>(context);
 
     print("Unformatted Text: '${widget.unformattedText}'");
     print("Is Input Empty: $isInputEmpty");
@@ -314,7 +314,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     if (!isInputEmpty){
       return WillPopScope(
         onWillPop: () async {
-          Provider.of<AppState>(context, listen: false).navigateToHomePage();
+          // Provider.of<AppState>(context, listen: false).navigateToHomePage();
           return false; // Prevent default back navigation
         },
         child: Scaffold(
@@ -326,7 +326,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
             leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
                 onPressed: (){
-                  appState.navigateToHomePage();
+                  // appState.navigateToHomePage();
                 }),
             backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
             bottom: TabBar(
@@ -423,7 +423,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       );
     }else{
       var mq = MediaQuery.of(context).size;
-      final appState = Provider.of<AppState>(context);
+      // final appState = Provider.of<AppState>(context);
 
       return Scaffold(
         backgroundColor:Color(0xFFEEF6F5),
@@ -438,7 +438,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                   size: 20,
                 ),
                 onPressed: () {
-                  appState.navigateToHomePage();
+                  // appState.navigateToHomePage();
 
                 },
               ),],),),
@@ -485,8 +485,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                       ),
                       iconSize: mq.height * 1 / 18,
                       onPressed: () async {
-                        appState.navigateToTranscriptionPage();
-                        Provider.of<AppState>(context, listen: false).navigateToRecordingPage(ManualSttController(context));
+                        // appState.navigateToTranscriptionPage();
+                        // Provider.of<AppState>(context, listen: false).navigateToRecordingPage(ManualSttController(context));
                       },),),),),),],),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       );
@@ -529,7 +529,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         icon: Icon(Icons.delete_outline_rounded,
                             color: Colors.red),
                         onPressed: () {
-                          Provider.of<AppState>(context, listen: false).navigateToHomePage();
+                          // Provider.of<AppState>(context, listen: false).navigateToHomePage();
                           // appState.navigateToHomePage();
 
                           // Navigator.of(context).pop();
@@ -543,7 +543,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                 child: GestureDetector(
                   onTap: () async {
                     await _sendTranscriptionToBackend();
-                    Provider.of<AppState>(context, listen: false).navigateToHomePage();
+                    // Provider.of<AppState>(context, listen: false).navigateToHomePage();
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(

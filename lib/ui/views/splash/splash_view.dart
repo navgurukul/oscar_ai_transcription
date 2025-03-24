@@ -59,13 +59,13 @@ class _SplashScreenState extends State<SplashScreen> {
         context,
         MaterialPageRoute(
             builder: (context) =>
-                CombinedPage(profileName: profileName, profilePicUrl: profilePicUrl, tokenid: tokenid, controller: ManualSttController(context),)
-          //     HomePage(
-          //   profileName: profileName,
-          //   profilePicUrl: profilePicUrl,
-          //   transcribedata: transcribedata,
-          //   tokenid: tokenid,
-          // ),
+                // CombinedPage(profileName: profileName, profilePicUrl: profilePicUrl, tokenid: tokenid, controller: ManualSttController(context),)
+              HomePage(
+            profileName: profileName,
+            profilePicUrl: profilePicUrl,
+            transcribedata: transcribedata,
+            tokenid: tokenid,controller: ManualSttController(context),
+          ),
         ),
       );
     }
