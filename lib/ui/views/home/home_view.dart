@@ -88,13 +88,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _refreshData(); // Refresh data when returning from another page
       }
     });
-
-    Future.delayed(Duration.zero, () {
-      final appState = Provider.of<AppState>(context, listen: false);
-      if (appState.showRecordingPage) {
-        print("First-time launch: Navigating to RecordView");
-      }
-    });
+    //
+    // Future.delayed(Duration.zero, () {
+    //   // final appState = Provider.of<AppState>(context, listen: false);
+    //   if (appState.showRecordingPage) {
+    //     print("First-time launch: Navigating to RecordView");
+    //   }
+    // }
+    // );
 
   }
   //////////////////////////////////////
@@ -304,7 +305,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageSize = screenWidth * 0.75;
 
-    final appState = Provider.of<AppState>(context);
+    // final appState = Provider.of<AppState>(context);
 
     return WillPopScope(
       onWillPop: () async {
@@ -645,7 +646,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             widget.controller.startStt();
                             print("Recording started on home page");
                           }
-                          appState.navigateToRecordingPage(widget.controller); // Correctly call the method
+
+                          // appState.navigateToRecordingPage(widget.controller); // Correctly call the method
+
+
                           // final appState = Provider.of<AppState>(context, listen: false);
                           // try {
                           //   // Check microphone permission only when needed

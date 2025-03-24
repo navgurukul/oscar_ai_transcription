@@ -98,9 +98,9 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
       if (formattedData != null && mounted) {
         String titleText = formattedData["title"] ?? 'Untitled';
         String formattedText = formattedData["transcript"] ?? transcriptionToSend;
-        final appState = Provider.of<AppState> (context, listen: false);
-        appState.updateFormattedText(formattedText, transcriptionToSend, titleText);
-        appState.navigateToTranscriptionPage();
+        // final appState = Provider.of<AppState> (context, listen: false);
+        // appState.updateFormattedText(formattedText, transcriptionToSend, titleText);
+        // appState.navigateToTranscriptionPage();
       } else {
         print('No formatted text available.');
       }
@@ -286,7 +286,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
       widget.controller.resumeStt();
       _startCountdown();
     } else {
-      Provider.of<AppState>(context, listen: false).navigateToHomePage();
+      // Provider.of<AppState>(context, listen: false).navigateToHomePage();
     }
   }
 
@@ -377,12 +377,12 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
-    final appState = Provider.of<AppState>(context);
+    // final appState = Provider.of<AppState>(context);
 
     return
       WillPopScope(
         onWillPop: () async {
-          Provider.of<AppState>(context, listen: false).navigateToHomePage();
+          // Provider.of<AppState>(context, listen: false).navigateToHomePage();
           return false; // Prevent default back navigation
         },
         child: Scaffold(
@@ -460,7 +460,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
                       ),
                     ),
 
-                    Text("Final text: ${appState.finalRecognizedText}",style: TextStyle(fontSize: 12),),
+                    // Text("Final text: ${appState.finalRecognizedText}",style: TextStyle(fontSize: 12),),
 
                     SizedBox(height: mq.height * 0.25),
                     Row(
@@ -525,10 +525,10 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
 
                               onPressed: () async {
                                 widget.controller.stopStt();
-                                print('Final Recognized Text: "${appState.finalRecognizedText}"');
-                                print('Is Final Recognized Text Empty: ${appState.finalRecognizedText.trim().isEmpty}');
-                                await _sendFormattedTextToTranscribePage(appState.finalRecognizedText);
-                                appState.clearFinalRecognizedText();
+                                // print('Final Recognized Text: "${appState.finalRecognizedText}"');
+                                // print('Is Final Recognized Text Empty: ${appState.finalRecognizedText.trim().isEmpty}');
+                                // await _sendFormattedTextToTranscribePage(appState.finalRecognizedText);
+                                // appState.clearFinalRecognizedText();
                               }
 
                           ),
