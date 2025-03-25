@@ -88,7 +88,8 @@ class _LoginViewState extends State<LoginView> {
                     tokenid: globalToken5!,
                     profileName: result.displayName ?? "User's Name",
                     profilePicUrl: result.photoUrl ?? "",
-                    transcribedata: '', controller: ManualSttController(context),
+                    transcribedata: '',
+                    // controller: ManualSttController(context),
 
                   ),
             ),

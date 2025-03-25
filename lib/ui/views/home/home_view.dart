@@ -31,7 +31,7 @@ class HomePage extends StatefulWidget {
   final String profilePicUrl;
   final String transcribedata;
   final String tokenid;
-  final ManualSttController controller;
+  // final ManualSttController controller;
 
   const HomePage({
     Key? key,
@@ -39,7 +39,7 @@ class HomePage extends StatefulWidget {
     required this.profileName,
     required this.profilePicUrl,
     required this.tokenid,
-    required this.controller,
+    // required this.controller,
   }) : super(key: key);
 
   @override
@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late Future<List<Map<String, dynamic>>> _transcriptionsFuture;
   final Connectivity _connectivity = Connectivity();
   late final Stream<ConnectivityResult> _connectivityStream;
-  // final dndPlugin = DoNotDisturbPlugin();
+  final dndPlugin = DoNotDisturbPlugin();
   bool isListening = false;
   List<Map<String, dynamic>> _currentTranscriptions = [];
 
@@ -99,19 +99,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   }
   //////////////////////////////////////
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      print("App resumed. Checking DND permission again.");
-      // _checkDndPermission();
-    } else if (state == AppLifecycleState.paused) {
-      print("App moved to background.");
-      // Stop recording if needed
-      if (isListening) {
-        widget.controller.stopStt();
-      }
-    }
-  }
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (state == AppLifecycleState.resumed) {
+  //     print("App resumed. Checking DND permission again.");
+  //     // _checkDndPermission();
+  //   } else if (state == AppLifecycleState.paused) {
+  //     print("App moved to background.");
+  //     // Stop recording if needed
+  //     if (isListening) {
+  //       widget.controller.stopStt();
+  //     }
+  //   }
+  // }
 
   void _showRefreshAlertDialog() {
     showDialog(
@@ -133,10 +133,41 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
+  Future<List<Map<String, dynamic>>> _fetchTranscriptions() async {
+    final response = await http.get(
+      Uri.parse('https://dev-oscar.merakilearn.org/api/v1/transcriptions'),
+      headers: {'Authorization': 'Bearer ${widget.tokenid}'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return List<Map<String, dynamic>>.from(data['data']);
+    } else if (response.statusCode == 400) {
+      final data = jsonDecode(response.body);
+      _showErrorDialog(context, data['message']);
+      return data['message'];
+    } else if (response.statusCode == 404) {
+      final data = jsonDecode(response.body);
+      _showErrorDialog(context, data['message']);
+      return data['message'];
+    } else if (response.statusCode == 500) {
+      final data = jsonDecode(response.body);
+      _showErrorDialog(context, data['message']);
+      return data['message'];
+    } else if (response.statusCode == 401) {
+      final data = jsonDecode(response.body);
+      _showErrorDialog(context, data['message']);
+      return data['message'];
+    } else {
+      _showErrorDialog(context, 'Failed to load transcription');
+      throw Exception('Failed to load transcriptions');
+    }
+  }
+
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
-        widget.controller.stopStt();
+        // widget.controller.stopStt();
 
         // Navigate to the NoInternetScreen
         Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -144,6 +175,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ));
       }
     });
+  }
+  Future<void> _enableDndMode() async {
+    if (await dndPlugin.isNotificationPolicyAccessGranted()) {
+      await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
+      print("DND mode enabled.");
+    } else {
+      print("DND permission not granted.");
+      await dndPlugin.openNotificationPolicyAccessSettings();
+    }
   }
 
   void _deleteTranscription(String transcriptionId) async {
@@ -278,6 +318,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           // Handle error state if needed
         });
       }
+    }
+  }
+
+  Future<void> _disableDndMode() async {
+    if (await dndPlugin.isNotificationPolicyAccessGranted()) {
+      await dndPlugin.setInterruptionFilter(InterruptionFilter.all);
+      print("DND mode disabled.");
+    } else {
+      print("DND permission not granted.");
     }
   }
 
@@ -642,10 +691,47 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ),
                         iconSize: mq.height * 1 / 18,
                         onPressed: () async {
-                          if (currentState == ManualSttState.stopped) {
-                            widget.controller.startStt();
-                            print("Recording started on home page");
+                          await _enableDndMode();
+                          print("Microphone button pressed");
+                          final newTranscription = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context, ) => RecordView(
+                                onRecordingComplete: (transcribedText) {
+                                  _refreshData();
+                                  Navigator.pop(context, true);
+                                  _disableDndMode();
+                                  setState(() {
+                                    _transcriptionsFuture =
+                                        _fetchTranscriptions();
+                                  });
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => TranscribeResult(
+                                        transcribedText: transcribedText,
+                                        unformattedText: '',
+                                        onDelete: () =>
+                                            _deleteTranscription(transcribedText),
+                                        tokenid: widget.tokenid, title_text: '',
+                                        isEmptyInput: false,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                tokenid: widget.tokenid,
+                              ),
+                            ),
+                          );
+                          if (newTranscription != null &&
+                              newTranscription == true) {
+                            _refreshData();
                           }
+
+                          // if (currentState == ManualSttState.stopped) {
+                          //   // widget.controller.startStt();
+                          //   print("Recording started on home page");
+                          // }
 
                           // appState.navigateToRecordingPage(widget.controller); // Correctly call the method
 
