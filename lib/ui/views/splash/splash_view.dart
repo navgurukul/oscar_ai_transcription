@@ -64,7 +64,8 @@ class _SplashScreenState extends State<SplashScreen> {
             profileName: profileName,
             profilePicUrl: profilePicUrl,
             transcribedata: transcribedata,
-            tokenid: tokenid,controller: ManualSttController(context),
+            tokenid: tokenid,
+                // controller: ManualSttController(context),
           ),
         ),
       );

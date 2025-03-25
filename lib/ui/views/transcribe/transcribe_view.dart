@@ -23,23 +23,16 @@ class TranscribeResult extends StatefulWidget {
   final String unformattedText;
   final VoidCallback? onDelete;
   final String tokenid;
-  final ManualSttController controller;
-  final String transcriptionId;
-
-  // final bool isEmptyInput;
-  // final date;
-
+  final bool isEmptyInput;
 
   const TranscribeResult(
       {Key? key,
         required this.transcribedText,
         this.onDelete,
         required this.tokenid,
-        // required this.isEmptyInput,
-        required this.transcriptionId,
+        required this.isEmptyInput,
         required this.unformattedText,
-        required this.title_text, required this.controller,
-        // required this.date
+        required this.title_text,
       }) : super(key: key);
 
   @override
@@ -71,9 +64,6 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
-        widget.controller.stopStt();
-
-        // Navigate to the NoInternetScreen
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => NoInternetScreen(),
         ));
@@ -81,62 +71,12 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     });
   }
 
-  // Future<void> _deleteTranscription(String transcriptionId) async {
-  //   try {
-  //     final response = await http.delete(
-  //       Uri.parse('https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
-  //       headers: {'Authorization': 'Bearer ${widget.tokenid}'},
-  //     );
-  //
-  //     if (response.statusCode == 200) {
-  //       print('deleted successfully');
-  //       // Update the state in HomePage
-  //       final appState = Provider.of<AppState>(context, listen: false);
-  //       await appState.refreshData();
-  //
-  //       // Hide the transcription result and show the homepage
-  //       setState(() {
-  //         _showTranscriptionResult = false;
-  //       });
-  //
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Transcription deleted')),
-  //       );
-  //     } else {
-  //       throw Exception('Failed to delete transcription');
-  //     }
-  //   } catch (e) {
-  //     print('Error: $e');
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Error deleting transcription: $e')),
-  //     );
-  //   }
-  // }
-
-  Future<void> _deleteTranscription(String transcriptionId) async {
-    try {
-      final response = await http.delete(
-        Uri.parse('https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
-        headers: {'Authorization': 'Bearer ${widget.tokenid}'},
-      );
-
-      if (response.statusCode == 200) {
-        print('deleted successfully');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Transcription deleted')),
-        );
-        Navigator.pop(context); // Navigate back to homepage
-      } else {
-        throw Exception('Failed to delete transcription');
-      }
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting transcription: $e')),
-      );
-    }
-  }
-
+  Future<void> _deleteTranscription(BuildContext context) async {
+    widget.onDelete!();
+    Navigator.pop(context, 'Transcription deleted');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Transcription deleted')),
+    );}
 
   void _showErrorDialog(BuildContext context, String errorMessage) {
     var mq = MediaQuery.of(context).size;
@@ -182,6 +122,9 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     );
   }
 
+  void _handleBack() {
+    Navigator.pop(context, 'show_popup');
+  }
 
   void checkInput({required bool isEmptyInput}) {
     if (isEmptyInput) {
@@ -229,25 +172,31 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         body: jsonEncode(<String, String>{
           'transcribedText': _textController.text,
           'userTextInput': _notFormattedText.text,
-          'title': _text_titleController.text,
+          'title': _text_titleController.text ,
         }),
       );
-
       if (response.statusCode == 201) {
         print('Transcription successfully sent: ${response.statusCode}');
+        final headerDate = response.headers['date'];
+        if (responseDate != null) {
+          displayedDate = _formatDate(responseDate!);
+          setState(() {});
+        }
+        else {
+          print('Date header not found');
+        }
 
-        // Refresh the transcriptions in AppState
-        // final appState = Provider.of<AppState>(context, listen: false);
-        // await appState.refreshData();
-
-        // Navigate back to the HomePage
-        // appState.navigateToHomePage();
-      } else if (response.statusCode == 401) {
-        print('Invalid token: ${response.statusCode}');
-        // Show AlertDialog
+        Navigator.pop(context, 'Saved transcription');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Saved transcription')),
+        );
+      }
+      else if (response.statusCode == 401) {
+        print(' Invalid token: ${response.statusCode}');
         showDialog(
           context: context,
-          barrierDismissible: false, // Prevent dialog from closing on tap outside
+          barrierDismissible:
+          false,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Session Expired'),
@@ -255,23 +204,19 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
               actions: [
                 TextButton(
                   onPressed: () async {
-                    Navigator.of(context).pop(); // Close the dialog
-                    // Sign out and clear session
+                    Navigator.of(context).pop();
+
                     await GoogleSignIn().signOut();
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    SharedPreferences prefs =
+                    await SharedPreferences.getInstance();
                     await prefs.remove('isLoggedIn');
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (context) => LoginView()),
                           (route) => false,
                     );
                   },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      } else {
+                  child: Text('OK'),),],);},);}
+      else {
         print('Failed to send transcription: ${response.statusCode}');
       }
     } catch (e) {
@@ -325,9 +270,10 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
             elevation: 0,
             leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
-                onPressed: (){
+                onPressed: _handleBack
+
                   // appState.navigateToHomePage();
-                }),
+                ),
             backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
             bottom: TabBar(
               controller: _tabController,
@@ -438,6 +384,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                   size: 20,
                 ),
                 onPressed: () {
+                  Navigator.pop(context);
+
                   // appState.navigateToHomePage();
 
                 },
@@ -529,6 +477,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         icon: Icon(Icons.delete_outline_rounded,
                             color: Colors.red),
                         onPressed: () {
+                          _deleteTranscription(context);
+                          Navigator.pop(context);
                           // Provider.of<AppState>(context, listen: false).navigateToHomePage();
                           // appState.navigateToHomePage();
 
@@ -539,6 +489,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         },
                         iconSize: 20,),
                     ],),),),
+
               SafeArea(
                 child: GestureDetector(
                   onTap: () async {
