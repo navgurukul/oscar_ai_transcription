@@ -337,6 +337,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   Future<void> _onBackPressed() async {
     // Print("Back arrow pressed");
     _pauseTimer();
+    _speech.pauseStt();
     // widget.controller.pauseStt();
     bool? result = await showDialog<bool>(
         context: context,
@@ -352,7 +353,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
                     fontWeight: FontWeight.w700
                 ),),
               content: Text(
-                'You are exiting the recording. Recorded data will be lost.',
+                'Any recorded speech will be lost and will need to be recorded again',
                 style: GoogleFonts.karla(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
@@ -368,7 +369,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
                         EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
                   ),
                   onPressed: () {
-                    Navigator.of(context).pop(); // Close the dialog
+                    Navigator.of(context).pop(false); // Close the dialog
                   },
                   child: Text(
                     'Discard',
@@ -406,8 +407,16 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     );
     if (result == true) {
       // widget.controller.resumeStt();
-      _startCountdown();
+      setState(() {
+        _cumulativeText +=
+            " " + _finalRecognizedText.trim(); 
+        _finalRecognizedText = ""; 
+      });
+      _resumeTimer();
+      _speech.startStt();
+      // _startCountdown();
     } else {
+      Navigator.of(context).pop();
       // Provider.of<AppState>(context, listen: false).navigateToHomePage();
     }
   }
@@ -415,6 +424,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   void _onRestartPressed() async {
     _pauseTimer(); // Pause the timer
     print("Timer paused");
+    _speech.pauseStt();
     // widget.controller.pauseStt(); // Stop the recording
     print("Recording paused");
     bool? result = await showDialog<bool>(
@@ -425,9 +435,18 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
             borderRadius: BorderRadius.circular(20), // Adjust the radius here
           ),
           backgroundColor: Colors.white,
-          title: Text('Reset Recording'),
+          title: Text('Reset Recording',style: GoogleFonts.spectral(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700
+                ),),
           content: Text(
-              'Curent recording will be erased an a new one will be started '),
+              'Curent recording will be erased and a new one will be started ',
+              style: GoogleFonts.karla(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400
+                ),
+              
+              ),
           actions: <Widget>[
             TextButton(
               style: ButtonStyle(
@@ -438,10 +457,10 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
                     EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
               ),
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop(false); // Close the dialog
               },
               child: Text(
-                'Discard',
+                'Cancel',
                 style: GoogleFonts.karla(
                   fontSize: 16,
                   color: AppColors.ButtonColor2,
@@ -476,8 +495,22 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     );
     if (result == true){
       // widget.controller.startStt();
+      setState(() {
+        _finalRecognizedText = ""; 
+        _cumulativeText =
+        ""; 
+        _remainingTime = 180; 
+      });
+
+      _speech.startStt();
       _startCountdown();
     } else {
+      setState(() {
+        _cumulativeText += " " + _finalRecognizedText.trim(); 
+        _finalRecognizedText = "";
+      });
+      _resumeTimer();
+      _speech.startStt();
       // widget.controller.resumeStt();
     }
     // if (result == true) {
@@ -498,6 +531,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
@@ -507,7 +541,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
       WillPopScope(
         onWillPop: () async {
           // Provider.of<AppState>(context, listen: false).navigateToHomePage();
-          return false; // Prevent default back navigation
+          return true; // Prevent default back navigation
         },
         child: Scaffold(
           backgroundColor: Colors.white,
