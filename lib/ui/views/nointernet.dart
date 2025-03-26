@@ -4,10 +4,8 @@ import 'package:oscar_stt/core/constants/app_colors.dart';
 import 'auth/login_view.dart';
 
 class NoInternetScreen extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -31,10 +29,9 @@ class NoInternetScreen extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: (){
-                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LoginView()
-                ));
-
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => LoginView()));
               },
               child: Text(
                 'Retry',

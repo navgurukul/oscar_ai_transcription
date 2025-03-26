@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,7 +21,6 @@ class Detailpage extends StatefulWidget {
     required this.id1,
     required this.title,
     this.date,
-
   }) : super(key: key);
 
   @override
@@ -39,7 +37,6 @@ class _DetailpageState extends State<Detailpage>
     super.initState();
     _textController = TextEditingController(text: widget.transcribedText);
     _tabController = TabController(length: 2, vsync: this);
-    
   }
 
   void _handleBack() {
@@ -55,12 +52,13 @@ class _DetailpageState extends State<Detailpage>
     }
   }
 
-void _copyText() {
+  void _copyText() {
     Clipboard.setData(ClipboardData(text: _textController.text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Text copied to clipboard')),
     );
   }
+
   @override
   void didUpdateWidget(covariant Detailpage oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -144,8 +142,7 @@ void _copyText() {
       if (response.statusCode == 200) {
         print('deleted successfully');
         Navigator.of(context).pop();
-        setState(() {
-        });
+        setState(() {});
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -180,8 +177,7 @@ void _copyText() {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-                8.0),
+            borderRadius: BorderRadius.circular(8.0),
           ),
           title: const Text(
             'Oops! an error occured',
@@ -239,8 +235,7 @@ void _copyText() {
           indicatorSize: TabBarIndicatorSize.tab,
           indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0),
           labelColor: const Color(0xFF51A09B),
-          unselectedLabelColor:
-              const Color(0xFF6E6E6E),
+          unselectedLabelColor: const Color(0xFF6E6E6E),
           labelStyle: GoogleFonts.karla(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -261,7 +256,8 @@ void _copyText() {
         controller: _tabController,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top:20.0,left: 20.0, right: 20.0,bottom: 100),
+            padding: const EdgeInsets.only(
+                top: 20.0, left: 20.0, right: 20.0, bottom: 100),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,7 +267,7 @@ void _copyText() {
                     style: GoogleFonts.spectral(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color:Color(0xFF4A4A4A),
+                      color: Color(0xFF4A4A4A),
                     ),
                   ),
                   SizedBox(
@@ -304,7 +300,8 @@ void _copyText() {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top:20.0,left: 20.0, right: 20.0,bottom: 100),
+            padding: const EdgeInsets.only(
+                top: 20.0, left: 20.0, right: 20.0, bottom: 100),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,8 +340,7 @@ void _copyText() {
           ),
         ],
       ),
-      bottomSheet:
-          _buildFullInputBottomSheet(context),
+      bottomSheet: _buildFullInputBottomSheet(context),
     );
   }
 
@@ -361,7 +357,6 @@ void _copyText() {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
-          
                 margin: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
                 padding: EdgeInsets.symmetric(),
                 decoration: BoxDecoration(
@@ -372,29 +367,24 @@ void _copyText() {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                
                     IconButton(
                       icon: Icon(Icons.copy, color: AppColors.ButtonColor2),
                       onPressed: _copyText,
                       iconSize: 20,
                     ),
-                  
                     IconButton(
                       icon: Icon(Icons.share, color: AppColors.ButtonColor2),
                       onPressed: _shareText,
                       iconSize: 20,
                     ),
-              
                     IconButton(
                       icon:
                           Icon(Icons.delete_outline_rounded, color: Colors.red),
                       onPressed: () {
                         _confirmDeleteTranscription(widget.id1);
-                      
                       },
                       iconSize: mq.width * 0.07,
                     ),
-                    
                   ],
                 ),
               ),

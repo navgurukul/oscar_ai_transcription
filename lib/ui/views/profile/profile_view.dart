@@ -1,4 +1,3 @@
-
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:oscar_stt/ui/views/profile/policy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../auth/login_view.dart';
-
 
 class SettingsScreen extends StatefulWidget {
   final String profileName;
@@ -33,10 +31,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _checkAgreementStatus();
   }
 
-  Future<void> _checkAgreementStatus() async {
-  }
+  Future<void> _checkAgreementStatus() async {}
 
-  final String termsOfUseText =  '''
+  final String termsOfUseText = '''
 
 
 1. By using the Oscar AI Transcription App, you agree to be bound by these Terms of Use ("Terms"). If you do not agree with these Terms, you should not use the App.
@@ -61,7 +58,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 11. If you have any questions about these Terms, please contact us at''';
 
-  final String privacyPolicyText =  '''
+  final String privacyPolicyText = '''
 
 
 1. We value your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Oscar AI Transcription .
@@ -84,7 +81,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 10. If you have any questions about this Privacy Policy, please contact us at''';
 
-void handleback(){
+  void handleback() {
     Navigator.pop(context, 'Saved transcription');
   }
 
@@ -93,27 +90,30 @@ void handleback(){
     var mq = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor:  Colors.white,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
-        title: Text('Account Details',style: GoogleFonts.karla(fontSize: 18,fontWeight: FontWeight.w700),),
+        title: Text(
+          'Account Details',
+          style: GoogleFonts.karla(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.06),
-            onPressed: handleback,
-            ),),
+          icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.06),
+          onPressed: handleback,
+        ),
+      ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
-        
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(top:50.0),
-              child: Column(
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 50.0),
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -135,16 +135,20 @@ void handleback(){
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text(widget.profileName, style: GoogleFonts.spectral(fontSize: mq.width * 0.05,fontWeight: FontWeight.w700)),
+                    Text(widget.profileName,
+                        style: GoogleFonts.spectral(
+                            fontSize: mq.width * 0.05,
+                            fontWeight: FontWeight.w700)),
                   ],
                 ),
+              ),
             ),
-          ),
             SizedBox(height: mq.height * 0.02),
             Expanded(
               child: ListView.separated(
                 itemCount: 3,
-                separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey),
+                separatorBuilder: (context, index) =>
+                    Divider(height: 1, color: Colors.grey),
                 itemBuilder: (context, index) {
                   IconData iconData;
                   String title;
@@ -167,7 +171,10 @@ void handleback(){
                       break;
                   }
                   return ListTile(
-                    leading: Icon(iconData, color:  Color(0xFF4A4A4A),),
+                    leading: Icon(
+                      iconData,
+                      color: Color(0xFF4A4A4A),
+                    ),
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -183,14 +190,27 @@ void handleback(){
                     ),
                     onTap: () {
                       if (index == 0) {
-                        Navigator.push(context , MaterialPageRoute(builder: (context) => 
-                        SecondPage(termsOfUseText,'Terms of Use',_launchEmailClient,),));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SecondPage(
+                                termsOfUseText,
+                                'Terms of Use',
+                                _launchEmailClient,
+                              ),
+                            ));
                         Text(termsOfUseText);
                       } else if (index == 1) {
                         Text(privacyPolicyText);
-                        Navigator.push(context , MaterialPageRoute(builder: (context) => 
-                        SecondPage(privacyPolicyText, 'Privacy Policy',_launchEmailClient,),));
-                      
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SecondPage(
+                                privacyPolicyText,
+                                'Privacy Policy',
+                                _launchEmailClient,
+                              ),
+                            ));
                       } else if (index == 2) {
                         _launchEmailClient();
                       }
@@ -206,7 +226,6 @@ void handleback(){
     );
   }
 
-
   Widget _buildCustomSignOutButton(BuildContext context) {
     const String KEYLOGIN = "Login";
     return Padding(
@@ -219,13 +238,15 @@ void handleback(){
             SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.remove('isLoggedIn');
             await prefs.setBool(KEYLOGIN, false);
-            print("Profile Name after logout: ${prefs.getString('profileName')}"); 
-            print("Profile Pic URL after logout: ${prefs.getString('profilePicUrl')}");
+            print(
+                "Profile Name after logout: ${prefs.getString('profileName')}");
+            print(
+                "Profile Pic URL after logout: ${prefs.getString('profilePicUrl')}");
             print("Token ID after logout: ${prefs.getString('tokenid')}");
 
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => LoginView()),
-                  (route) => false,
+              (route) => false,
             );
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Log out..')),
@@ -257,7 +278,7 @@ void handleback(){
     );
   }
 
-Future<void> _launchEmailClient() async {
+  Future<void> _launchEmailClient() async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: contactEmail,
@@ -269,8 +290,10 @@ Future<void> _launchEmailClient() async {
     }
   }
 
-String? encodeQueryParameters(Map<String, String> params) {
-    return params.entries.map((MapEntry<String, String> e) =>
-    '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
+  String? encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
   }
 }
