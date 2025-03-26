@@ -9,21 +9,14 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
-// import 'package:testing_oscar/core/viewmodels/get_api.dart';
-
 import '../../../core/constants/app_colors.dart';
 import '../../../core/viewmodels/api_service.dart';
-// import '../../../detailpage.dart';
 import '../../detailpage.dart';
 import '../../shared/styles/text_style.dart';
-import '../CombinedScreenProvider.dart';
 import '../nointernet.dart';
 import '../profile/profile_view.dart';
 import '../record/record_view.dart';
 import 'dart:async';
-
 import '../transcribe/transcribe_view.dart';
 
 class HomePage extends StatefulWidget {
@@ -31,7 +24,6 @@ class HomePage extends StatefulWidget {
   final String profilePicUrl;
   final String transcribedata;
   final String tokenid;
-  // final ManualSttController controller;
 
   const HomePage({
     Key? key,
@@ -39,7 +31,6 @@ class HomePage extends StatefulWidget {
     required this.profileName,
     required this.profilePicUrl,
     required this.tokenid,
-    // required this.controller,
   }) : super(key: key);
 
   @override
@@ -53,14 +44,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final dndPlugin = DoNotDisturbPlugin();
   bool isListening = false;
   List<Map<String, dynamic>> _currentTranscriptions = [];
-
   late ManualSttController _controller;
   ManualSttState _currentState = ManualSttState.stopped;
   String _finalRecognizedText = '';
   // late ManualSttController _controller;
-
   ManualSttState currentState = ManualSttState.stopped;
-
 
   @override
   void didChangeDependencies() {
@@ -74,8 +62,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     print("App initialized");
-    // _transcriptionsFuture = ApiService().fetchTranscriptions(widget.tokenid);
-    // Provider.of<AppState>(context, listen: false).monitorInternet(context);
     _connectivityStream =
         _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
@@ -85,33 +71,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ModalRoute.of(context)?.settings.arguments == true) {
         _showRefreshAlertDialog();
-        _refreshData(); // Refresh data when returning from another page
+        _refreshData();
       }
     });
-    //
-    // Future.delayed(Duration.zero, () {
-    //   // final appState = Provider.of<AppState>(context, listen: false);
-    //   if (appState.showRecordingPage) {
-    //     print("First-time launch: Navigating to RecordView");
-    //   }
-    // }
-    // );
-
   }
-  //////////////////////////////////////
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   if (state == AppLifecycleState.resumed) {
-  //     print("App resumed. Checking DND permission again.");
-  //     // _checkDndPermission();
-  //   } else if (state == AppLifecycleState.paused) {
-  //     print("App moved to background.");
-  //     // Stop recording if needed
-  //     if (isListening) {
-  //       widget.controller.stopStt();
-  //     }
-  //   }
-  // }
 
   void _showRefreshAlertDialog() {
     showDialog(
@@ -167,15 +130,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
-        // widget.controller.stopStt();
-
-        // Navigate to the NoInternetScreen
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => NoInternetScreen(),
         ));
       }
     });
   }
+
   Future<void> _enableDndMode() async {
     if (await dndPlugin.isNotificationPolicyAccessGranted()) {
       await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
@@ -197,7 +158,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (response.statusCode == 200) {
         print('deleted successfully');
         setState(() {
-          _transcriptionsFuture = fetchTranscriptions(); // Refresh the data
+          _transcriptionsFuture = fetchTranscriptions();
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -222,7 +183,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         throw Exception('Failed to delete transcription');
       }
     } catch (e) {
-      // Handle the error
       print('Error: $e');
       _showErrorDialog(context, '$e');
     }
@@ -236,8 +196,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-                8.0), // Square shape with slightly rounded corners
+            borderRadius: BorderRadius.circular(8.0),
           ),
           title: const Text('Oops! an error occured',
               style: TextStyle(
@@ -249,11 +208,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 fontWeight: FontWeight.w400,
                 fontSize: mq.width * 0.04,
                 color: Colors.black,
-              )), // Display error message dynamically
+              )),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: const Text(
                 'OK',
@@ -299,7 +258,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     try {
       final newTranscriptions =
           await ApiService().fetchTranscriptions(widget.tokenid);
-      // print("New transcriptions: $newTranscriptions");
 
       if (mounted) {
         setState(() {
@@ -314,9 +272,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } catch (e) {
       print("Error fetching transcriptions: $e");
       if (mounted) {
-        setState(() {
-          // Handle error state if needed
-        });
+        setState(() {});
       }
     }
   }
@@ -354,11 +310,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final screenWidth = MediaQuery.of(context).size.width;
     final imageSize = screenWidth * 0.75;
 
-    // final appState = Provider.of<AppState>(context);
-
     return WillPopScope(
       onWillPop: () async {
-        // Exit the app directly
         await SystemNavigator.pop();
         return false;
       },
@@ -372,11 +325,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-            SvgPicture.asset(
-                    'assets1/Frame 31584.svg',
-                    width: 98,
-                    height: 32,
-                  ),
+              SvgPicture.asset(
+                'assets1/Frame 31584.svg',
+                width: 98,
+                height: 32,
+              ),
               IconButton(
                 icon: CircleAvatar(
                   backgroundImage: widget.profilePicUrl != null &&
@@ -421,15 +374,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return SingleChildScrollView(
-                  physics:
-                      AlwaysScrollableScrollPhysics(), // Ensures scroll even when empty
+                  physics: AlwaysScrollableScrollPhysics(),
                   child: Container(
                     height:
                         mq.height - kToolbarHeight, // Full height minus AppBar
                     child: Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center, // Center the content vertically
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment
                             .center, // Center the content horizontally
                         children: [
@@ -446,16 +397,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                               ),
                             ),
                           ),
-
                           SizedBox(height: mq.height * 0.20),
-
-                          // The image
                           Image.asset(
                             'assets1/Group-12307.png',
                             width: 118.31,
                             height: 118.31,
                           ),
-
                           Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 80.0, vertical: 30),
@@ -563,7 +510,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                               );
                                             },
                                             child: Container(
-                                                //height: 200.0,
                                                 child: Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
@@ -574,7 +520,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                 children: [
                                                   Text(
                                                     transcription['title'] ??
-                                                        'Untitled', // Display the title or fallback text
+                                                        'Untitled',
                                                     style: GoogleFonts.karla(
                                                       fontSize: 16.0,
                                                       fontWeight:
@@ -668,16 +614,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           alignment: Alignment.center,
           children: <Widget>[
             Container(
-              // width: mq.width*1/7,
               height: 64,
               decoration: BoxDecoration(
-                // color: AppColors.flotingButton,
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Container(
                   height: 64,
-                  // width: mq.width*1/10,
                   decoration: BoxDecoration(
                     color: AppColors.ButtonColor2,
                     shape: BoxShape.circle,
@@ -685,9 +628,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   child: Center(
                     child: IconButton(
                         icon: Icon(
-                          Icons.mic, // Microphone icon
-                          color: Colors.white, // Icon color
-                          size: 32.0, // Icon size
+                          Icons.mic,
+                          color: Colors.white,
+                          size: 32.0,
                         ),
                         iconSize: mq.height * 1 / 18,
                         onPressed: () async {
@@ -696,7 +639,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           final newTranscription = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context, ) => RecordView(
+                              builder: (
+                                context,
+                              ) =>
+                                  RecordView(
                                 onRecordingComplete: (transcribedText) {
                                   _refreshData();
                                   Navigator.pop(context, true);
@@ -711,9 +657,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                       builder: (context) => TranscribeResult(
                                         transcribedText: transcribedText,
                                         unformattedText: '',
-                                        onDelete: () =>
-                                            _deleteTranscription(transcribedText),
-                                        tokenid: widget.tokenid, title_text: '',
+                                        onDelete: () => _deleteTranscription(
+                                            transcribedText),
+                                        tokenid: widget.tokenid,
+                                        title_text: '',
                                         isEmptyInput: false,
                                       ),
                                     ),
@@ -727,35 +674,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                               newTranscription == true) {
                             _refreshData();
                           }
-
-                          // if (currentState == ManualSttState.stopped) {
-                          //   // widget.controller.startStt();
-                          //   print("Recording started on home page");
-                          // }
-
-                          // appState.navigateToRecordingPage(widget.controller); // Correctly call the method
-
-
-                          // final appState = Provider.of<AppState>(context, listen: false);
-                          // try {
-                          //   // Check microphone permission only when needed
-                          //   var status = await Permission.microphone.request();
-                          //   if (status.isGranted) {
-                          //     print("Microphone permission granted. Starting recording...");
-                          //     await _checkDndPermission();
-                          //     await _enableDndMode();
-                          //     appState.navigateToRecordingPage();
-                          //     await appState.refreshData();
-                          //   } else {
-                          //     print("Microphone permission denied. Cannot start recording.");
-                          //   }
-                          // } catch (e) {
-                          //   print('Error occurred: $e');
-                          // }
-
-                        }
-
-                        ),
+                        }),
                   ),
                 ),
               ),

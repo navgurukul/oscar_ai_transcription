@@ -6,10 +6,6 @@ import 'app.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 
-// void main(List<String> args) {
-//   runApp(const MaterialApp(home: ManualSpeechRecognitionExample()));
-// }
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -30,13 +26,9 @@ void main() async {
     return true;
   };
   SystemChrome.setPreferredOrientations(
-    [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown])
-      .then(
-        (_) {
-  runApp( MyApp());
-  },
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then(
+    (_) {
+      runApp(MyApp());
+    },
   );
 }
-
-
-
