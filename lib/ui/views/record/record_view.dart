@@ -531,6 +531,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
