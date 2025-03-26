@@ -191,7 +191,7 @@ class _LoginViewState extends State<LoginView> {
                 controller: _pageController,
                 onPageChanged: _onPageChanged,
                 children: [
-                  _buildPage1(imageSize),
+                  // _buildPage1(imageSize),
                   _buildPage2(imageSize),
                   _buildPage3(imageSize),
 
@@ -215,16 +215,16 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 SizedBox(width: screenWidth * 0.02),
 
-                GestureDetector(
-                  onTap: () => _onDashTap(1),
-                  child: Container(
-                    width: screenWidth * 0.09,
-                    height: screenHeight * 0.01,
-                    decoration: BoxDecoration(
-                      color: _currentPage == 1 ? AppColors.ButtonColor2 : Colors.grey[400],
-                      borderRadius: BorderRadius.circular(20), // Set the border radius
-                    ),                  ),
-                ),
+                // GestureDetector(
+                //   onTap: () => _onDashTap(1),
+                //   child: Container(
+                //     width: screenWidth * 0.09,
+                //     height: screenHeight * 0.01,
+                //     decoration: BoxDecoration(
+                //       color: _currentPage == 1 ? AppColors.ButtonColor2 : Colors.grey[400],
+                //       borderRadius: BorderRadius.circular(20), // Set the border radius
+                //     ),                  ),
+                // ),
                 SizedBox(width: screenWidth * 0.02),
                 GestureDetector(
                   onTap: () => _onDashTap(2),
@@ -273,7 +273,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         SizedBox(width: screenWidth * 0.03),
                         Text(
-                          'Login with Google',
+                          'Login With Google',
                           style: GoogleFonts.karla(color: Colors.white, fontSize: screenWidth * 0.04),
                         ),
                       ],
@@ -312,7 +312,7 @@ class _LoginViewState extends State<LoginView> {
           child: Column(
             children: [
               Text(
-                'Speech your thoughts',
+                'Speak Your Thoughts',
                 style: GoogleFonts.spectral(
                   fontSize: 25.0,
                   color: Colors.black87,
@@ -322,7 +322,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               SizedBox(height: 15),
               Text(
-                'Simply talk, and let your voice express your ideas',
+                'Let your voice express the innovative ideas effortlessly',
                 style: GoogleFonts.karla(
                   fontSize: 15.0,
                   color: Colors.black87,
@@ -361,7 +361,7 @@ class _LoginViewState extends State<LoginView> {
           child: Column(
             children: [
               Text(
-                "Let AI Do it's magic",
+                "Let AI Do It's Magic",
                 style: GoogleFonts.spectral(
                   fontSize: 25.0,
                   color: Colors.black87,
@@ -371,7 +371,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               SizedBox(height: 15),
               Text(
-                'Our AI instantly converts your spoken words into clear polished text',
+                'Your spoken words turned into clear and polished text',
                 style: GoogleFonts.karla(
                   fontSize: 14.5,
                   fontWeight: FontWeight.w400,
@@ -384,98 +384,99 @@ class _LoginViewState extends State<LoginView> {
         ),
       ],
     );
-  }
-  Widget _buildPage1(double imageSize) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+  }}
 
-        Center(
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Column(
-              children: [
-                SizedBox(height: 35),
+//   Widget _buildPage1(double imageSize) {
+//     return Column(
+//       mainAxisAlignment: MainAxisAlignment.start,
+//       crossAxisAlignment: CrossAxisAlignment.stretch,
+//       children: [
 
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Speak it',
-                        style: GoogleFonts.spectral(
-                          fontSize: 38.0,
-                          color: Colors.black87, // 'Speak it' in black
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '. ', // Dot in green
-                        style: GoogleFonts.francoisOne(
-                          fontSize: 25.0,
-                          color: AppColors.ButtonColor2, // Dot color in green
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'See it',
-                        style: GoogleFonts.spectral(
-                          fontSize: 38.0,
-                          color: Colors.black87, // 'See it' in black
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '. ', // Dot in green
-                        style: GoogleFonts.francoisOne(
-                          fontSize: 25.0,
-                          color: AppColors.ButtonColor2, // Dot color in green
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+//         Center(
+//           child: Container(
+//             padding: EdgeInsets.all(16.0),
+//             decoration: BoxDecoration(
+//               borderRadius: BorderRadius.circular(8.0),
+//             ),
+//             child: Column(
+//               children: [
+//                 SizedBox(height: 35),
 
-                SizedBox(height: 5),
+//                 Text.rich(
+//                   TextSpan(
+//                     children: [
+//                       TextSpan(
+//                         text: 'Speak it',
+//                         style: GoogleFonts.spectral(
+//                           fontSize: 38.0,
+//                           color: Colors.black87, // 'Speak it' in black
+//                           fontWeight: FontWeight.w600,
+//                         ),
+//                       ),
+//                       TextSpan(
+//                         text: '. ', // Dot in green
+//                         style: GoogleFonts.francoisOne(
+//                           fontSize: 25.0,
+//                           color: AppColors.ButtonColor2, // Dot color in green
+//                           fontWeight: FontWeight.w600,
+//                         ),
+//                       ),
+//                       TextSpan(
+//                         text: 'See it',
+//                         style: GoogleFonts.spectral(
+//                           fontSize: 38.0,
+//                           color: Colors.black87, // 'See it' in black
+//                           fontWeight: FontWeight.w600,
+//                         ),
+//                       ),
+//                       TextSpan(
+//                         text: '. ', // Dot in green
+//                         style: GoogleFonts.francoisOne(
+//                           fontSize: 25.0,
+//                           color: AppColors.ButtonColor2, // Dot color in green
+//                           fontWeight: FontWeight.w600,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                   textAlign: TextAlign.center,
+//                 ),
 
-
-
-
-                Text(
-                  "Save it or Share it.",
-                  style: GoogleFonts.spectral(
-                    fontSize: 35.0,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 5),
-                Text(
-                  "Effortlessly.",
-                  style: GoogleFonts.spectral(
-                    fontSize: 35.0,
-                    color: AppColors.ButtonColor2,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+//                 SizedBox(height: 5),
 
 
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-}
+
+//                 Text(
+//                   "Save it or Share it.",
+//                   style: GoogleFonts.spectral(
+//                     fontSize: 35.0,
+//                     color: Colors.black87,
+//                     fontWeight: FontWeight.w600,
+//                   ),
+//                   textAlign: TextAlign.center,
+//                 ),
+//                 SizedBox(height: 5),
+//                 Text(
+//                   "Effortlessly.",
+//                   style: GoogleFonts.spectral(
+//                     fontSize: 35.0,
+//                     color: AppColors.ButtonColor2,
+//                     fontWeight: FontWeight.w600,
+//                   ),
+//                   textAlign: TextAlign.center,
+//                 ),
+
+
+//               ],
+//             ),
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+
+
 
 
 

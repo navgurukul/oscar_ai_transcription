@@ -372,11 +372,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SvgPicture.asset(
-                'assets1/Oscar Logo with Text.svg',
-                width: imageSize,
-                height: imageSize * 0.15,
-              ),
+            SvgPicture.asset(
+                    'assets1/Frame 31584.svg',
+                    width: 98,
+                    height: 32,
+                  ),
               IconButton(
                 icon: CircleAvatar(
                   backgroundImage: widget.profilePicUrl != null &&

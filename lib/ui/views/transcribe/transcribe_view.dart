@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
+import 'package:oscar_stt/ui/views/record/record_view.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,9 +65,10 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
+        if (mounted){
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => NoInternetScreen(),
-        ));
+        ));}
       }
     });
   }
@@ -103,7 +105,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                if(mounted){
+                Navigator.of(context).pop();} // Close the dialog
               },
               child: const Text(
                 'OK',
@@ -123,7 +126,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   }
 
   void _handleBack() {
-    Navigator.pop(context, 'show_popup');
+    if(mounted){
+    Navigator.pop(context, 'show_popup');}
   }
 
   void checkInput({required bool isEmptyInput}) {
@@ -185,8 +189,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         else {
           print('Date header not found');
         }
-
-        Navigator.pop(context, 'Saved transcription');
+        if(mounted){
+        Navigator.pop(context, 'Saved transcription');}
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Saved transcription')),
         );
@@ -204,7 +208,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
               actions: [
                 TextButton(
                   onPressed: () async {
-                    Navigator.of(context).pop();
+                    if(mounted){
+                    Navigator.of(context).pop();}
 
                     await GoogleSignIn().signOut();
                     SharedPreferences prefs =
@@ -239,6 +244,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('MMMM dd, yyyy').format(now);
     // bool isInputEmpty = widget.unformattedText != widget.unformattedText.trim().isEmpty;
 
     bool isInputEmpty = widget.unformattedText.trim().isEmpty; // Corrected condition
@@ -260,7 +267,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       return WillPopScope(
         onWillPop: () async {
           // Provider.of<AppState>(context, listen: false).navigateToHomePage();
-          return false; // Prevent default back navigation
+          return true; // Prevent default back navigation
         },
         child: Scaffold(
           backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
@@ -317,10 +324,12 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                       SizedBox(
                         height: 5,
                       ),
-                      if (displayedDate != null)
                         Text(
-                          'Date: $displayedDate',
-                          style: GoogleFonts.spectral(fontSize: 16),
+                          formattedDate,
+                          style: GoogleFonts.karla(fontSize: 16,fontWeight: FontWeight.w400,
+                          color: Color.fromRGBO(110, 110, 110, 1.0),
+                          ),
+                        
                         ),
                       SizedBox(height: 10,),
                       Text(
@@ -384,7 +393,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                   size: 20,
                 ),
                 onPressed: () {
-                  Navigator.pop(context);
+                  if(mounted){
+                  Navigator.pop(context);}
 
                   // appState.navigateToHomePage();
 
@@ -433,6 +443,15 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                       ),
                       iconSize: mq.height * 1 / 18,
                       onPressed: () async {
+                        
+                        print("Microphone button pressed");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RecordView(
+                              onRecordingComplete: (String recording) {
+                              },
+                              tokenid: widget.tokenid,),),);
                         // appState.navigateToTranscriptionPage();
                         // Provider.of<AppState>(context, listen: false).navigateToRecordingPage(ManualSttController(context));
                       },),),),),),],),
@@ -443,6 +462,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
 
   Widget _buildFullInputBottomSheet(BuildContext context) {
     var mq = MediaQuery.of(context).size;
+   
     return SafeArea(
       child: BottomAppBar(
         height: mq.height * 1 / 9,
@@ -478,7 +498,9 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                             color: Colors.red),
                         onPressed: () {
                           _deleteTranscription(context);
+                          if (mounted){
                           Navigator.pop(context);
+                          }
                           // Provider.of<AppState>(context, listen: false).navigateToHomePage();
                           // appState.navigateToHomePage();
 

@@ -96,7 +96,7 @@ void handleback(){
       backgroundColor:  Colors.white,
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
-        title: Text('Account Details',style: GoogleFonts.karla(fontSize: 25,fontWeight: FontWeight.w700),),
+        title: Text('Account Details',style: GoogleFonts.karla(fontSize: 18,fontWeight: FontWeight.w700),),
         automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
