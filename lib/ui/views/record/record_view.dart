@@ -7,11 +7,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-// import 'package:testing_oscar/ui/views/CombinedScreenProvider.dart';
 import '../../../core/constants/app_colors.dart';
 import 'package:http/http.dart' as http;
 import '../nointernet.dart';
 import '../transcribe/transcribe_view.dart';
+
 
 class SpeechService {
   static SpeechService? _instance;

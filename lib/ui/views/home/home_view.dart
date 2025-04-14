@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:do_not_disturb/do_not_disturb_plugin.dart';
 import 'package:do_not_disturb/types.dart';
@@ -151,6 +150,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   //     // return false;
   //   }
   // }
+
   Future<bool> _checkAndEnableDnd() async {
     try {
       bool isGranted = await dndPlugin.isNotificationPolicyAccessGranted();
@@ -165,7 +165,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         isGranted = await dndPlugin.isNotificationPolicyAccessGranted();
 
         if (!isGranted) {
-          _showDndAlert();
+          // _showDndAlert();
           return false;
         }
       }
