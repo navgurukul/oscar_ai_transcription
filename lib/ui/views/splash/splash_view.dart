@@ -121,9 +121,9 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
       body: Center(
         child: SvgPicture.asset(
-          'assets1/Oscar Logo with Text.svg',
+          'assets1/logo.svg',
           width: imageSize,
-          height: imageSize * 0.75,
+          height: imageSize * 0.75/1.5,
         ),
       ),
     );

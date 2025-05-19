@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import 'package:http/http.dart' as http;
 import '../nointernet.dart';
@@ -51,6 +50,8 @@ class RecordView extends StatefulWidget {
 }
 
 class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
+  bool _wasRecordingBeforeBackground = false;
+  bool _isFirstTime = true;
   int _remainingTime = 180; // 3 minutes in seconds
   Timer? _timer;
   final Connectivity _connectivity = Connectivity();
@@ -61,11 +62,13 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   bool _isListening = false;
   String _finalRecognizedText = "";
   String _cumulativeText = "";
+  bool _isAppActive = true;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // _resetRecordingState();
     _checkPermissionAndStartListening();
     _speech = SpeechService(context).speechInstance;
     _initSpeech();
@@ -74,6 +77,21 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
         _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
   }
+
+
+//   void _resetRecordingState() {
+//   _remainingTime = 180;
+//   _finalRecognizedText = "";
+//   _cumulativeText = "";
+//   _isListening = false;
+//   _isProcessing = false;
+//   _isLoading = false;
+//   _isFirstTime = true;
+//   // Reinitialize speech service
+//   _speech = SpeechService(context).speechInstance;
+//   _initializeSpeech();
+//   _checkPermissionAndStartListening();
+// }
 
   void _initSpeech() async {
     try {
@@ -95,6 +113,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
         }
       },
       onListeningTextChanged: (recognizedText) {
+        if (!_isAppActive) return; // Ignore text changes when app is in background
         print("[Partial Recognized]: $recognizedText");
         if (mounted) {
           setState(() {
@@ -102,17 +121,29 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
           });
         }
       },
+      // onSoundLevelChanged: (level) {
+      //   log("Sound level: $level");
+      //   if (!_isListening && level > 0.5) {
+      //     log("Sound detected after pause. Resuming recording...");
+      //     Future.delayed(Duration(milliseconds: 500), () {
+      //       if (mounted) {
+      //         _speech.startStt();
+      //       }
+      //     });
+      //   }
+      // },
       onSoundLevelChanged: (level) {
-        log("Sound level: $level");
-        if (!_isListening && level > 0.5) {
-          log("Sound detected after pause. Resuming recording...");
-          Future.delayed(Duration(milliseconds: 500), () {
-            if (mounted) {
-              _speech.startStt();
-            }
-          });
-        }
-      },
+  if (!_isAppActive) return; // Ignore sound when in background
+  log("Sound level: $level");
+  if (!_isListening && level > 0.5) {
+    log("Sound detected after pause. Resuming recording...");
+    Future.delayed(Duration(milliseconds: 500), () {
+      if (mounted && _isAppActive) {
+        _speech.startStt();
+      }
+    });
+  }
+},
     );
 
     _speech.pauseIfMuteFor = Duration(seconds: 60);
@@ -179,6 +210,8 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   }
 
   void _startListening() {
+    if (!_isAppActive) return;
+  
     _speech.pauseIfMuteFor = Duration(seconds: 60);
     _speech.startStt();
 
@@ -219,13 +252,88 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     });
   }
 
-  @override
+
+
+    @override
+
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   super.didChangeAppLifecycleState(state);
+    
+  //   setState(() {
+  //     _isAppActive = state == AppLifecycleState.resumed;
+  //   });
+
+  //   if (state == AppLifecycleState.paused ||
+  //       state == AppLifecycleState.inactive ||
+  //       state == AppLifecycleState.detached) {
+  //     // App went to background or was closed
+  //     _handleAppBackgrounded();
+  //     // Future.delayed(Duration(milliseconds: 300), () {
+  //     //   if (mounted) {
+  //     //     widget.onRecordingComplete(_finalRecognizedText);
+  //     //   }});
+  //   } else if (state == AppLifecycleState.resumed) {
+  //     // App came back to foreground
+  //     _handleAppForegrounded();
+  //   }
+  // }
+
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      // widget.controller.stopStt(); // Stop recording when app goes to background
+  super.didChangeAppLifecycleState(state);
+  
+  setState(() {
+    _isAppActive = state == AppLifecycleState.resumed;
+  });
+
+  if (state == AppLifecycleState.paused ||
+      state == AppLifecycleState.inactive ||
+      state == AppLifecycleState.detached) {
+    // App went to background
+    _handleAppBackgrounded();
+  } else if (state == AppLifecycleState.resumed) {
+    // App came back to foreground
+    _handleAppForegrounded();
+  }
+}
+void _handleAppBackgrounded() async {
+  // Save whether we were recording before backgrounding
+  _wasRecordingBeforeBackground = _isListening;
+  
+  if (_isListening) {
+    // Save current recognized text to cumulative text
+    if(mounted){
+    setState(() {
+      _cumulativeText += " " + _finalRecognizedText.trim();
+      _finalRecognizedText = "";
+    });}
+    
+    // Pause recording and timer
+    await _speech.pauseStt;
+    _pauseTimer();
+    
+    if (mounted) {
+      setState(() {
+        _isListening = false;
+      });
     }
   }
+}
+
+void _handleAppForegrounded() async {
+  // Only resume if we were recording before backgrounding
+  if (_wasRecordingBeforeBackground && _remainingTime > 0) {
+    // Resume recording with previous cumulative text
+    _resumeTimer();
+    await _speech.startStt;
+    
+    if (mounted) {
+      setState(() {
+        _isListening = true;
+      });
+    }
+  }
+}
+
 
   Future<Map<String, String>?> _formatText(String speechText) async {
     if (!mounted) return null;
@@ -481,7 +589,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
         _cumulativeText = "";
         _remainingTime = 180;
       });
-
+      // _resetRecordingState();
       _speech.startStt();
       _startCountdown();
     } else {
@@ -498,15 +606,31 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _speech.stopStt(); // Ensure recording is stopped when widget is disposed
     SpeechService(context).dispose(); // Dispose the Singleton instance
     _speech.dispose();
     _timer?.cancel();
     _pauseTimer();
     super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+
   }
 
   @override
   Widget build(BuildContext context) {
+    // Only show recording UI when app is active
+    if (!_isAppActive) {
+      
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Text(
+            'Recording paused - return to app to continue',
+            style: GoogleFonts.karla(fontSize: 16),
+          ),
+        ),
+      );
+    }
     var mq = MediaQuery.of(context).size;
     // final appState = Provider.of<AppState>(context);
 
@@ -515,7 +639,8 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
         // Provider.of<AppState>(context, listen: false).navigateToHomePage();
         return true; // Prevent default back navigation
       },
-      child: Scaffold(
+      child: 
+      Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -566,16 +691,27 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            // Text(
+                            //   _remainingTime > 0
+                            //       ? '${(_remainingTime ~/ 60).toString().padLeft(2, '0')}:${(_remainingTime % 60).toString().padLeft(2, '0')}'
+                            //       : 'Time is up!',
+                            //   style: GoogleFonts.karla(
+                            //     fontSize: 20,
+                            //     fontWeight: FontWeight.w700,
+                            //     color: Colors.black,
+                            //   ),
+                            // ),
                             Text(
-                              _remainingTime > 0
-                                  ? '${(_remainingTime ~/ 60).toString().padLeft(2, '0')}:${(_remainingTime % 60).toString().padLeft(2, '0')}'
-                                  : 'Time is up!',
-                              style: GoogleFonts.karla(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                              ),
-                            ),
+  !_isAppActive ? 'Paused' : 
+  _remainingTime > 0 
+    ? '${(_remainingTime ~/ 60).toString().padLeft(2, '0')}:${(_remainingTime % 60).toString().padLeft(2, '0')}'
+    : 'Time is up!',
+  style: GoogleFonts.karla(
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    color: !_isAppActive ? Colors.grey : Colors.black,
+  ),
+),
                             SizedBox(height: mq.height * 0.015),
                             Image.asset(
                               'assets1/audioWave.gif',

@@ -274,6 +274,7 @@ class _TranscribeResultState extends State<TranscribeResult>
               controller: _tabController,
               indicatorColor: const Color(0xFF51A09B), // Custom indicator color
               indicatorWeight: 4.0,
+              indicatorSize: TabBarIndicatorSize.tab,
               indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0),
               labelColor: const Color(0xFF51A09B), // Active tab text color
               unselectedLabelColor:
@@ -581,3 +582,8 @@ class _TranscribeResultState extends State<TranscribeResult>
     super.dispose();
   }
 }
+
+
+
+
+

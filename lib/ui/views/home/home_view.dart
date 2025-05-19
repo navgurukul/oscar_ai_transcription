@@ -305,6 +305,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       } else {
         throw Exception(
             'Failed to load transcriptions. Status Code: ${response.statusCode}');
+            
       }
     } catch (e) {
       print("Error fetching transcriptions: $e");
