@@ -1,14 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:do_not_disturb/do_not_disturb_plugin.dart';
 import 'package:do_not_disturb/types.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/viewmodels/api_service.dart';
 import '../../detailpage.dart';
@@ -16,7 +18,6 @@ import '../../shared/styles/text_style.dart';
 import '../nointernet.dart';
 import '../profile/profile_view.dart';
 import '../record/record_view.dart';
-import 'dart:async';
 import '../transcribe/transcribe_view.dart';
 
 class HomePage extends StatefulWidget {
@@ -137,15 +138,72 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> _enableDndMode() async {
-    if (await dndPlugin.isNotificationPolicyAccessGranted()) {
-      await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
-      print("DND mode enabled.");
-    } else {
-      print("DND permission not granted.");
-      await dndPlugin.openNotificationPolicyAccessSettings();
+  // Future<void> _enableDndMode() async {
+  //   if (await dndPlugin.isNotificationPolicyAccessGranted()) {
+  //     // return true;
+  //     await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
+  //     print("DND mode enabled.");
+  //     // return true;
+  //   } else {
+  //     print("DND permission not granted.");
+  //     await dndPlugin.openNotificationPolicyAccessSettings();
+  //     // return false;
+  //   }
+  // }
+
+  Future<bool> _checkAndEnableDnd() async {
+    try {
+      bool isGranted = await dndPlugin.isNotificationPolicyAccessGranted();
+      if (!isGranted) {
+        // Open settings - this returns void so we can't check the result directly
+        await dndPlugin.openNotificationPolicyAccessSettings();
+
+        // Add a small delay to allow user to go to settings and return
+        await Future.delayed(Duration(seconds: 1));
+
+        // Re-check after returning from settings
+        isGranted = await dndPlugin.isNotificationPolicyAccessGranted();
+
+        if (!isGranted) {
+          // _showDndAlert();
+          return false;
+        }
+      }
+
+      if (isGranted) {
+        await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Error in DND check: $e");
+      return false;
     }
   }
+
+  Future<bool> _checkMicrophonePermission() async {
+    PermissionStatus status = await Permission.microphone.status;
+    if (status.isDenied) {
+      status = await Permission.microphone.request();
+    }
+    return status.isGranted;
+  }
+
+  Future<bool> _checkDndStatus() async {
+    try {
+      bool isGranted = await dndPlugin.isNotificationPolicyAccessGranted();
+      return isGranted;
+    } catch (e) {
+      print("Error checking DND status: $e");
+      return false;
+    }
+  }
+
+// Future<void> requestDNDPermission() async {
+//   if (!(await Permission.notification.isGranted)) {
+//     openAppSettings(); // Directly opens app settings for DND
+//   }
+// }
 
   void _deleteTranscription(String transcriptionId) async {
     try {
@@ -247,6 +305,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       } else {
         throw Exception(
             'Failed to load transcriptions. Status Code: ${response.statusCode}');
+            
       }
     } catch (e) {
       print("Error fetching transcriptions: $e");
@@ -284,6 +343,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } else {
       print("DND permission not granted.");
     }
+  }
+
+  void _showDndAlert() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('DND Permission Required'),
+        content: Text(
+            'Please enable Do Not Disturb mode for optimal recording experience'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showNewTranscriptionSnackBar() {
@@ -634,7 +710,27 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ),
                         iconSize: mq.height * 1 / 18,
                         onPressed: () async {
-                          await _enableDndMode();
+                          // First check microphone permission
+                          bool hasMicPermission =
+                              await _checkMicrophonePermission();
+                          if (!hasMicPermission) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      'Microphone permission is required')),
+                            );
+                            return;
+                          }
+                          // Then handle DND
+                          bool isDndEnabled = await _checkAndEnableDnd();
+                          if (!isDndEnabled) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      'Please enable DND mode for better recording')),
+                            );
+                            return;
+                          }
                           print("Microphone button pressed");
                           final newTranscription = await Navigator.push(
                             context,

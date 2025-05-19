@@ -357,6 +357,7 @@ class _DetailpageState extends State<Detailpage>
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Container(
+                height:48,
                 margin: EdgeInsets.symmetric(horizontal: mq.width * 0.04),
                 padding: EdgeInsets.symmetric(),
                 decoration: BoxDecoration(

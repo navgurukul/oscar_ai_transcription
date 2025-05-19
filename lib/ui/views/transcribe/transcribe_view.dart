@@ -274,6 +274,7 @@ class _TranscribeResultState extends State<TranscribeResult>
               controller: _tabController,
               indicatorColor: const Color(0xFF51A09B), // Custom indicator color
               indicatorWeight: 4.0,
+              indicatorSize: TabBarIndicatorSize.tab,
               indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0),
               labelColor: const Color(0xFF51A09B), // Active tab text color
               unselectedLabelColor:
@@ -297,10 +298,13 @@ class _TranscribeResultState extends State<TranscribeResult>
           body: TabBarView(
             controller: _tabController,
             children: [
-              SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
+              
+                Padding(
+                  padding: const EdgeInsets.only(
+                  top: 20.0, left: 20.0, right: 20.0, bottom: 100),
+                  child:SingleChildScrollView(
+                    child:
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -336,10 +340,14 @@ class _TranscribeResultState extends State<TranscribeResult>
                       ),
                     ],
                   ),
+                  ),
                 ),
-              ),
+              
+              
               Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.only(
+                top: 20.0, left: 20.0, right: 20.0, bottom: 100),
+                child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -361,6 +369,7 @@ class _TranscribeResultState extends State<TranscribeResult>
                     SizedBox(
                       height: 20,
                     ),
+
                     Text(
                       widget.unformattedText == null
                           ? 'No original text is provided'
@@ -372,7 +381,7 @@ class _TranscribeResultState extends State<TranscribeResult>
                       ),
                     ),
                   ],
-                ),
+                ),),
               ),
             ],
           ),
@@ -477,7 +486,7 @@ class _TranscribeResultState extends State<TranscribeResult>
     var mq = MediaQuery.of(context).size;
     return SafeArea(
       child: BottomAppBar(
-        height: mq.height * 1 / 9,
+        height: 100,
         color: Color.fromRGBO(220, 236, 235, 1.0),
         child: Padding(
           padding: EdgeInsets.only(bottom: mq.height * 0.01),
@@ -574,3 +583,8 @@ class _TranscribeResultState extends State<TranscribeResult>
     super.dispose();
   }
 }
+
+
+
+
+
