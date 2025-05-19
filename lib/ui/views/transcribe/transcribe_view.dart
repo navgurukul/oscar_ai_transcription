@@ -7,12 +7,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:oscar_stt/ui/views/auth/login_view.dart';
-import 'package:oscar_stt/ui/views/nointernet.dart';
+import 'package:oscar_stt/ui/views/record/record_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
-import '../record/record_view.dart';
+import '../auth/login_view.dart';
+import '../nointernet.dart';
 import 'dart:async';
 
 class TranscribeResult extends StatefulWidget {
@@ -23,30 +23,30 @@ class TranscribeResult extends StatefulWidget {
   final String tokenid;
   final bool isEmptyInput;
 
+  const TranscribeResult({
+    Key? key,
+    required this.transcribedText,
+    this.onDelete,
+    required this.tokenid,
+    required this.isEmptyInput,
+    required this.unformattedText,
+    required this.title_text,
+  }) : super(key: key);
 
-
-  const TranscribeResult(
-      {Key? key,
-        required this.transcribedText,
-        this.onDelete,
-        required this.tokenid,
-        required this.isEmptyInput,
-        required this.unformattedText,
-        required this.title_text,
-        
-      }) : super(key: key);
   @override
   State<TranscribeResult> createState() => _TranscribeResultState();
 }
-class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerProviderStateMixin{
+
+class _TranscribeResultState extends State<TranscribeResult>
+    with SingleTickerProviderStateMixin {
   late TextEditingController _textController;
   late TextEditingController _text_titleController;
   late TextEditingController _notFormattedText;
   late TabController _tabController;
-  final Connectivity _connectivity = Connectivity();
   late final Stream<ConnectivityResult> _connectivityStream;
   String? responseDate;
   String? displayedDate;
+  final Connectivity _connectivity = Connectivity();
 
   @override
   void initState() {
@@ -55,20 +55,80 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     _notFormattedText = TextEditingController(text: widget.unformattedText);
     _text_titleController = TextEditingController(text: widget.title_text);
     _tabController = TabController(length: 2, vsync: this);
-    
-    super.initState();
-    _connectivityStream = _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
+    _connectivityStream =
+        _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
   }
 
   void _monitorInternet() {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => NoInternetScreen(),
-        ));
+        if (mounted) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => NoInternetScreen(),
+          ));
+        }
       }
     });
+  }
+
+  Future<void> _deleteTranscription(BuildContext context) async {
+    widget.onDelete!();
+    Navigator.pop(context, 'Transcription deleted');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Transcription deleted')),
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String errorMessage) {
+    var mq = MediaQuery.of(context).size;
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dialog from closing on outside tap
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          title: const Text('Oops! an error occured',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              )),
+          content: Text(errorMessage,
+              style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: mq.width * 0.04,
+                color: Colors.black,
+              )),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ButtonStyle(
+                backgroundColor:
+                    WidgetStateProperty.all(AppColors.ButtonColor2),
+                padding: WidgetStateProperty.all(
+                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handleBack() {
+    if (mounted) {
+      Navigator.pop(context, 'show_popup');
+    }
   }
 
   void checkInput({required bool isEmptyInput}) {
@@ -78,9 +138,7 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       print("Input is provided.");
     }
   }
-  void _handleBack() {
-    Navigator.pop(context, 'show_popup');
-  }
+
   void _shareText() {
     try {
       Share.share(_textController.text);
@@ -89,20 +147,24 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       print('Error sharing text: $e');
     }
   }
-  Future<void> _deleteTranscription(BuildContext context) async {
-    widget.onDelete!();
-    Navigator.pop(context, 'Transcription deleted');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Transcription deleted')),
-    );}
+
+  // Future<void> _deleteTranscription(BuildContext context) async {
+  //   widget.onDelete!(); // Perform the delete operation
+  //   Navigator.pop(context, 'Transcription deleted');
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text('Transcription deleted')),
+  //   );}
+
   void _copyText() {
     Clipboard.setData(ClipboardData(text: _textController.text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Text copied to clipboard')),
     );
   }
+
   Future<void> _sendTranscriptionToBackend() async {
-    final String apiUrl = 'https://dev-oscar.merakilearn.org/api/v1/transcriptions/add';
+    final String apiUrl =
+        'https://dev-oscar.merakilearn.org/api/v1/transcriptions/add';
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
@@ -113,31 +175,29 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
         body: jsonEncode(<String, String>{
           'transcribedText': _textController.text,
           'userTextInput': _notFormattedText.text,
-          'title': _text_titleController.text ,
+          'title': _text_titleController.text,
         }),
       );
-    if (response.statusCode == 201) {
+      if (response.statusCode == 201) {
         print('Transcription successfully sent: ${response.statusCode}');
         final headerDate = response.headers['date'];
         if (responseDate != null) {
           displayedDate = _formatDate(responseDate!);
           setState(() {});
-        }
-        else {
+        } else {
           print('Date header not found');
         }
-
-        Navigator.pop(context, 'Saved transcription');
+        if (mounted) {
+          Navigator.pop(context, 'Saved transcription');
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Saved transcription')),
         );
-      }
-      else if (response.statusCode == 401) {
+      } else if (response.statusCode == 401) {
         print(' Invalid token: ${response.statusCode}');
         showDialog(
           context: context,
-          barrierDismissible:
-          false,
+          barrierDismissible: false,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Session Expired'),
@@ -145,25 +205,33 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
               actions: [
                 TextButton(
                   onPressed: () async {
-                    Navigator.of(context).pop();
-          
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                    }
+
                     await GoogleSignIn().signOut();
                     SharedPreferences prefs =
-                    await SharedPreferences.getInstance();
+                        await SharedPreferences.getInstance();
                     await prefs.remove('isLoggedIn');
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (context) => LoginView()),
-                          (route) => false,
+                      (route) => false,
                     );
                   },
-                  child: Text('OK'),),],);},);}
-      else {
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
         print('Failed to send transcription: ${response.statusCode}');
       }
     } catch (e) {
       print('Error during sending transcription: $e');
     }
   }
+
   @override
   void didUpdateWidget(covariant TranscribeResult oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -171,9 +239,10 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
       _textController.text = widget.transcribedText;
     }
   }
+
   String _formatDate(String dateString) {
     final date = DateTime.parse(dateString).toLocal();
-    return DateFormat('MMM dd, yyyy').format(date);
+    return DateFormat('MMM dd, yyyy').format(date); // Formats to Jan 10, 2025
   }
 
   @override
@@ -181,111 +250,148 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     var mq = MediaQuery.of(context).size;
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('MMMM dd, yyyy').format(now);
-    bool isInputEmpty = widget.unformattedText != '' ;
-    if (isInputEmpty){
-      return Scaffold(
-        backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-        appBar: AppBar(
-          scrolledUnderElevation: 0.0,
-          automaticallyImplyLeading: false,
-          elevation: 0,
-          leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
-              onPressed: _handleBack),
+    bool isInputEmpty =
+        widget.unformattedText.trim().isEmpty; // Corrected condition
+    print("Unformatted Text: '${widget.unformattedText}'");
+    print("Is Input Empty: $isInputEmpty");
+
+    if (!isInputEmpty) {
+      return WillPopScope(
+        onWillPop: () async {
+          return true; // Prevent default back navigation
+        },
+        child: Scaffold(
           backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
-          bottom: TabBar(
-            controller: _tabController,
-            indicatorColor: const Color(0xFF51A09B),
-            indicatorWeight: 4.0,
-            indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0),
-            labelColor: const Color(0xFF51A09B),
-            unselectedLabelColor:
-            const Color(0xFF6E6E6E),
-            labelStyle: GoogleFonts.karla(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            unselectedLabelStyle: GoogleFonts.karla(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            tabs: [
-              Tab(
-                text: "Polished Text",
+          appBar: AppBar(
+            scrolledUnderElevation: 0.0,
+            automaticallyImplyLeading: false,
+            elevation: 0,
+            leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios, size: mq.width * 0.04),
+                onPressed: _handleBack),
+            backgroundColor: Color.fromRGBO(220, 236, 235, 1.0),
+            bottom: TabBar(
+              controller: _tabController,
+              indicatorColor: const Color(0xFF51A09B), // Custom indicator color
+              indicatorWeight: 4.0,
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicatorPadding: EdgeInsets.symmetric(horizontal: 20.0),
+              labelColor: const Color(0xFF51A09B), // Active tab text color
+              unselectedLabelColor:
+                  const Color(0xFF6E6E6E), // Inactive tab text color
+              labelStyle: GoogleFonts.karla(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
-              Tab(text: "Original Text"),
-            ],
-          ),),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
+              unselectedLabelStyle: GoogleFonts.karla(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+              tabs: [
+                Tab(
+                  text: "Polished Text",
+                ),
+                Tab(text: "Original Text"),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            controller: _tabController,
+            children: [
+              
+                Padding(
+                  padding: const EdgeInsets.only(
+                  top: 20.0, left: 20.0, right: 20.0, bottom: 100),
+                  child:SingleChildScrollView(
+                    child:
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _text_titleController.text,
+                        style: GoogleFonts.spectral(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        formattedDate,
+                        style: GoogleFonts.karla(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Color.fromRGBO(110, 110, 110, 1.0),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        widget.transcribedText == null
+                            ? 'No formatted text available'
+                            : widget.transcribedText!,
+                        style: GoogleFonts.karla(
+                          fontSize: 16,
+                          color: const Color(0xFF6E6E6E),
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                  ),
+                ),
+              
+              
+              Padding(
+                padding: const EdgeInsets.only(
+                top: 20.0, left: 20.0, right: 20.0, bottom: 100),
+                child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _text_titleController.text,
-                      style: GoogleFonts.spectral(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+                    Container(
+                      height: 43,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          color: Colors.white),
+                      child: Center(
+                        child: Text(
+                          "Unprocessed text as spoken to Oscar",
+                          style: TextStyle(
+                              color: const Color(0xFF4A4A4A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
                     SizedBox(
-                      height: 5,
+                      height: 20,
                     ),
-                      Text(
-                        formattedDate,
-                        style: GoogleFonts.spectral(fontSize: 16),
-                      ),
-                    SizedBox(height: 10,),
+
                     Text(
-                      widget.transcribedText == null
-                          ? 'No formatted text available'
-                          : widget.transcribedText!,
+                      widget.unformattedText == null
+                          ? 'No original text is provided'
+                          : widget.unformattedText!,
                       style: GoogleFonts.karla(
                         fontSize: 16,
                         color: const Color(0xFF6E6E6E),
-                        fontWeight: FontWeight.w400,),),],),),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 43,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        color: Colors.white),
-                    child: Center(
-                      child: Text(
-                        "Unprocessed text as spoken to Oscar",
-                        style: TextStyle(
-                            color: const Color(0xFF4A4A4A),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700),
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    widget.unformattedText == null
-                        ? 'No original text is provided'
-                        : widget.unformattedText!,
-                    style: GoogleFonts.karla(
-                      fontSize: 16,
-                      color: const Color(0xFF6E6E6E),
-                      fontWeight: FontWeight.w400,),),],),),],),
-        bottomSheet: _buildFullInputBottomSheet(context),
+                  ],
+                ),),
+              ),
+            ],
+          ),
+          bottomSheet: _buildFullInputBottomSheet(context),
+        ),
       );
-    }else{
+    } else {
       var mq = MediaQuery.of(context).size;
       return Scaffold(
-        backgroundColor:Color(0xFFEEF6F5),
+        backgroundColor: Color(0xFFEEF6F5),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
@@ -297,9 +403,14 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                   size: 20,
                 ),
                 onPressed: () {
-                  Navigator.pop(context);
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
                 },
-              ),],),),
+              ),
+            ],
+          ),
+        ),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -310,14 +421,20 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                 height: 90.31,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 30),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
                 child: Text(
                   "It seems the mic was not working or no words were spoken",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.karla(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
-                      color: const Color(0xFF4D4D4D)),),),],),),
+                      color: const Color(0xFF4D4D4D)),
+                ),
+              ),
+            ],
+          ),
+        ),
         floatingActionButton: Stack(
           alignment: Alignment.center,
           children: <Widget>[
@@ -347,19 +464,29 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                           context,
                           MaterialPageRoute(
                             builder: (context) => RecordView(
-                              onRecordingComplete: (String recording) {
-                              },
-                              tokenid: widget.tokenid,),),);},),),),),),],),
-                              floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+                              onRecordingComplete: (String recording) {},
+                              tokenid: widget.tokenid,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       );
     }
-    
   }
+
   Widget _buildFullInputBottomSheet(BuildContext context) {
     var mq = MediaQuery.of(context).size;
     return SafeArea(
       child: BottomAppBar(
-        height: mq.height * 1 / 9,
+        height: 100,
         color: Color.fromRGBO(220, 236, 235, 1.0),
         child: Padding(
           padding: EdgeInsets.only(bottom: mq.height * 0.01),
@@ -392,12 +519,21 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                             color: Colors.red),
                         onPressed: () {
                           _deleteTranscription(context);
-                          Navigator.pop(context);
+                          if (mounted) {
+                            Navigator.pop(context);
+                          }
                         },
-                        iconSize: 20,),],),),),
+                        iconSize: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               SafeArea(
                 child: GestureDetector(
-                  onTap: _sendTranscriptionToBackend,
+                  onTap: () async {
+                    await _sendTranscriptionToBackend();
+                  },
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 20,
@@ -417,13 +553,27 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
                         ),
                         SizedBox(
                             width:
-                            mq.width * 0.02),
+                                mq.width * 0.02), // Space between icon and text
                         Text(
                           "Save",
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
-                            fontSize: 16,),),],),),),),],),),),);}
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _textController.dispose();
@@ -433,6 +583,8 @@ class _TranscribeResultState extends State<TranscribeResult>  with SingleTickerP
     super.dispose();
   }
 }
+
+
 
 
 

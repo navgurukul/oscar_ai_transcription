@@ -1,22 +1,24 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:do_not_disturb/do_not_disturb_plugin.dart';
 import 'package:do_not_disturb/types.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:oscar_stt/core/constants/app_colors.dart';
-import 'package:oscar_stt/ui/detailpage.dart';
-import 'package:oscar_stt/ui/views/nointernet.dart';
-import 'package:oscar_stt/ui/views/transcribe/transcribe_view.dart';
+import 'package:manual_speech_to_text/manual_speech_to_text.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/viewmodels/api_service.dart';
+import '../../detailpage.dart';
 import '../../shared/styles/text_style.dart';
+import '../nointernet.dart';
 import '../profile/profile_view.dart';
 import '../record/record_view.dart';
-import 'dart:async';
+import '../transcribe/transcribe_view.dart';
 
 class HomePage extends StatefulWidget {
   final String profileName;
@@ -36,67 +38,43 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late Future<List<Map<String, dynamic>>> _transcriptionsFuture;
-  List<Map<String, dynamic>> _currentTranscriptions = [];
   final Connectivity _connectivity = Connectivity();
+  late final Stream<ConnectivityResult> _connectivityStream;
   final dndPlugin = DoNotDisturbPlugin();
   bool isListening = false;
-
-
-  late final Stream<ConnectivityResult> _connectivityStream;
+  List<Map<String, dynamic>> _currentTranscriptions = [];
+  late ManualSttController _controller;
+  ManualSttState _currentState = ManualSttState.stopped;
+  String _finalRecognizedText = '';
+  // late ManualSttController _controller;
+  ManualSttState currentState = ManualSttState.stopped;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Fetch fresh data every time the dependencies change,
     _transcriptionsFuture = ApiService().fetchTranscriptions(widget.tokenid);
+    _refreshData();
   }
 
   @override
   void initState() {
     super.initState();
+    print("App initialized");
     _connectivityStream =
         _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
+    WidgetsBinding.instance.addObserver(this);
+    _controller = ManualSttController(context);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ModalRoute.of(context)?.settings.arguments == true) {
         _showRefreshAlertDialog();
         _refreshData();
       }
     });
-  }
-
-  void _monitorInternet() {
-    _connectivityStream.listen((ConnectivityResult result) {
-      if (result == ConnectivityResult.none) {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => NoInternetScreen(),
-        ));
-      }
-    });
-  }
-
-  void dispose() {
-    super.dispose();
-  }
-
-  Future<void> _enableDndMode() async {
-    if (await dndPlugin.isNotificationPolicyAccessGranted()) {
-      await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
-      print("DND mode enabled.");
-    } else {
-      print("DND permission not granted.");
-      await dndPlugin.openNotificationPolicyAccessSettings();
-    }
-  }
-
-  Future<void> _disableDndMode() async {
-    if (await dndPlugin.isNotificationPolicyAccessGranted()) {
-      await dndPlugin.setInterruptionFilter(InterruptionFilter.all);
-      print("DND mode disabled.");
-    } else {
-      print("DND permission not granted.");
-    }
   }
 
   void _showRefreshAlertDialog() {
@@ -109,7 +87,7 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Close the dialog
               },
               child: Text('OK'),
             ),
@@ -117,70 +95,6 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
-  }
-
-  Future<void> _refreshData() async {
-    final newTranscriptions =
-        await ApiService().fetchTranscriptions(widget.tokenid);
-
-    setState(() {
-      _transcriptionsFuture = Future.value(newTranscriptions);
-      _currentTranscriptions = newTranscriptions;
-    });
-
-    if (_currentTranscriptions.length < newTranscriptions.length) {
-      _showNewTranscriptionSnackBar();
-    }
-  }
-
-  void _showNewTranscriptionSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('New transcription added'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _deleteTranscription(String transcriptionId) async {
-    try {
-      final response = await http.delete(
-        Uri.parse(
-            'https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
-        headers: {'Authorization': 'Bearer ${widget.tokenid}'},
-      );
-
-      if (response.statusCode == 200) {
-        print('deleted successfully');
-        setState(() {
-          _transcriptionsFuture = _fetchTranscriptions();
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Transcription deleted'),
-          ),
-        );
-      } else if (response.statusCode == 400) {
-        print('Bad Request');
-        _showErrorDialog(
-            context, 'Failed to delete transcription due to Bad Request');
-      } else if (response.statusCode == 404) {
-        print('Transcription not found');
-        _showErrorDialog(
-            context, 'Failed to delete due to Transcription not found');
-      } else if (response.statusCode == 500) {
-        print('Internal server error ');
-        _showErrorDialog(context,
-            'Failed to delete transcription due to Internal server error ');
-      } else {
-        _showErrorDialog(context, 'Failed to delete transcription');
-        throw Exception('Failed to delete transcription');
-      }
-    } catch (e) {
-      print('Error: $e');
-      _showErrorDialog(context, '$e');
-    }
   }
 
   Future<List<Map<String, dynamic>>> _fetchTranscriptions() async {
@@ -214,21 +128,133 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  String _formatDate(String dateString) {
-    final date = DateTime.parse(dateString).toLocal();
-    return DateFormat('MMM dd, yyyy').format(date);
+  void _monitorInternet() {
+    _connectivityStream.listen((ConnectivityResult result) {
+      if (result == ConnectivityResult.none) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => NoInternetScreen(),
+        ));
+      }
+    });
+  }
+
+  // Future<void> _enableDndMode() async {
+  //   if (await dndPlugin.isNotificationPolicyAccessGranted()) {
+  //     // return true;
+  //     await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
+  //     print("DND mode enabled.");
+  //     // return true;
+  //   } else {
+  //     print("DND permission not granted.");
+  //     await dndPlugin.openNotificationPolicyAccessSettings();
+  //     // return false;
+  //   }
+  // }
+
+  Future<bool> _checkAndEnableDnd() async {
+    try {
+      bool isGranted = await dndPlugin.isNotificationPolicyAccessGranted();
+      if (!isGranted) {
+        // Open settings - this returns void so we can't check the result directly
+        await dndPlugin.openNotificationPolicyAccessSettings();
+
+        // Add a small delay to allow user to go to settings and return
+        await Future.delayed(Duration(seconds: 1));
+
+        // Re-check after returning from settings
+        isGranted = await dndPlugin.isNotificationPolicyAccessGranted();
+
+        if (!isGranted) {
+          // _showDndAlert();
+          return false;
+        }
+      }
+
+      if (isGranted) {
+        await dndPlugin.setInterruptionFilter(InterruptionFilter.priority);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Error in DND check: $e");
+      return false;
+    }
+  }
+
+  Future<bool> _checkMicrophonePermission() async {
+    PermissionStatus status = await Permission.microphone.status;
+    if (status.isDenied) {
+      status = await Permission.microphone.request();
+    }
+    return status.isGranted;
+  }
+
+  Future<bool> _checkDndStatus() async {
+    try {
+      bool isGranted = await dndPlugin.isNotificationPolicyAccessGranted();
+      return isGranted;
+    } catch (e) {
+      print("Error checking DND status: $e");
+      return false;
+    }
+  }
+
+// Future<void> requestDNDPermission() async {
+//   if (!(await Permission.notification.isGranted)) {
+//     openAppSettings(); // Directly opens app settings for DND
+//   }
+// }
+
+  void _deleteTranscription(String transcriptionId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse(
+            'https://dev-oscar.merakilearn.org/api/v1/transcriptions/$transcriptionId'),
+        headers: {'Authorization': 'Bearer ${widget.tokenid}'},
+      );
+
+      if (response.statusCode == 200) {
+        print('deleted successfully');
+        setState(() {
+          _transcriptionsFuture = fetchTranscriptions();
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Transcription deleted'),
+          ),
+        );
+      } else if (response.statusCode == 400) {
+        print('Bad Request');
+        _showErrorDialog(
+            context, 'Failed to delete transcription due to Bad Request');
+      } else if (response.statusCode == 404) {
+        print('Transcription not found');
+        _showErrorDialog(
+            context, 'Failed to delete due to Transcription not found');
+      } else if (response.statusCode == 500) {
+        print('Internal server error ');
+        _showErrorDialog(context,
+            'Failed to delete transcription due to Internal server error ');
+      } else {
+        _showErrorDialog(context, 'Failed to delete transcription');
+        throw Exception('Failed to delete transcription');
+      }
+    } catch (e) {
+      print('Error: $e');
+      _showErrorDialog(context, '$e');
+    }
   }
 
   void _showErrorDialog(BuildContext context, String errorMessage) {
     var mq = MediaQuery.of(context).size;
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: false, // Prevent dialog from closing on outside tap
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-                8.0),
+            borderRadius: BorderRadius.circular(8.0),
           ),
           title: const Text('Oops! an error occured',
               style: TextStyle(
@@ -263,9 +289,102 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<List<Map<String, dynamic>>> fetchTranscriptions() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://dev-oscar.merakilearn.org/api/v1/transcriptions'),
+        headers: {'Authorization': 'Bearer ${widget.tokenid}'},
+      );
+
+      print("API Response Status Code: ${response.statusCode}");
+      print("API Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(data['data']);
+      } else {
+        throw Exception(
+            'Failed to load transcriptions. Status Code: ${response.statusCode}');
+            
+      }
+    } catch (e) {
+      print("Error fetching transcriptions: $e");
+      throw Exception('Failed to load transcriptions');
+    }
+  }
+
+  Future<void> _refreshData() async {
+    try {
+      final newTranscriptions =
+          await ApiService().fetchTranscriptions(widget.tokenid);
+
+      if (mounted) {
+        setState(() {
+          _transcriptionsFuture = Future.value(newTranscriptions);
+          _currentTranscriptions = newTranscriptions;
+        });
+      }
+
+      if (_currentTranscriptions.length < newTranscriptions.length) {
+        _showNewTranscriptionSnackBar();
+      }
+    } catch (e) {
+      print("Error fetching transcriptions: $e");
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  Future<void> _disableDndMode() async {
+    if (await dndPlugin.isNotificationPolicyAccessGranted()) {
+      await dndPlugin.setInterruptionFilter(InterruptionFilter.all);
+      print("DND mode disabled.");
+    } else {
+      print("DND permission not granted.");
+    }
+  }
+
+  void _showDndAlert() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('DND Permission Required'),
+        content: Text(
+            'Please enable Do Not Disturb mode for optimal recording experience'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNewTranscriptionSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('New transcription added'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  String _formatDate(String dateString) {
+    final date = DateTime.parse(dateString).toLocal();
+    return DateFormat('MMM dd, yyyy').format(date); // Formats to Jan 10, 2025
+  }
+
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     var mq = MediaQuery.of(context).size;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageSize = screenWidth * 0.75;
 
     return WillPopScope(
       onWillPop: () async {
@@ -282,16 +401,10 @@ class _HomePageState extends State<HomePage> {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(
-                    'assets1/Frame 31584.svg',
-                    width: 98,
-                    height: 32,
-                  ),
-                  SizedBox(width: 5,),
-                ],
+              SvgPicture.asset(
+                'assets1/Frame 31584.svg',
+                width: 98,
+                height: 32,
               ),
               IconButton(
                 icon: CircleAvatar(
@@ -316,14 +429,11 @@ class _HomePageState extends State<HomePage> {
                 ),
                 onPressed: () {
                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsScreen(
-                        profileName: widget.profileName,
-                        profilePicUrl: widget.profilePicUrl,
-                      ),
-                    ),
-                  );
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SettingsScreen(
+                              profileName: widget.profileName,
+                              profilePicUrl: widget.profilePicUrl)));
                 },
               )
             ],
@@ -340,17 +450,15 @@ class _HomePageState extends State<HomePage> {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return SingleChildScrollView(
-                  physics:
-                      AlwaysScrollableScrollPhysics(),
+                  physics: AlwaysScrollableScrollPhysics(),
                   child: Container(
                     height:
-                        mq.height - kToolbarHeight,
+                        mq.height - kToolbarHeight, // Full height minus AppBar
                     child: Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment
-                            .center,
+                            .center, // Center the content horizontally
                         children: [
                           Align(
                             alignment: Alignment.topLeft,
@@ -420,20 +528,21 @@ class _HomePageState extends State<HomePage> {
                         child: ListView.builder(
                           padding: EdgeInsets.symmetric(
                               horizontal: mq.width *
-                                  0.05),
+                                  0.05), // Added padding on left and right
                           itemCount: transcriptions.length,
                           itemBuilder: (context, index) {
                             final transcription =
                                 transcriptions.reversed.toList()[index];
                             final formattedDate =
                                 _formatDate(transcription['createdAt']);
+                            // Determine maxLines based on the text length
                             int maxLines;
                             if (transcription.length <= 50) {
-                              maxLines = 1;
+                              maxLines = 1; // Short text
                             } else if (transcription.length <= 150) {
-                              maxLines = 2;
+                              maxLines = 2; // Medium text
                             } else {
-                              maxLines = 5;
+                              maxLines = 5; // Long text
                             }
 
                             return Padding(
@@ -500,9 +609,10 @@ class _HomePageState extends State<HomePage> {
                                                   Text(
                                                     transcription[
                                                         'transcribedText'],
-                                                    maxLines:3,
+                                                    maxLines:
+                                                        maxLines, // Dynamic number of lines
                                                     overflow: TextOverflow
-                                                        .ellipsis,
+                                                        .ellipsis, // Truncate extra text
                                                     style: GoogleFonts.karla(
                                                         fontSize: 14.0,
                                                         fontWeight:
@@ -593,51 +703,74 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: Center(
                     child: IconButton(
-                      icon: Icon(
-                        Icons.mic,
-                        color: Colors.white,
-                        size: 32.0,
-                      ),
-                      iconSize: mq.height * 1 / 18,
-                      onPressed: () async {
-                        await _enableDndMode();
-                        print("Microphone button pressed");
-                        final newTranscription = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context, ) => RecordView(
-                              onRecordingComplete: (transcribedText) {
-                                _refreshData();
-                                Navigator.pop(context, true);
-                                _disableDndMode();
-                                setState(() {
-                                  _transcriptionsFuture =
-                                      _fetchTranscriptions();
-                                });
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TranscribeResult(
-                                      transcribedText: transcribedText,
-                                      unformattedText: '',
-                                      onDelete: () =>
-                                          _deleteTranscription(transcribedText),
-                                      tokenid: widget.tokenid, title_text: '',
-                                      isEmptyInput: false,
+                        icon: Icon(
+                          Icons.mic,
+                          color: Colors.white,
+                          size: 32.0,
+                        ),
+                        iconSize: mq.height * 1 / 18,
+                        onPressed: () async {
+                          // First check microphone permission
+                          bool hasMicPermission =
+                              await _checkMicrophonePermission();
+                          if (!hasMicPermission) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      'Microphone permission is required')),
+                            );
+                            return;
+                          }
+                          // Then handle DND
+                          bool isDndEnabled = await _checkAndEnableDnd();
+                          if (!isDndEnabled) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      'Please enable DND mode for better recording')),
+                            );
+                            return;
+                          }
+                          print("Microphone button pressed");
+                          final newTranscription = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (
+                                context,
+                              ) =>
+                                  RecordView(
+                                onRecordingComplete: (transcribedText) {
+                                  _refreshData();
+                                  Navigator.pop(context, true);
+                                  _disableDndMode();
+                                  setState(() {
+                                    _transcriptionsFuture =
+                                        _fetchTranscriptions();
+                                  });
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => TranscribeResult(
+                                        transcribedText: transcribedText,
+                                        unformattedText: '',
+                                        onDelete: () => _deleteTranscription(
+                                            transcribedText),
+                                        tokenid: widget.tokenid,
+                                        title_text: '',
+                                        isEmptyInput: false,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                              tokenid: widget.tokenid,
+                                  );
+                                },
+                                tokenid: widget.tokenid,
+                              ),
                             ),
-                          ),
-                        );
-                        if (newTranscription != null &&
-                            newTranscription == true) {
-                          _refreshData();
-                        }
-                      },
-                    ),
+                          );
+                          if (newTranscription != null &&
+                              newTranscription == true) {
+                            _refreshData();
+                          }
+                        }),
                   ),
                 ),
               ),
