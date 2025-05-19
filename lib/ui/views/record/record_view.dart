@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'dart:async';
 import 'dart:developer';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import '../../../core/constants/app_colors.dart';
 import 'package:http/http.dart' as http;
 import '../nointernet.dart';
@@ -17,8 +19,7 @@ class SpeechService {
   final ManualSttController _speech;
 
   // Private constructor
-  SpeechService._internal(BuildContext context)
-      : _speech = ManualSttController(context);
+  SpeechService._internal(BuildContext context) : _speech = ManualSttController(context);
 
   // Factory constructor to return the singleton instance
   factory SpeechService(BuildContext context) {
@@ -28,12 +29,15 @@ class SpeechService {
 
   // Getter for the speech instance
   ManualSttController get speechInstance => _speech;
-  // Dispose method to clean up resource.
+
+  // Dispose method to clean up resources
+
   Future<void> dispose() async {
     await _speech.pauseStt;
     print("SpeechService disposed.");
   }
 }
+
 
 class RecordView extends StatefulWidget {
   final Function(String) onRecordingComplete;
@@ -50,52 +54,39 @@ class RecordView extends StatefulWidget {
 }
 
 class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
+
   bool _wasRecordingBeforeBackground = false;
   bool _isFirstTime = true;
-  int _remainingTime = 180; // 3 minutes in seconds
+  late ManualSttController _speech;
+  String _finalRecognizedText = "";
+  int _remainingTime = 180;
   Timer? _timer;
   final Connectivity _connectivity = Connectivity();
   late final Stream<ConnectivityResult> _connectivityStream;
   bool _isProcessing = false;
   bool _isLoading = false;
-  late ManualSttController _speech;
   bool _isListening = false;
-  String _finalRecognizedText = "";
   String _cumulativeText = "";
   bool _isAppActive = true;
+
+
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // _resetRecordingState();
     _checkPermissionAndStartListening();
     _speech = SpeechService(context).speechInstance;
     _initSpeech();
     _initializeSpeech();
-    _connectivityStream =
-        _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
+    _connectivityStream = _connectivity.onConnectivityChanged.cast<ConnectivityResult>();
     _monitorInternet();
   }
 
 
-//   void _resetRecordingState() {
-//   _remainingTime = 180;
-//   _finalRecognizedText = "";
-//   _cumulativeText = "";
-//   _isListening = false;
-//   _isProcessing = false;
-//   _isLoading = false;
-//   _isFirstTime = true;
-//   // Reinitialize speech service
-//   _speech = SpeechService(context).speechInstance;
-//   _initializeSpeech();
-//   _checkPermissionAndStartListening();
-// }
-
   void _initSpeech() async {
     try {
-      await _speech.startStt;
+      await _speech.startStt; // Start speech-to-text
       print("Speech-to-text started successfully.");
       setState(() {});
     } catch (e) {
@@ -121,29 +112,20 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
           });
         }
       },
-      // onSoundLevelChanged: (level) {
-      //   log("Sound level: $level");
-      //   if (!_isListening && level > 0.5) {
-      //     log("Sound detected after pause. Resuming recording...");
-      //     Future.delayed(Duration(milliseconds: 500), () {
-      //       if (mounted) {
-      //         _speech.startStt();
-      //       }
-      //     });
-      //   }
-      // },
+
       onSoundLevelChanged: (level) {
-  if (!_isAppActive) return; // Ignore sound when in background
-  log("Sound level: $level");
-  if (!_isListening && level > 0.5) {
-    log("Sound detected after pause. Resuming recording...");
-    Future.delayed(Duration(milliseconds: 500), () {
-      if (mounted && _isAppActive) {
-        _speech.startStt();
-      }
-    });
-  }
-},
+        if (!_isAppActive) return; // Ignore sound when in background
+        log("Sound level: $level");
+        if (!_isListening && level > 0.5) {
+          log("Sound detected after pause. Resuming recording...");
+          Future.delayed(Duration(milliseconds: 500), () {
+            if (mounted) {
+              _speech.startStt();
+            }
+          });
+        }
+      },
+
     );
 
     _speech.pauseIfMuteFor = Duration(seconds: 60);
@@ -246,6 +228,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
       if (result == ConnectivityResult.none) {
         // widget.controller.stopStt();
         Navigator.of(context).pushReplacement(MaterialPageRoute(
+
           builder: (context) => NoInternetScreen(),
         ));
       }
@@ -253,30 +236,8 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   }
 
 
-
     @override
 
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   super.didChangeAppLifecycleState(state);
-    
-  //   setState(() {
-  //     _isAppActive = state == AppLifecycleState.resumed;
-  //   });
-
-  //   if (state == AppLifecycleState.paused ||
-  //       state == AppLifecycleState.inactive ||
-  //       state == AppLifecycleState.detached) {
-  //     // App went to background or was closed
-  //     _handleAppBackgrounded();
-  //     // Future.delayed(Duration(milliseconds: 300), () {
-  //     //   if (mounted) {
-  //     //     widget.onRecordingComplete(_finalRecognizedText);
-  //     //   }});
-  //   } else if (state == AppLifecycleState.resumed) {
-  //     // App came back to foreground
-  //     _handleAppForegrounded();
-  //   }
-  // }
 
   void didChangeAppLifecycleState(AppLifecycleState state) {
   super.didChangeAppLifecycleState(state);
@@ -390,7 +351,7 @@ void _handleAppForegrounded() async {
         });
       }
     }
-  }
+
 
   void _resumeTimer() {
     if (_remainingTime > 0) {
@@ -437,6 +398,7 @@ void _handleAppForegrounded() async {
     _pauseTimer();
     _speech.pauseStt();
     // widget.controller.pauseStt();
+
     bool? result = await showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
@@ -507,7 +469,7 @@ void _handleAppForegrounded() async {
       });
       _resumeTimer();
       _speech.startStt();
-      // _startCountdown();
+
     } else {
       Navigator.of(context).pop();
     }
@@ -516,8 +478,9 @@ void _handleAppForegrounded() async {
   void _onRestartPressed() async {
     _pauseTimer(); // Pause the timer
     print("Timer paused");
+
     _speech.pauseStt();
-    // widget.controller.pauseStt(); // Stop the recording
+
     print("Recording paused");
     bool? result = await showDialog<bool>(
       context: context,
@@ -589,9 +552,10 @@ void _handleAppForegrounded() async {
         _cumulativeText = "";
         _remainingTime = 180;
       });
-      // _resetRecordingState();
-      _speech.startStt();
-      _startCountdown();
+
+        _speech.startStt();
+      _startCountdown(); 
+
     } else {
       setState(() {
         _cumulativeText += " " + _finalRecognizedText.trim();
@@ -614,7 +578,6 @@ void _handleAppForegrounded() async {
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
 
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -830,3 +793,4 @@ void _handleAppForegrounded() async {
     );
   }
 }
+
