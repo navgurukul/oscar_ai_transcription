@@ -191,6 +191,29 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     }
   }
 
+  
+  void _startCountdown() {
+    _timer?.cancel();
+    _remainingTime = 180;
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() {
+        if (_remainingTime > 0) {
+          _remainingTime--;
+        } else {
+          // widget.controller.stopStt();
+        }
+      });
+    });
+  }
+
+  void _stopCountdown() {
+    _timer?.cancel();
+    _remainingTime = 180;
+    if (!mounted) return;
+    setState(() {});
+  }
+
   void _startListening() {
     if (!_isAppActive) return;
   
@@ -266,44 +289,44 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     }
   }
 
-void _handleAppBackgrounded() async {
-  // Save whether we were recording before backgrounding
-  _wasRecordingBeforeBackground = _isListening;
+// void _handleAppBackgrounded() async {
+//   // Save whether we were recording before backgrounding
+//   _wasRecordingBeforeBackground = _isListening;
   
-  if (_isListening) {
-    // Save current recognized text to cumulative text
-    if(mounted){
-    setState(() {
-      _cumulativeText += " " + _finalRecognizedText.trim();
-      _finalRecognizedText = "";
-    });}
+//   if (_isListening) {
+//     // Save current recognized text to cumulative text
+//     if(mounted){
+//     setState(() {
+//       _cumulativeText += " " + _finalRecognizedText.trim();
+//       _finalRecognizedText = "";
+//     });}
     
-    // Pause recording and timer
-    await _speech.pauseStt;
-    _pauseTimer();
+//     // Pause recording and timer
+//     await _speech.pauseStt;
+//     _pauseTimer();
     
-    if (mounted) {
-      setState(() {
-        _isListening = false;
-      });
-    }
-  }
-}
+//     if (mounted) {
+//       setState(() {
+//         _isListening = false;
+//       });
+//     }
+//   }
+// }
 
-void _handleAppForegrounded() async {
-  // Only resume if we were recording before backgrounding
-  if (_wasRecordingBeforeBackground && _remainingTime > 0) {
-    // Resume recording with previous cumulative text
-    _resumeTimer();
-    await _speech.startStt;
+// void _handleAppForegrounded() async {
+//   // Only resume if we were recording before backgrounding
+//   if (_wasRecordingBeforeBackground && _remainingTime > 0) {
+//     // Resume recording with previous cumulative text
+//     _resumeTimer();
+//     await _speech.startStt;
     
-    if (mounted) {
-      setState(() {
-        _isListening = true;
-      });
-    }
-  }
-}
+//     if (mounted) {
+//       setState(() {
+//         _isListening = true;
+//       });
+//     }
+//   }
+// }
 
 
   Future<Map<String, String>?> _formatText(String speechText) async {
@@ -361,6 +384,7 @@ void _handleAppForegrounded() async {
         });
       }
     }
+  }
 
 
   void _resumeTimer() {
@@ -378,27 +402,6 @@ void _handleAppForegrounded() async {
     }
   }
 
-  void _startCountdown() {
-    _timer?.cancel();
-    _remainingTime = 180;
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!mounted) return;
-      setState(() {
-        if (_remainingTime > 0) {
-          _remainingTime--;
-        } else {
-          // widget.controller.stopStt();
-        }
-      });
-    });
-  }
-
-  void _stopCountdown() {
-    _timer?.cancel();
-    _remainingTime = 180;
-    if (!mounted) return;
-    setState(() {});
-  }
 
   void _pauseTimer() {
     _timer?.cancel();
@@ -587,6 +590,7 @@ void _handleAppForegrounded() async {
     _pauseTimer();
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
+  }
 
 
   @override
