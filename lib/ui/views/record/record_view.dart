@@ -278,23 +278,33 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   //   }
   // }
 
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-  super.didChangeAppLifecycleState(state);
+//   void didChangeAppLifecycleState(AppLifecycleState state) {
+//   super.didChangeAppLifecycleState(state);
   
-  setState(() {
-    _isAppActive = state == AppLifecycleState.resumed;
-  });
+//   setState(() {
+//     _isAppActive = state == AppLifecycleState.resumed;
+//   });
 
-  if (state == AppLifecycleState.paused ||
-      state == AppLifecycleState.inactive ||
-      state == AppLifecycleState.detached) {
-    // App went to background
-    _handleAppBackgrounded();
-  } else if (state == AppLifecycleState.resumed) {
-    // App came back to foreground
-    _handleAppForegrounded();
+//   if (state == AppLifecycleState.paused ||
+//       state == AppLifecycleState.inactive ||
+//       state == AppLifecycleState.detached) {
+//     // App went to background
+//     _handleAppBackgrounded();
+//   } else if (state == AppLifecycleState.resumed) {
+//     // App came back to foreground
+//     _handleAppForegrounded();
+//   }
+// }
+
+
+
+@override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      // widget.controller.stopStt(); // Stop recording when app goes to background
+    }
   }
-}
+
 void _handleAppBackgrounded() async {
   // Save whether we were recording before backgrounding
   _wasRecordingBeforeBackground = _isListening;
