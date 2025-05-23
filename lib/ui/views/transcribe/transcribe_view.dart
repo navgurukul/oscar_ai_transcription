@@ -369,6 +369,7 @@ class _TranscribeResultState extends State<TranscribeResult>
                     SizedBox(
                       height: 20,
                     ),
+
                     Text(
                       widget.unformattedText == null
                           ? 'No original text is provided'
