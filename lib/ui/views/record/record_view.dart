@@ -55,8 +55,6 @@ class RecordView extends StatefulWidget {
 
 class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
 
-  bool _wasRecordingBeforeBackground = false;
-  bool _isFirstTime = true;
   late ManualSttController _speech;
   String _finalRecognizedText = "";
   int _remainingTime = 180;
@@ -68,6 +66,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   bool _isListening = false;
   String _cumulativeText = "";
   bool _isAppActive = true;
+  bool _hasAutoStopped = false;
 
 
 
@@ -215,6 +214,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   }
 
   void _startListening() {
+    _hasAutoStopped = false;
     if (!_isAppActive) return;
   
     _speech.pauseIfMuteFor = Duration(seconds: 60);
@@ -327,6 +327,8 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
 //     }
 //   }
 // }
+
+
 
 
   Future<Map<String, String>?> _formatText(String speechText) async {
@@ -595,6 +597,14 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+
+     // Add this effect to trigger when remaining time reaches 0
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (_remainingTime == 0 && !_hasAutoStopped) {
+      _hasAutoStopped = true; // prevent multiple triggers
+      _stopListening();
+    }
+  });
     // Only show recording UI when app is active
     if (!_isAppActive) {
       
@@ -610,13 +620,13 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     }
     var mq = MediaQuery.of(context).size;
     // final appState = Provider.of<AppState>(context);
-
+    
     return WillPopScope(
       onWillPop: () async {
         // Provider.of<AppState>(context, listen: false).navigateToHomePage();
         return true; // Prevent default back navigation
       },
-      child: 
+      child:
       Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
