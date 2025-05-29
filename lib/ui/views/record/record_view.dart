@@ -415,6 +415,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     // widget.controller.pauseStt();
 
     bool? result = await showDialog<bool>(
+      barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
@@ -498,6 +499,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
 
     print("Recording paused");
     bool? result = await showDialog<bool>(
+      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -511,7 +513,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
                 GoogleFonts.spectral(fontSize: 20, fontWeight: FontWeight.w700),
           ),
           content: Text(
-            'Curent recording will be erased and a new one will be started ',
+            'Current recording will be erased and a new one will be started ',
             style: GoogleFonts.karla(fontSize: 16, fontWeight: FontWeight.w400),
           ),
           actions: <Widget>[
