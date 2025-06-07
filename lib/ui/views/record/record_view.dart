@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:manual_speech_to_text/manual_speech_to_text.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -262,23 +263,6 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     @override
 
 
-//   void didChangeAppLifecycleState(AppLifecycleState state) {
-//   super.didChangeAppLifecycleState(state);
-  
-//   setState(() {
-//     _isAppActive = state == AppLifecycleState.resumed;
-//   });
-
-//   if (state == AppLifecycleState.paused ||
-//       state == AppLifecycleState.inactive ||
-//       state == AppLifecycleState.detached) {
-//     // App went to background
-//     _handleAppBackgrounded();
-//   } else if (state == AppLifecycleState.resumed) {
-//     // App came back to foreground
-//     _handleAppForegrounded();
-//   }
-// }
 
 
 
@@ -288,45 +272,6 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
       // widget.controller.stopStt(); // Stop recording when app goes to background
     }
   }
-
-// void _handleAppBackgrounded() async {
-//   // Save whether we were recording before backgrounding
-//   _wasRecordingBeforeBackground = _isListening;
-  
-//   if (_isListening) {
-//     // Save current recognized text to cumulative text
-//     if(mounted){
-//     setState(() {
-//       _cumulativeText += " " + _finalRecognizedText.trim();
-//       _finalRecognizedText = "";
-//     });}
-    
-//     // Pause recording and timer
-//     await _speech.pauseStt;
-//     _pauseTimer();
-    
-//     if (mounted) {
-//       setState(() {
-//         _isListening = false;
-//       });
-//     }
-//   }
-// }
-
-// void _handleAppForegrounded() async {
-//   // Only resume if we were recording before backgrounding
-//   if (_wasRecordingBeforeBackground && _remainingTime > 0) {
-//     // Resume recording with previous cumulative text
-//     _resumeTimer();
-//     await _speech.startStt;
-    
-//     if (mounted) {
-//       setState(() {
-//         _isListening = true;
-//       });
-//     }
-//   }
-// }
 
 
 
@@ -410,177 +355,212 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   }
 
   Future<void> _onBackPressed() async {
-    _pauseTimer();
-    _speech.pauseStt();
-    // widget.controller.pauseStt();
+  _pauseTimer();
+  _speech.pauseStt();
 
-    bool? result = await showDialog<bool>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              backgroundColor: Colors.white,
-              title: Text(
-                'Discard Recording',
-                style: GoogleFonts.spectral(
-                    fontSize: 20, fontWeight: FontWeight.w700),
-              ),
-              content: Text(
-                'Any recorded speech will be lost and will need to be recorded again',
-                style: GoogleFonts.karla(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(Colors.white),
-                    side: WidgetStateProperty.all(
-                        BorderSide(color: AppColors.ButtonColor2)),
-                    padding: WidgetStateProperty.all(
-                        EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop(false); // Close the dialog
-                  },
-                  child: Text(
-                    'Discard',
-                    style: GoogleFonts.karla(
-                      fontSize: 16,
-                      color: AppColors.ButtonColor2,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.all(AppColors.ButtonColor2),
-                    padding: WidgetStateProperty.all(
-                        EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                  child: Text(
-                    'Keep Recording',
-                    style: GoogleFonts.karla(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ]);
-        });
-    if (result == true) {
-      // widget.controller.resumeStt();
-      setState(() {
-        _cumulativeText += " " + _finalRecognizedText.trim();
-        _finalRecognizedText = "";
-      });
-      _resumeTimer();
-      _speech.startStt();
-
-    } else {
-      Navigator.of(context).pop();
-    }
-  }
-
-  void _onRestartPressed() async {
-    _pauseTimer(); // Pause the timer
-    print("Timer paused");
-
-    _speech.pauseStt();
-
-    print("Recording paused");
-    bool? result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // Adjust the radius here
+  bool? result = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        backgroundColor: Colors.white,
+        insetPadding: EdgeInsets.symmetric(horizontal: 16), // ✅ Added horizontal spacing
+        title: Text(
+          'Discard Recording',
+          style: GoogleFonts.spectral(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
           ),
-          backgroundColor: Colors.white,
-          title: Text(
-            'Reset Recording',
-            style:
-                GoogleFonts.spectral(fontSize: 20, fontWeight: FontWeight.w700),
-          ),
-          content: Text(
-            'Curent recording will be erased and a new one will be started ',
-            style: GoogleFonts.karla(fontSize: 16, fontWeight: FontWeight.w400),
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(Colors.white),
-                side: WidgetStateProperty.all(
-                    BorderSide(color: AppColors.ButtonColor2)),
-                padding: WidgetStateProperty.all(
-                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+        ),
+        content:
+       
+        Padding(
+  padding: EdgeInsets.only(bottom: 32),
+  child: Text(
+    'Any recorded speech will be lost and will need to be recorded again',
+    style: GoogleFonts.karla(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+    ),
+  ),
+),
+        actions: <Widget>[
+          TextButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.white),
+              side: WidgetStateProperty.all(
+                BorderSide(color: AppColors.ButtonColor2),
               ),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.karla(
-                  fontSize: 16,
-                  color: AppColors.ButtonColor2,
-                  fontWeight: FontWeight.w400,
-                ),
+              padding: WidgetStateProperty.all(
+                EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
               ),
             ),
-            TextButton(
-              style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all(AppColors.ButtonColor2),
-                side: WidgetStateProperty.all(
-                    BorderSide(color: AppColors.ButtonColor2)),
-                padding: WidgetStateProperty.all(
-                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: Text(
-                'Reset',
-                style: GoogleFonts.karla(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white,
-                ),
+            onPressed: () {
+              Navigator.of(context).pop(false); // Close the dialog
+            },
+            child: Text(
+              'Discard',
+              style: GoogleFonts.karla(
+                fontSize: 16,
+                color: AppColors.ButtonColor2,
+                fontWeight: FontWeight.w400,
               ),
             ),
-          ],
-        );
-      },
-    );
-    if (result == true) {
-      // widget.controller.startStt();
-      setState(() {
-        _finalRecognizedText = "";
-        _cumulativeText = "";
-        _remainingTime = 180;
-      });
+          ),
+          TextButton(
+            style: ButtonStyle(
+              backgroundColor:
+                  WidgetStateProperty.all(AppColors.ButtonColor2),
+              padding: WidgetStateProperty.all(
+                EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+            child: Text(
+              'Keep Recording',
+              style: GoogleFonts.karla(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
 
-        _speech.startStt();
-      _startCountdown(); 
-
-    } else {
-      setState(() {
-        _cumulativeText += " " + _finalRecognizedText.trim();
-        _finalRecognizedText = "";
-      });
-      _resumeTimer();
-      _speech.startStt();
-      // widget.controller.resumeStt();
-    }
+  if (result == true) {
+    setState(() {
+      _cumulativeText += " " + _finalRecognizedText.trim();
+      _finalRecognizedText = "";
+    });
+    _resumeTimer();
+    _speech.startStt();
+  } else {
+    Navigator.of(context).pop();
   }
+}
+
+
+
+void _onRestartPressed() async {
+  _pauseTimer(); // Pause the timer
+  print("Timer paused");
+
+  _speech.pauseStt();
+  print("Recording paused");
+
+  bool? result = await showDialog<bool>(
+    
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        backgroundColor: Colors.white,
+        insetPadding: EdgeInsets.symmetric(horizontal: 16), 
+        titlePadding: EdgeInsets.fromLTRB(16, 24, 16, 8),  
+        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+        actionsPadding: EdgeInsets.only(right: 8, bottom: 8), 
+        
+        title: Text(
+          'Reset Recording',
+          style: GoogleFonts.spectral(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        
+        content:
+        
+        Padding(
+  padding: EdgeInsets.only(bottom: 32),
+  child: Text(
+    'Curent recording will be erased and a new one will be started',
+    style: GoogleFonts.karla(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+    ),
+  ),
+),
+        
+        
+        
+        actions: <Widget>[
+          TextButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.white),
+              side: WidgetStateProperty.all(
+                BorderSide(color: AppColors.ButtonColor2),
+              ),
+              padding: WidgetStateProperty.all(
+                EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.karla(
+                fontSize: 16,
+                color: AppColors.ButtonColor2,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+          
+          TextButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
+              side: WidgetStateProperty.all(
+                BorderSide(color: AppColors.ButtonColor2),
+              ),
+              padding: WidgetStateProperty.all(
+                EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+            child: Text(
+              'Reset',
+              style: GoogleFonts.karla(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (result == true) {
+    setState(() {
+      _finalRecognizedText = "";
+      _cumulativeText = "";
+      _remainingTime = 180;
+    });
+    _speech.startStt();
+    _startCountdown();
+  } else {
+    setState(() {
+      _cumulativeText += " " + _finalRecognizedText.trim();
+      _finalRecognizedText = "";
+    });
+    _resumeTimer();
+    _speech.startStt();
+  }
+}
 
   @override
   void dispose() {
@@ -678,16 +658,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Text(
-                            //   _remainingTime > 0
-                            //       ? '${(_remainingTime ~/ 60).toString().padLeft(2, '0')}:${(_remainingTime % 60).toString().padLeft(2, '0')}'
-                            //       : 'Time is up!',
-                            //   style: GoogleFonts.karla(
-                            //     fontSize: 20,
-                            //     fontWeight: FontWeight.w700,
-                            //     color: Colors.black,
-                            //   ),
-                            // ),
+                          
                             Text(
   !_isAppActive ? 'Paused' : 
   _remainingTime > 0 
@@ -778,8 +749,8 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
                               Container(
                                   height: 120,
                                   width: 120,
-                                  child: Image.asset(
-                                      "assets1/Sorting-Center.png")),
+                                  child: SvgPicture.asset(
+                                      "assets1/Sorting Center 1 1.svg")),
                               SizedBox(height: mq.height * 0.03),
                               Container(
                                 height: 16,

@@ -371,12 +371,14 @@
 
 
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../home/home_view.dart';
 
@@ -555,7 +557,7 @@ class _LoginViewState extends State<LoginView> {
                   height: _screenHeight * 0.06,
                   width: _screenWidth * 0.1,
                   decoration: const BoxDecoration(
-                    shape: BoxShape.circle, 
+                    shape: BoxShape.circle,
                     color: Colors.white,
                   ),
                   child: Image.asset(
@@ -569,7 +571,9 @@ class _LoginViewState extends State<LoginView> {
                   'Login With Google',
                   style: GoogleFonts.karla(
                     color: Colors.white,
-                    fontSize: _screenWidth * 0.04,
+                    fontWeight : FontWeight.bold,
+                    fontSize: _screenWidth * 0.05,
+                    // fontSize: 18,
                   ),
                 ),
               ],
