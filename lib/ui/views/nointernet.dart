@@ -282,7 +282,7 @@ class NoInternetScreen extends StatelessWidget {
                 'Retry',
                 style: GoogleFonts.karla(
                   fontSize: 16,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.ButtonColor2,
                 ),
               ),
