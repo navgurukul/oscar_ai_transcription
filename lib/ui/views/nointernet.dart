@@ -255,10 +255,10 @@ class NoInternetScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets1/Bad-Connection.png',
+            SvgPicture.asset(
+              'assets1/Bad Connection 3 2.svg',
               width: 118.31,
-              height: 118.31,
+              height: 82.31,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -282,7 +282,7 @@ class NoInternetScreen extends StatelessWidget {
                 'Retry',
                 style: GoogleFonts.karla(
                   fontSize: 16,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.ButtonColor2,
                 ),
               ),
