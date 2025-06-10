@@ -355,6 +355,7 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   }
 
   Future<void> _onBackPressed() async {
+
   _pauseTimer();
   _speech.pauseStt();
 
@@ -445,7 +446,6 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     Navigator.of(context).pop();
   }
 }
-
 
 
 void _onRestartPressed() async {
