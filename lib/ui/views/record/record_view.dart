@@ -385,6 +385,7 @@ void _monitorInternet() {
   }
 
   Future<void> _onBackPressed() async {
+
   _pauseTimer();
   _speech.pauseStt();
 
@@ -475,7 +476,6 @@ void _monitorInternet() {
     Navigator.of(context).pop();
   }
 }
-
 
 
 void _onRestartPressed() async {
