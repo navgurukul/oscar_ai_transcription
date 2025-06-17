@@ -11,7 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../../../core/constants/app_colors.dart';
 import 'package:http/http.dart' as http;
-import '../nointernet.dart';
+import '../../../connectivity/nointernet.dart';
 import '../transcribe/transcribe_view.dart';
 
 
@@ -229,6 +229,8 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
   }
 
   void _stopListening() async {
+    if (_hasAutoStopped) return; // ⛔ skip if already auto stopped due to no internet
+
     await _speech.stopStt;
 
     try {
@@ -247,17 +249,45 @@ class _RecordViewState extends State<RecordView> with WidgetsBindingObserver {
     }
   }
 
-  void _monitorInternet() {
-    _connectivityStream.listen((ConnectivityResult result) {
-      if (result == ConnectivityResult.none) {
-        // widget.controller.stopStt();
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
+  // void _monitorInternet() {
+  //   _connectivityStream.listen((ConnectivityResult result) {
+  //     if (result == ConnectivityResult.none) {
+  //       // widget.controller.stopStt();
+  //       Navigator.of(context).pushReplacement(MaterialPageRoute(
 
-          builder: (context) => NoInternetScreen(),
-        ));
-      }
-    });
-  }
+  //         builder: (context) => NoInternetScreen(onRetry: () {  },),
+  //       ));
+  //     }
+  //   });
+  // }
+
+void _monitorInternet() {
+  _connectivityStream.listen((ConnectivityResult result) async {
+    if (result == ConnectivityResult.none) {
+      print("⚠️ No internet detected — stopping recording...");
+
+      // 1️⃣ Stop STT safely
+      await _speech.stopStt;
+
+      // 2️⃣ Cancel Timer
+      _pauseTimer();
+
+      // 3️⃣ Prevent automatic navigation to transcribe screen
+      setState(() {
+        _finalRecognizedText = '';
+        _cumulativeText = '';
+        _hasAutoStopped = true; // Prevents auto navigation
+      });
+
+      // 4️⃣ Navigate to NoInternet screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => NoInternetScreen(onRetry: () {  },),
+        ),
+      );
+    }
+  });
+}
 
 
     @override

@@ -56,7 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 10. We reserve the right to modify these Terms at any time. Your continued use of the App after any such changes constitutes your acceptance of the new Terms.
 
-11. If you have any questions about these Terms, please contact us at''';
+11. If you have any questions about these Terms, please contact us at platforms@samyarth.org''';
 
   final String privacyPolicyText = '''
 
@@ -79,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 9. We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy within the App. Your continued use of the App after any such changes constitutes your acceptance of the new Privacy Policy.
 
-10. If you have any questions about this Privacy Policy, please contact us at''';
+10. If you have any questions about this Privacy Policy, please contact us at platforms@samyarth.org''';
 
   void handleback() {
     Navigator.pop(context, 'Saved transcription');
@@ -265,7 +265,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Text(
                   'Log Out',
                   style: GoogleFonts.lato(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.redAccent,
                   ),

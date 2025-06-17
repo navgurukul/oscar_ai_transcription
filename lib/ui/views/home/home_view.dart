@@ -15,7 +15,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/viewmodels/api_service.dart';
 import '../../detailpage.dart';
 import '../../shared/styles/text_style.dart';
-import '../nointernet.dart';
+import '../../../connectivity/nointernet.dart';
 import '../profile/profile_view.dart';
 import '../record/record_view.dart';
 import '../transcribe/transcribe_view.dart';
@@ -68,7 +68,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _monitorInternet();
     WidgetsBinding.instance.addObserver(this);
     _controller = ManualSttController(context);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ModalRoute.of(context)?.settings.arguments == true) {
         _showRefreshAlertDialog();
@@ -132,7 +131,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _connectivityStream.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => NoInternetScreen(),
+          builder: (context) => NoInternetScreen(onRetry: () {  },),
         ));
       }
     });
@@ -503,7 +502,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       child: Text(
                         "My Transcripts (${transcriptions.length})",
                         style: GoogleFonts.karla(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -596,7 +595,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   style: GoogleFonts.karla(
-                                                    fontSize: 14.0,
+                                                    fontSize: 16.0,
                                                     fontWeight: FontWeight.w400,
                                                     color: AppColors.Text2,
                                                   ),

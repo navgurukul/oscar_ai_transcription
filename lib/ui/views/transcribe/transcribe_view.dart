@@ -12,7 +12,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../auth/login_view.dart';
-import '../nointernet.dart';
+import '../../../connectivity/nointernet.dart';
 import 'dart:async';
 
 class TranscribeResult extends StatefulWidget {
@@ -65,7 +65,7 @@ class _TranscribeResultState extends State<TranscribeResult>
       if (result == ConnectivityResult.none) {
         if (mounted) {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => NoInternetScreen(),
+            builder: (context) => NoInternetScreen(onRetry: () {  },),
           ));
         }
       }
