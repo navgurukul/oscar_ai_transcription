@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "89230287346",
     "project_id": "oscar-ai-transcription",
-    "storage_bucket": "oscar-ai-transcription.appspot.com"
+    "storage_bucket": "oscar-ai-transcription.firebasestorage.app"
   },
   "client": [
     {
@@ -19,6 +19,62 @@
           "android_info": {
             "package_name": "org.samyarth.oscarai.release",
             "certificate_hash": "3729113005a9417ab1ac88f2b3c3d48411ae24c0"
+          }
+        },
+        {
+          "client_id": "89230287346-ecmqk660jhrvqcrev3dt05dc7t656qdj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "3a8487a913e55a727bc33aa1075ec150f78f745a"
+          }
+        },
+        {
+          "client_id": "89230287346-gragj3muo4iihbe4upsfhb1egqh6dfkt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "9ef113f460b40f3e07b48c83597e4d35c02cad23"
+          }
+        },
+        {
+          "client_id": "89230287346-gs1nbvbfqv2tm521l0jqt06jbv8r64bm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "7864f0894284418503f25ec702c1f6911f7af6f2"
+          }
+        },
+        {
+          "client_id": "89230287346-ics3735f3fcusv9h2o851gi22lq21skl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "07fc95e6b91c33bf3a8e37ce9498e95d6d534553"
+          }
+        },
+        {
+          "client_id": "89230287346-ruaglqb3himeb6hh8lg2hq8t8iseeujr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "01cd0c86e586a10469efe325a65d8db14d3bac24"
+          }
+        },
+        {
+          "client_id": "89230287346-sc6gmvjonp35lr0n9r4tc52nnkgu7ht1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "bac7aaf3aca02a4139bd620a6c5f9ec0a2dd44a2"
+          }
+        },
+        {
+          "client_id": "89230287346-veofe7vl5ubfsrkpb3hsq7vtlhtc1b7d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.samyarth.oscarai.release",
+            "certificate_hash": "a5baf962bdf3de80a7d25e22c9f255c64b191e94"
           }
         },
         {

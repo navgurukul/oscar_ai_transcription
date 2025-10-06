@@ -116,7 +116,7 @@ class _TranscribeResultState extends State<TranscribeResult> {
                     Navigator.of(context).pop(); // Close the dialog
 
                     // Sign out and clear session
-                    await GoogleSignIn().signOut();
+                    await GoogleSignIn.instance.signOut();
                     SharedPreferences prefs =
                         await SharedPreferences.getInstance();
                     await prefs.remove('isLoggedIn');

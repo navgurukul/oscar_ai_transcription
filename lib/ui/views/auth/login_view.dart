@@ -1,5 +1,3 @@
-
-
 import 'dart:convert';
 
 import 'package:flutter_svg/svg.dart';
@@ -20,98 +18,388 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-
   static const String KEYLOGIN = "Login"; // Define the constant here
 
   var googleSignInAccount;
   String? globalToken5;
 
-  Future<void> GoogleLogin() async {
-    print('Google login method called');
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
-    GoogleSignIn _googleSignIn = GoogleSignIn(
-      // clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com",  //from this app
-//clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com", //Old one
-//clientId: "361814667544-pf7l8b9hik69709hh5hcujgcjrc6e1jg.apps.googleusercontent.com",
-//clientId: "361814667544-p0jkacu1vs23tbtv5sfil1dln4v410kv.apps.googleusercontent.com",
-clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
+  @override
+  void initState() {
+    super.initState();
+    _initializeGoogleSignIn();
+  }
 
-    scopes: [
-        'https://www.googleapis.com/auth/userinfo.email',
-        'openid',
-        'https://www.googleapis.com/auth/userinfo.profile',
-      ],
+  Future<void> _initializeGoogleSignIn() async {
+    await _googleSignIn.initialize(
+      clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
+      // optional: serverClientId etc.
     );
-    try {
-      var result = await _googleSignIn.signIn();
-      print(result);
-      googleSignInAccount = result;
-
-      if (result != null) {
-        String fullName = result.displayName ?? "";
-        List<String> nameParts = fullName.split(' ');
-
-        String firstName = nameParts.length > 0 ? nameParts[0] : "";
-        String lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : "";
-
-        String email = result.email;
-        String profilePicUrl = result.photoUrl ?? "";
-        String? id = result.id;
-
-        globalToken5 = id;  /// when i use here then able to do login
-
-        print("Google Sign-In successful");
-        print("First Name: $firstName");
-        print("Last Name: $lastName");
-        print("Email: $email");
-        print("Profile Picture URL: $profilePicUrl");
-        print("ID: $id");
-        print("Google Sign-In successful");
-        await _authWithMeraki(fullName,lastName, email, profilePicUrl, id, context);
-
-
-        if (globalToken5 != null) {
-
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setBool(KEYLOGIN, true);
-          await prefs.setString('profileName', fullName);
-          await prefs.setString('profilePicUrl', profilePicUrl);
-          await prefs.setString('tokenid', globalToken5!);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Successfully Logged In')),
-          );
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  HomePage(
-                tokenid: globalToken5!,
-                profileName: result.displayName ?? "User's Name",
-                profilePicUrl: result.photoUrl ?? "",
-                transcribedata: '',
-              ),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Token is null, authentication failed')),
-          );
-        }
-      } else {
-        print("Sign-in canceled");
+    // Listen to authentication event stream
+    _googleSignIn.authenticationEvents.listen((event) {
+      if (event is GoogleSignInAuthenticationEventSignIn) {
+        final user = event.user;
+        _onSignIn(user);
+      } else if (event is GoogleSignInAuthenticationEventSignOut) {
+        // user signed out
       }
-    } catch (error) {
-      print(error);
+    });
+  }
+
+  Future<void> GoogleLogin() async {
+    try {
+      // Use authenticate (interactive) or attemptLightweightAuthentication for silent
+      final account = await _googleSignIn.authenticate();
+
+      // If authenticate is not supported, you might fallback to something else
+      if (account != null) {
+        _onSignIn(account);
+      } else {
+        print("Sign-in canceled or failed");
+      }
+    } catch (e) {
+      print("Error during Google Sign-In: $e");
     }
   }
+
+  Future<void> _onSignIn(GoogleSignInAccount account) async {
+    final fullName = account.displayName ?? "";
+    final parts = fullName.split(' ');
+    final firstName = parts.isNotEmpty ? parts[0] : "";
+    final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : "";
+    final email = account.email;
+    final profilePicUrl = account.photoUrl ?? "";
+    final id = account.id;
+
+    globalToken5 = id;
+
+    print("Google Sign-In succeeded:");
+    print("Name: $fullName, Email: $email, ID: $id");
+
+    // Call your backend with these values
+    await _authWithMeraki(fullName, lastName, email, profilePicUrl, id, context);
+
+    if (globalToken5 != null) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(KEYLOGIN, true);
+      await prefs.setString('profileName', fullName);
+      await prefs.setString('profilePicUrl', profilePicUrl);
+      await prefs.setString('tokenid', globalToken5!);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Successfully Logged In')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (ctx) => HomePage(
+              tokenid: globalToken5!,
+              profileName: fullName,
+              profilePicUrl: profilePicUrl,
+              transcribedata: '',
+            ),
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Token is null, auth failed')),
+      );
+    }
+  }
+
+// // Use the singleton instance!
+//   final GoogleSignIn googleSignIn = GoogleSignIn(
+//     // Optional: Specify clientId for web/desktop, usually set via configuration for Android/iOS
+//     clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
+//     scopes: [
+//       'email',
+//       'https://www.googleapis.com/auth/userinfo.email',
+//       'openid',
+//       'https://www.googleapis.com/auth/userinfo.profile',
+//     ],
+//   );
+//
+//   Future<void> googleLogin(BuildContext context) async {
+//     print('Google login method called');
+//
+//     try {
+//       final GoogleSignInAccount? result = await googleSignIn.signIn();
+//
+//       if (result != null) {
+//         final String fullName = result.displayName ?? "";
+//         final List<String> nameParts = fullName.split(' ');
+//
+//         final String firstName = nameParts.isNotEmpty ? nameParts[0] : "";
+//         final String lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : "";
+//
+//         final String email = result.email;
+//         final String profilePicUrl = result.photoUrl ?? "";
+//         final String? id = result.id;
+//
+//         // Example global variable assignment (replace as needed)
+//         String? globalToken5 = id;
+//
+//         print("Google Sign-In successful");
+//         print("First Name: $firstName");
+//         print("Last Name: $lastName");
+//         print("Email: $email");
+//         print("Profile Picture URL: $profilePicUrl");
+//         print("ID: $id");
+//
+//         // Call your custom auth method
+//         await _authWithMeraki(fullName, lastName, email, profilePicUrl, id, context);
+//
+//         if (globalToken5 != null) {
+//           SharedPreferences prefs = await SharedPreferences.getInstance();
+//           await prefs.setBool('KEYLOGIN', true);
+//           await prefs.setString('profileName', fullName);
+//           await prefs.setString('profilePicUrl', profilePicUrl);
+//           await prefs.setString('tokenid', globalToken5);
+//
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(content: Text('Successfully Logged In')),
+//           );
+//           Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) => HomePage(
+//                 tokenid: globalToken5,
+//                 profileName: result.displayName ?? "User's Name",
+//                 profilePicUrl: result.photoUrl ?? "",
+//                 transcribedata: '',
+//               ),
+//             ),
+//           );
+//         } else {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(content: Text('Token is null, authentication failed')),
+//           );
+//         }
+//       } else {
+//         print("Sign-in canceled");
+//       }
+//     } catch (error) {
+//       print(error);
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text('Google Sign-In failed: $error')),
+//       );
+//     }
+//   }
+
+///////////////////////////////////////////
+//   Future<void> GoogleLogin() async {
+//     print('Google login method called');
+//
+//     GoogleSignIn _googleSignIn = GoogleSignIn(
+//       // clientId: "1092333241196-7j3l0c2s7mtdvf0n2p1ct4uoukvk0c08.apps.googleusercontent.com",
+//
+//       // clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com",  //from this app
+// //clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com", //Old one
+// //clientId: "361814667544-pf7l8b9hik69709hh5hcujgcjrc6e1jg.apps.googleusercontent.com",
+// //clientId: "361814667544-p0jkacu1vs23tbtv5sfil1dln4v410kv.apps.googleusercontent.com",
+// clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
+//
+//     scopes: [
+//       'email',
+//         'https://www.googleapis.com/auth/userinfo.email',
+//         'openid',
+//         'https://www.googleapis.com/auth/userinfo.profile',
+//       ],
+//     );
+//     try {
+//       var result = await _googleSignIn.signIn();
+//       print(result);
+//       googleSignInAccount = result;
+//
+//       if (result != null) {
+//         String fullName = result.displayName ?? "";
+//         List<String> nameParts = fullName.split(' ');
+//
+//         String firstName = nameParts.length > 0 ? nameParts[0] : "";
+//         String lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : "";
+//
+//         String email = result.email;
+//         String profilePicUrl = result.photoUrl ?? "";
+//         String? id = result.id;
+//
+//         globalToken5 = id;  /// when i use here then able to do login
+//
+//         print("Google Sign-In successful");
+//         print("First Name: $firstName");
+//         print("Last Name: $lastName");
+//         print("Email: $email");
+//         print("Profile Picture URL: $profilePicUrl");
+//         print("ID: $id");
+//         print("Google Sign-In successful");
+//         await _authWithMeraki(fullName,lastName, email, profilePicUrl, id, context);
+//
+//
+//         if (globalToken5 != null) {
+//
+//           SharedPreferences prefs = await SharedPreferences.getInstance();
+//           await prefs.setBool(KEYLOGIN, true);
+//           await prefs.setString('profileName', fullName);
+//           await prefs.setString('profilePicUrl', profilePicUrl);
+//           await prefs.setString('tokenid', globalToken5!);
+//
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(content: Text('Successfully Logged In')),
+//           );
+//           Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) =>
+//                   HomePage(
+//                 tokenid: globalToken5!,
+//                 profileName: result.displayName ?? "User's Name",
+//                 profilePicUrl: result.photoUrl ?? "",
+//                 transcribedata: '',
+//               ),
+//             ),
+//           );
+//         } else {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(content: Text('Token is null, authentication failed')),
+//           );
+//         }
+//       } else {
+//         print("Sign-in canceled");
+//       }
+//     } catch (error) {
+//       print(error);
+//     }
+//   }
+
+
+////////////////////////////////
+
+  // static const String KEYLOGIN = "Login";
+  //
+  // GoogleSignInAccount? _currentUser;
+  // String? globalToken5;
+  //
+  // final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  // bool _isInitialized = false; // track initialization
+  //
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //
+  //   // Ensure initialization completes before anything else
+  //   _initializeGoogleSignIn();
+  // }
+  //
+  // Future<void> _initializeGoogleSignIn() async {
+  //   await _googleSignIn.initialize(
+  //     serverClientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
+  //   );
+  //
+  //   setState(() {
+  //     _isInitialized = true;
+  //   });
+  //
+  //   _googleSignIn.authenticationEvents.listen((event) {
+  //     if (event is GoogleSignInAuthenticationEventSignIn) {
+  //       final user = event.user;
+  //       setState(() {
+  //         _currentUser = user;
+  //       });
+  //       _handlePostSignIn(user);
+  //     } else if (event is GoogleSignInAuthenticationEventSignOut) {
+  //       setState(() {
+  //         _currentUser = null;
+  //       });
+  //     }
+  //
+  //   });
+  //
+  //   // Attempt lightweight auth if needed
+  //   _googleSignIn.attemptLightweightAuthentication();
+  // }
+  //
+  // Future<void> GoogleLogin() async {
+  //   if (!_isInitialized) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text("Google Sign-In is initializing. Please try again after a few seconds."))
+  //     );
+  //     return;
+  //   }
+  //   try {
+  //     final account = await _googleSignIn.authenticate();
+  //     if (account != null) {
+  //       setState(() {
+  //         _currentUser = account;
+  //       });
+  //       await _handlePostSignIn(account);
+  //     } else {
+  //       print("Sign-in canceled");
+  //     }
+  //   } catch (error) {
+  //     print("Google Sign-In error: $error");
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error occurred during Google Sign-In: $error')),
+  //     );
+  //
+  //
+  //   }
+  // }
+  //
+  // Future<void> _handlePostSignIn(GoogleSignInAccount account) async {
+  //   final String fullName = account.displayName ?? "";
+  //   final List<String> nameParts = fullName.split(' ');
+  //   final String lastName =
+  //       nameParts.length > 1 ? nameParts.sublist(1).join(' ') : "";
+  //   final String email = account.email;
+  //   final String profilePicUrl = account.photoUrl ?? "";
+  //   final String id = account.id;
+  //
+  //   await _authWithMeraki(
+  //       fullName, lastName, email, profilePicUrl, id, context);
+  //
+  //   if (globalToken5 != null) {
+  //     SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     await prefs.setBool(KEYLOGIN, true);
+  //     await prefs.setString('profileName', fullName);
+  //     await prefs.setString('profilePicUrl', profilePicUrl);
+  //     await prefs.setString('tokenid', globalToken5!);
+  //
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Successfully Logged In')),
+  //     );
+  //
+  //     if (mounted) {
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => HomePage(
+  //             tokenid: globalToken5!,
+  //             profileName: fullName,
+  //             profilePicUrl: profilePicUrl,
+  //             transcribedata: '',
+  //           ),
+  //         ),
+  //       );
+  //     }
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Token is null, authentication failed')),
+  //     );
+  //   }
+  // }
+
 
 
   // Post API,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
-  Future<void> _authWithMeraki(String firstName, String lastName,String email, String profilePicUrl, String id, BuildContext context) async {
-    final String apiUrl = 'https://dev-oscar.merakilearn.org/api/v1/auth/android/login';
-        // 'https://dev-oscar.merakilearn.org/api#/auth/AuthController_register' ;
+  Future<void> _authWithMeraki(String firstName, String lastName, String email,
+      String profilePicUrl, String id, BuildContext context) async {
+    final String apiUrl =
+        'https://dev-oscar.merakilearn.org/api/v1/auth/android/login';
+    // 'https://dev-oscar.merakilearn.org/api#/auth/AuthController_register' ;
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
@@ -126,7 +414,8 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
           'id': id,
           'email': email,
           // 'lastName' : lastName,
-        }),);
+        }),
+      );
       if (response.statusCode == 201) {
         final responseBody = json.decode(response.body);
         setState(() {
@@ -134,7 +423,6 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
         });
         print("this is token $globalToken5");
         print("Backend Authentication successful: $responseBody");
-
       } else {
         print('Failed to authenticate. Status code: ${response.statusCode}');
         print('Response body: ${response.body}');
@@ -150,7 +438,6 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
       );
     }
   }
-
 
   PageController _pageController = PageController();
   int _currentPage = 0;
@@ -193,7 +480,6 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
                   _buildPage1(imageSize),
                   _buildPage2(imageSize),
                   _buildPage3(imageSize),
-
                 ],
               ),
             ),
@@ -201,28 +487,34 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-
                 GestureDetector(
                   onTap: () => _onDashTap(0),
                   child: Container(
                     width: screenWidth * 0.09,
                     height: screenHeight * 0.01,
                     decoration: BoxDecoration(
-                      color: _currentPage == 0 ? AppColors.ButtonColor2 : Colors.grey[400],
-                      borderRadius: BorderRadius.circular(20), // Set the border radius
-                    ),                  ),
+                      color: _currentPage == 0
+                          ? AppColors.ButtonColor2
+                          : Colors.grey[400],
+                      borderRadius:
+                          BorderRadius.circular(20), // Set the border radius
+                    ),
+                  ),
                 ),
                 SizedBox(width: screenWidth * 0.02),
-
                 GestureDetector(
                   onTap: () => _onDashTap(1),
                   child: Container(
                     width: screenWidth * 0.09,
                     height: screenHeight * 0.01,
                     decoration: BoxDecoration(
-                      color: _currentPage == 1 ? AppColors.ButtonColor2 : Colors.grey[400],
-                      borderRadius: BorderRadius.circular(20), // Set the border radius
-                    ),                  ),
+                      color: _currentPage == 1
+                          ? AppColors.ButtonColor2
+                          : Colors.grey[400],
+                      borderRadius:
+                          BorderRadius.circular(20), // Set the border radius
+                    ),
+                  ),
                 ),
                 SizedBox(width: screenWidth * 0.02),
                 GestureDetector(
@@ -231,9 +523,13 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
                     width: screenWidth * 0.09,
                     height: screenHeight * 0.01,
                     decoration: BoxDecoration(
-                      color: _currentPage == 2 ? AppColors.ButtonColor2 : Colors.grey[400],
-                      borderRadius: BorderRadius.circular(20), // Set the border radius
-                    ),                  ),
+                      color: _currentPage == 2
+                          ? AppColors.ButtonColor2
+                          : Colors.grey[400],
+                      borderRadius:
+                          BorderRadius.circular(20), // Set the border radius
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -256,14 +552,17 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
                       color: AppColors.ButtonColor2,
                       borderRadius: BorderRadius.circular(100.0),
                     ),
-                    padding: EdgeInsets.symmetric(vertical: screenHeight * 0.015, horizontal: screenWidth * 0.05),
+                    padding: EdgeInsets.symmetric(
+                        vertical: screenHeight * 0.015,
+                        horizontal: screenWidth * 0.05),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
                           height: screenHeight * 0.06,
                           width: screenWidth * 0.1,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.white),
                           child: Image.asset(
                             'assets1/g2.png',
                             height: screenHeight * 0.05,
@@ -273,7 +572,9 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
                         SizedBox(width: screenWidth * 0.03),
                         Text(
                           'Login with Google',
-                          style: GoogleFonts.karla(color: Colors.white, fontSize: screenWidth * 0.04),
+                          style: GoogleFonts.karla(
+                              color: Colors.white,
+                              fontSize: screenWidth * 0.04),
                         ),
                       ],
                     ),
@@ -293,14 +594,11 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Center(
-          child:
-
-          SvgPicture.asset(
+          child: SvgPicture.asset(
             'assets1/Frame.svg',
             width: imageSize,
             height: imageSize * 0.85,
           ),
-
         ),
         SizedBox(height: 20.0),
         Container(
@@ -341,15 +639,11 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Center(
-          child:
-
-          SvgPicture.asset(
-      'assets1/Frame5.svg',
-      width: imageSize,
-      height: imageSize * 0.85,
-    ),
-
-
+          child: SvgPicture.asset(
+            'assets1/Frame5.svg',
+            width: imageSize,
+            height: imageSize * 0.85,
+          ),
         ),
         SizedBox(height: 20.0),
         Container(
@@ -384,12 +678,12 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
       ],
     );
   }
+
   Widget _buildPage1(double imageSize) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-
         Center(
           child: Container(
             padding: EdgeInsets.all(16.0),
@@ -399,7 +693,6 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
             child: Column(
               children: [
                 SizedBox(height: 35),
-
                 Text.rich(
                   TextSpan(
                     children: [
@@ -439,12 +732,7 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
                   ),
                   textAlign: TextAlign.center,
                 ),
-
                 SizedBox(height: 5),
-
-
-
-
                 Text(
                   "Save it or Share it.",
                   style: GoogleFonts.spectral(
@@ -464,8 +752,6 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
                   ),
                   textAlign: TextAlign.center,
                 ),
-
-
               ],
             ),
           ),
@@ -473,13 +759,4 @@ clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.c
       ],
     );
   }
-
 }
-
-
-
-
-
-
-
-
