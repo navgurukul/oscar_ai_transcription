@@ -257,7 +257,7 @@ void handleback(){
         alignment: Alignment.bottomLeft,
         child: GestureDetector(
           onTap: () async {
-            await GoogleSignIn().signOut();
+            await GoogleSignIn.instance.signOut();
             SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.remove('isLoggedIn');
             // Added some line below for solving the bug related to credentials get stored after logout
@@ -407,3 +407,93 @@ void handleback(){
 
 
 
+
+////////////////////////////////
+
+//   static const String KEYLOGIN = "Login"; // Define the constant here
+//
+//   var googleSignInAccount;
+//   String? globalToken5;
+//
+//   Future<void> GoogleLogin() async {
+//     print('Google login method called');
+//
+//     GoogleSignIn _googleSignIn = GoogleSignIn(
+//       // clientId: "1092333241196-7j3l0c2s7mtdvf0n2p1ct4uoukvk0c08.apps.googleusercontent.com",
+//
+//       // clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com",  //from this app
+// //clientId: "229869143761-q39p62le5ettq8suss0qj7elpqq5pk9i.apps.googleusercontent.com", //Old one
+// //clientId: "361814667544-pf7l8b9hik69709hh5hcujgcjrc6e1jg.apps.googleusercontent.com",
+// //clientId: "361814667544-p0jkacu1vs23tbtv5sfil1dln4v410kv.apps.googleusercontent.com",
+// clientId: "89230287346-710j4dvn558bpgi9i2dqa4chofoorqb5.apps.googleusercontent.com",
+//
+//     scopes: [
+//       'email',
+//         'https://www.googleapis.com/auth/userinfo.email',
+//         'openid',
+//         'https://www.googleapis.com/auth/userinfo.profile',
+//       ],
+//     );
+//     try {
+//       var result = await _googleSignIn.signIn();
+//       print(result);
+//       googleSignInAccount = result;
+//
+//       if (result != null) {
+//         String fullName = result.displayName ?? "";
+//         List<String> nameParts = fullName.split(' ');
+//
+//         String firstName = nameParts.length > 0 ? nameParts[0] : "";
+//         String lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : "";
+//
+//         String email = result.email;
+//         String profilePicUrl = result.photoUrl ?? "";
+//         String? id = result.id;
+//
+//         globalToken5 = id;  /// when i use here then able to do login
+//
+//         print("Google Sign-In successful");
+//         print("First Name: $firstName");
+//         print("Last Name: $lastName");
+//         print("Email: $email");
+//         print("Profile Picture URL: $profilePicUrl");
+//         print("ID: $id");
+//         print("Google Sign-In successful");
+//         await _authWithMeraki(fullName,lastName, email, profilePicUrl, id, context);
+//
+//
+//         if (globalToken5 != null) {
+//
+//           SharedPreferences prefs = await SharedPreferences.getInstance();
+//           await prefs.setBool(KEYLOGIN, true);
+//           await prefs.setString('profileName', fullName);
+//           await prefs.setString('profilePicUrl', profilePicUrl);
+//           await prefs.setString('tokenid', globalToken5!);
+//
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(content: Text('Successfully Logged In')),
+//           );
+//           Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) =>
+//                   HomePage(
+//                 tokenid: globalToken5!,
+//                 profileName: result.displayName ?? "User's Name",
+//                 profilePicUrl: result.photoUrl ?? "",
+//                 transcribedata: '',
+//               ),
+//             ),
+//           );
+//         } else {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             SnackBar(content: Text('Token is null, authentication failed')),
+//           );
+//         }
+//       } else {
+//         print("Sign-in canceled");
+//       }
+//     } catch (error) {
+//       print(error);
+//     }
+//   }
