@@ -55,7 +55,6 @@ class _RecordViewState extends State<RecordView> {
     super.initState();
     // _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: 'AIzaSyD2-74-Ol3Yw29b0aG31o9yUnukrW2aHqo'); // Replace 'YOUR_API_KEY' with your actual API key
     _initializeSpeechToText();
-    _startRecording();
   }
 
 
@@ -224,123 +223,103 @@ class _RecordViewState extends State<RecordView> {
   //   }
   // }
 
-Future<String?> _formatText(String _speechText) async {
-  var mq = MediaQuery.of(context).size;
-  setState(() {
-    _isLoading = true; // Start loading
-    // _isDialogOpen = false;
-  });
+  bool _isCloudFormattingAvailable = true;
 
-  const String apiUrl = "https://dev-oscar.merakilearn.org/api/v1/optimize/optimize-text"; // Replace with your API endpoint
-
-  try {
-    // Prepare the POST request body
-    final Map<String, String> body = {
-      
-      "user_input": _speechText,
-      "device_tag": '3',
-    };
-
-    // Make the POST request
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {
-        'Authorization': 'Bearer ${widget.tokenid}',
-        'Content-Type': 'application/json; charset=UTF-8'
-      },
-      body: jsonEncode(body),
-    );
-
-    // Check the status code
-    if (response.statusCode == 201) {
-      print('Transcription successfull ');
-      
-      final responseData = jsonDecode(response.body);
-
-      // Extract formatted text from response
-      final formattedText = responseData["data"]["output"] ?? _speechText;
-
-      return formattedText.isEmpty || formattedText == _speechText
-          ? _speechText
-          : formattedText;
-
-    }else if (response.statusCode == 401) {
-      print('Unauthorized');
-      // final responseData = jsonDecode(response.body);
-      // _showErrorDialog(context ,'Your token is expired , Please login again'  );
-       // Show AlertDialog
-        showDialog(
-          context: context,
-          barrierDismissible:
-              false, // Prevent dialog from closing on tap outside
-          builder: (BuildContext context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0), // Square shape with slightly rounded corners
-          ),
-              title: Text('Session Expired', style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),),
-              content: Text('Your token is expired and you will now be logged out . Please Login again', style: TextStyle(
-              fontWeight: FontWeight.w400,fontSize: mq.width * 0.04,
-              color: Colors.black,
-            ),),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    // Navigator.of(context).pop(); // Close the dialog
-
-                    // Sign out and clear session
-                    await GoogleSignIn().signOut();
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    await prefs.remove('isLoggedIn');
-
-                    // Navigate to LoginView
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => LoginView()),
-                      (route) => false,
-                    );
-                  },
-                  child: Text('OK',style: TextStyle(color: Colors.white),), style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
-                padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
-              ),
-                ),
-              ],
-            );
-          },
-        );
-
-    }else if (response.statusCode == 429) {
-      print('To many request or daily quota exceed');
-      _showErrorDialog(context ,'To many request or daily quota exceed');
-
-    }else if (response.statusCode == 500) {
-      print('Internal Server Error.');
-      _showErrorDialog(context ,'The server had an error while processing your request');
-    }
-
-    else {
-      
-      print("Error: ${response.statusCode} - ${response.body}");
-      final responseData = jsonDecode(response.body);
-      // _showErrorDialog(context ,responseData['message']);
-
-      return responseData['message']; // Return the "message"
-    }
-  } catch (e) {
-    // Handle exceptions
-    print("Error making POST request: $e");
-    _showErrorDialog(context , e as String);
-    // return _speechText;
-  } finally {
+  Future<String?> _formatText(String _speechText) async {
+    var mq = MediaQuery.of(context).size;
     setState(() {
-      _isLoading = false; // End loading
+      _isLoading = true; // Start loading
+      _isCloudFormattingAvailable = true;
     });
+
+    const String apiUrl = "https://dev-oscar.merakilearn.org/api/v1/optimize/optimize-text";
+
+    try {
+      final Map<String, String> body = {
+        "user_input": _speechText,
+        "device_tag": '3',
+      };
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Authorization': 'Bearer ${widget.tokenid}',
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 201) {
+        print('Transcription successful');
+        final responseData = jsonDecode(response.body);
+        final formattedText = responseData["data"]?["output"] ?? _speechText;
+        _isCloudFormattingAvailable = true;
+
+        return formattedText.isEmpty || formattedText == _speechText
+            ? _speechText
+            : formattedText;
+
+      } else if (response.statusCode == 401) {
+        print('Unauthorized');
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                title: const Text('Session Expired', style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                )),
+                content: Text('Your token is expired and you will now be logged out. Please Login again', style: TextStyle(
+                  fontWeight: FontWeight.w400, fontSize: mq.width * 0.04,
+                  color: Colors.black,
+                )),
+                actions: [
+                  TextButton(
+                    onPressed: () async {
+                      await GoogleSignIn().signOut();
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      await prefs.remove('isLoggedIn');
+                      if (mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => LoginView()),
+                          (route) => false,
+                        );
+                      }
+                    },
+                    child: const Text('OK', style: TextStyle(color: Colors.white)),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(AppColors.ButtonColor2),
+                      padding: WidgetStateProperty.all(const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0)),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+        return null;
+      } else {
+        print("Optimize API warning: ${response.statusCode} - ${response.body}");
+        _isCloudFormattingAvailable = false;
+        return _speechText;
+      }
+    } catch (e) {
+      print("Error optimizing text via cloud API: $e. Falling back to raw transcript.");
+      _isCloudFormattingAvailable = false;
+      return _speechText;
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
-}
 
 
 void _showErrorDialog(BuildContext context, String errorMessage) {
@@ -434,16 +413,13 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
     bool isEmptyInput = _speechText.isEmpty;
 
     if (!isRestarting && !_hasTranscriptionBeenSent) {
-      String textToSend;
       if (_speechText.isNotEmpty) {
         // Checking if formatting is needed
         final bool needsFormatting = _checkIfFormattingNeeded(_speechText);
 
-
         String? formattedText = needsFormatting ? await _formatText(_speechText) : _speechText;
 
-        if (formattedText != null) {
-          // await _sendTranscriptionToBackend(formattedText);
+        if (formattedText != null && mounted) {
           _hasTranscriptionBeenSent = true; // Mark as sent
 
           Navigator.pushReplacement(
@@ -453,6 +429,7 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
                 transcribedText: formattedText,
                 unformattedText: _speechText,
                 isEmptyInput: isEmptyInput,
+                isCloudFormattingAvailable: _isCloudFormattingAvailable,
                 onDelete: () {
                   widget.onRecordingComplete('');
                   _hasTranscriptionBeenSent = false; // Reset flag on deletion
@@ -466,7 +443,6 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
         }
       } else {
         print("Not available");
-
       }
     }
 
@@ -479,12 +455,10 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
       final transcriptionToSend = _isRestarted ? _speechText : _speechText;
       bool isEmptyInput = transcriptionToSend.isEmpty;
 
-
       if (!_hasTranscriptionBeenSent) {
         String? formattedText = await _formatText(transcriptionToSend);
 
-        if (formattedText != null) {
-          // await _sendTranscriptionToBackend(formattedText);
+        if (formattedText != null && mounted) {
           _isRestarted = false;
 
           Navigator.pushReplacement(
@@ -494,6 +468,7 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
                 transcribedText: formattedText,
                 unformattedText: _speechText,
                 isEmptyInput: isEmptyInput,
+                isCloudFormattingAvailable: _isCloudFormattingAvailable,
                 onDelete: () {
                   widget.onRecordingComplete('');
                   _hasTranscriptionBeenSent = false; // Reset flag on deletion
@@ -610,11 +585,19 @@ void _showErrorDialog(BuildContext context, String errorMessage) {
       },
     );
 
-    if (available) {
+    if (available && mounted) {
+      setState(() {
+        _isRecording = true;
+        _seconds = 0;
+      });
+      _startTimer();
+
       _speech.listen(onResult: (val) {
-        setState(() {
-          _speechText = val.recognizedWords;
-        });
+        if (mounted) {
+          setState(() {
+            _speechText = val.recognizedWords;
+          });
+        }
         if (val.finalResult) {
           print('Final speech result: $_speechText');
         }

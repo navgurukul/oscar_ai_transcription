@@ -28,15 +28,22 @@ if (flutterVersionName == null) {
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+if (!keystorePropertiesFile.exists()) {
+    throw new GradleException("Missing key.properties. Create android/key.properties with storeFile, storePassword, keyAlias, keyPassword.")
+}
+keystorePropertiesFile.withInputStream { stream ->
+    keystoreProperties.load(stream)
+}
+
+def keystoreStoreFile = keystoreProperties.getProperty('storeFile')
+if (keystoreStoreFile == null || keystoreStoreFile.trim().isEmpty()) {
+    throw new GradleException("key.properties is missing storeFile. Example: storeFile=../key/upload-keystore.jks")
 }
 
 android {
     namespace "org.samyarth.oscarai.release"
-    compileSdkVersion 34
-    ndkVersion flutter.ndkVersion
-    ndkVersion "26.1.10909125"
+    compileSdkVersion 36
+    ndkVersion "28.2.13676358"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -62,8 +69,8 @@ android {
         applicationId "org.samyarth.oscarai.release"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 21
-        targetSdkVersion 34
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
 
@@ -74,7 +81,7 @@ android {
         release {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storeFile file(keystoreStoreFile).exists() ? file(keystoreStoreFile) : rootProject.file(keystoreStoreFile)
             storePassword keystoreProperties['storePassword']
         }
     }
@@ -90,7 +97,7 @@ android {
             // Enable minification and resource shrinking for debug if needed
             minifyEnabled false
             shrinkResources false
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
 
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -106,8 +113,8 @@ flutter {
 }
 
 dependencies {
-    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.9.22')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22"
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:2.2.20')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.2.20"
     implementation platform('com.google.firebase:firebase-bom:33.3.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation("com.google.firebase:firebase-crashlytics")
