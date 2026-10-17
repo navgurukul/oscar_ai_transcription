@@ -70,7 +70,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 34
+        targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
 
@@ -81,7 +81,7 @@ android {
         release {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
-            storeFile rootProject.file(keystoreStoreFile)
+            storeFile file(keystoreStoreFile).exists() ? file(keystoreStoreFile) : rootProject.file(keystoreStoreFile)
             storePassword keystoreProperties['storePassword']
         }
     }
@@ -97,7 +97,7 @@ android {
             // Enable minification and resource shrinking for debug if needed
             minifyEnabled false
             shrinkResources false
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
 
 //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -113,8 +113,8 @@ flutter {
 }
 
 dependencies {
-    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.9.22')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22"
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:2.2.20')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.2.20"
     implementation platform('com.google.firebase:firebase-bom:33.3.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation("com.google.firebase:firebase-crashlytics")

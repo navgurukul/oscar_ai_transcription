@@ -18,6 +18,7 @@ class TranscribeResult extends StatefulWidget {
   final VoidCallback onDelete;
   final String tokenid;
   final bool isEmptyInput;
+  final bool isCloudFormattingAvailable;
 
   const TranscribeResult(
       {Key? key,
@@ -25,6 +26,7 @@ class TranscribeResult extends StatefulWidget {
         required this.onDelete,
         required this.tokenid,
         this.isEmptyInput = false,
+        this.isCloudFormattingAvailable = true,
         required this.unformattedText})
       : super(key: key);
 
@@ -43,6 +45,19 @@ class _TranscribeResultState extends State<TranscribeResult> {
     super.initState();
     _textController = TextEditingController(text: widget.transcribedText);
     _notFormattedText = TextEditingController(text: widget.unformattedText);
+
+    if (!widget.isCloudFormattingAvailable && !widget.isEmptyInput) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Cloud formatting unavailable. Displaying raw transcript.'),
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+      });
+    }
   }
 
 
@@ -93,52 +108,61 @@ class _TranscribeResultState extends State<TranscribeResult> {
       );
       if (response.statusCode == 201) {
         print('Transcription successfully sent: ${response.statusCode}');
-        Navigator.pop(context, 'Saved transcription');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Saved transcription')),
-        );
+        if (mounted) {
+          Navigator.pop(context, 'Saved transcription');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Saved transcription')),
+          );
+        }
       }
       // added below else if condition for error 401 , invalid token 
       else if (response.statusCode == 401) {
         print(' Invalid token: ${response.statusCode}');
-        // Show AlertDialog
-        showDialog(
-          context: context,
-          barrierDismissible:
-              false, // Prevent dialog from closing on tap outside
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Session Expired'),
-              content: Text('Your token is expired and you are logged out.'),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop(); // Close the dialog
-
-                    // Sign out and clear session
-                    await GoogleSignIn().signOut();
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    await prefs.remove('isLoggedIn');
-
-                    // Navigate to LoginView
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => LoginView()),
-                      (route) => false,
-                    );
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
+        if (mounted) {
+          // Show AlertDialog
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Session Expired'),
+                content: const Text('Your token is expired and you are logged out.'),
+                actions: [
+                  TextButton(
+                    onPressed: () async {
+                      await GoogleSignIn().signOut();
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      await prefs.remove('isLoggedIn');
+                      if (mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => LoginView()),
+                          (route) => false,
+                        );
+                      }
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       }
       else {
         print('Failed to send transcription: ${response.statusCode}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not save transcription to server (${response.statusCode})')),
+          );
+        }
       }
     } catch (e) {
       print('Error during sending transcription: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Server unavailable: could not save transcription')),
+        );
+      }
     }
   }
 
